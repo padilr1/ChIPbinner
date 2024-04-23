@@ -1,0 +1,24 @@
+Package: ChIPbinner
+Title: This package is designed for analyzing binned chip-seq data.
+Version: 0.0.0.9000
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports:
+  tidyverse,
+  dplyr,
+  rtracklayer,
+  GenomicRanges,
+  data.table,
+  tidyverse,
+  lattice,
+  gridExtra,
+  rtracklayer,
+  DiffBind,
+  idr2d,
+  patchwork
