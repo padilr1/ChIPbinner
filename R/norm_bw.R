@@ -8,8 +8,29 @@ library(lattice)
 library(gridExtra)
 library(DiffBind)
 library(patchwork)
-# function
-generate_norm_bw <- function(wd,chromSizes,binned_files_path,treatment,control=NULL,chipLibrarySize,inputLibrarySize=NULL,cell_line,histone_mark,blacklist,addition,raw_count_cutoff,use_input,window_size,scaling_factor=NULL){
+#' Title
+#'
+#' @param wd
+#' @param chromSizes
+#' @param binned_files_path
+#' @param treatment
+#' @param control
+#' @param chipLibrarySize
+#' @param inputLibrarySize
+#' @param cell_line
+#' @param histone_mark
+#' @param blacklist
+#' @param addition
+#' @param raw_count_cutoff
+#' @param use_input
+#' @param window_size
+#' @param scaling_factor
+#'
+#' @return
+#' @export
+#'
+#' @examples
+norm_bw <- function(wd,chromSizes,binned_files_path,treatment,control=NULL,chipLibrarySize,inputLibrarySize=NULL,cell_line,histone_mark,blacklist,addition,raw_count_cutoff,use_input,window_size,scaling_factor=NULL){
 #need to set wd
 setwd(wd)
 getwd()

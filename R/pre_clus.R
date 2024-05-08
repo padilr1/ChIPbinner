@@ -10,7 +10,21 @@ library(DiffBind)
 library(idr2d)
 library(patchwork)
 # start of function
-pre_clustering <- function(wd,path_for_norm_bw,window_size,treatment,control,cell_line,histone_mark){
+#' Title
+#'
+#' @param wd
+#' @param path_for_norm_bw
+#' @param window_size
+#' @param treatment
+#' @param control
+#' @param cell_line
+#' @param histone_mark
+#'
+#' @return
+#' @export
+#'
+#' @examples
+pre_clus <- function(wd,path_for_norm_bw,window_size,treatment,control,cell_line,histone_mark){
 # parameters
 setwd(wd)
 getwd()

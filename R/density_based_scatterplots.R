@@ -21,7 +21,35 @@ library(viridis)
 library(pals)
 library(isoband)
 # start of function
-generate_scatterplots <- function(wd,path_for_norm_bw,treatment,control,cell_line,histone_mark,gene,intergenic,title_of_plot,window_size,number_of_clusters,pow=NULL,show_legend=FALSE,min,max,bin_size,show_scales=TRUE,xaxis_label,yaxis_label,height_of_figure,width_of_figure){
+#' Title
+#'
+#' @param wd
+#' @param path_for_norm_bw
+#' @param treatment
+#' @param control
+#' @param cell_line
+#' @param histone_mark
+#' @param gene
+#' @param intergenic
+#' @param title_of_plot
+#' @param window_size
+#' @param number_of_clusters
+#' @param pow
+#' @param show_legend
+#' @param min
+#' @param max
+#' @param bin_size
+#' @param show_scales
+#' @param xaxis_label
+#' @param yaxis_label
+#' @param height_of_figure
+#' @param width_of_figure
+#'
+#' @return
+#' @export
+#'
+#' @examples
+density_based_scatterplots <- function(wd,path_for_norm_bw,treatment,control,cell_line,histone_mark,gene,intergenic,title_of_plot,window_size,number_of_clusters,pow=NULL,show_legend=FALSE,min,max,bin_size,show_scales=TRUE,xaxis_label,yaxis_label,height_of_figure,width_of_figure){
 # parameters
 setwd(wd)
 getwd()

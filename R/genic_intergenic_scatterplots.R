@@ -14,42 +14,33 @@ library(hexbin)
 library(pals)
 library(patchwork)
 library(gdata)
-# # specify desired options
-# parser$add_argument("-wd",help="Working directory")
-# parser$add_argument("-c","--control",type="character",help="Control sample")
-# parser$add_argument("-t","--treatment",type="character",help="Test sample")
-# parser$add_argument("-l","--line",type="character",help="Cell line")
-# parser$add_argument("-m","--mark",type="character",help="Histone mark")
-# #
-# parser$add_argument("-v", "--verbose", action="store_true", default=TRUE,
-#                     help="Print extra output [default]")
-# parser$add_argument("-q", "--quietly", action="store_false",
-#                     dest="verbose", help="Print little output")
-# parameter examples
-# wd = "~/Documents/NSD2i"
-# gene = "~/Documents/NSD2i/ref/gene.bed"
-# igr = "~/Documents/NSD2i/ref/intergenic.bed"
-# cell_line = "MiaPaCa2"
-# control = "Vehicle_D5_Rep1"
-# treatment = "NSD2i_D5_Rep1"
-# mark = "H3K27me3"
-# window_size = "10"
-# path="~/Documents/NSD2i/data/norm.bw/V4_K27me3"
-# title_of_plot="H3K27me3"
-# wd = "~/Documents/10T_downstream"
-# gene = "~/Documents/10T_downstream/ref/gene.bed"
-# intergenic = "~/Documents/10T_downstream/ref/intergenic.bed"
-# cell_line = "10T"
-# control = "parental"
-# treatment = "TKO"
-# mark = "H3K27me3"
-# window_size = "10"
-# path="~/Documents/10T_downstream/data/norm.bw/merged/H3K27me3"
-# title_of_plot="H3K27me3"
-# max_x=30
-# max_y=30
 # start of code
-generate_genic_intergenic_scatterplots <- function(wd,path,gene,intergenic,cell_line,treatment,control,histone_mark,window_size,title_of_plot,max_x,max_y,pow=NULL,xaxis_label,yaxis_label,min_x=NULL,min_y=NULL,show_scales=TRUE){
+#' Title
+#'
+#' @param wd
+#' @param path
+#' @param gene
+#' @param intergenic
+#' @param cell_line
+#' @param treatment
+#' @param control
+#' @param histone_mark
+#' @param window_size
+#' @param title_of_plot
+#' @param max_x
+#' @param max_y
+#' @param pow
+#' @param xaxis_label
+#' @param yaxis_label
+#' @param min_x
+#' @param min_y
+#' @param show_scales
+#'
+#' @return
+#' @export
+#'
+#' @examples
+genic_intergenic_scatterplots <- function(wd,path,gene,intergenic,cell_line,treatment,control,histone_mark,window_size,title_of_plot,max_x,max_y,pow=NULL,xaxis_label,yaxis_label,min_x=NULL,min_y=NULL,show_scales=TRUE){
 setwd(wd)
 getwd()
 path <- paste0(path)

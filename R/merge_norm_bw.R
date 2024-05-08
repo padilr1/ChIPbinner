@@ -8,7 +8,22 @@ library(lattice)
 library(gridExtra)
 library(DiffBind)
 library(patchwork)
-merge_reps <- function(wd,path,rep1,rep2,merged_sample_name,cell_line,histone_mark,window_size){
+#' Title
+#'
+#' @param wd
+#' @param path
+#' @param rep1
+#' @param rep2
+#' @param merged_sample_name
+#' @param cell_line
+#' @param histone_mark
+#' @param window_size
+#'
+#' @return
+#' @export
+#'
+#' @examples
+merge_norm_bw <- function(wd,path,rep1,rep2,merged_sample_name,cell_line,histone_mark,window_size){
 # parameters
 #need to set wd
 setwd(wd)
