@@ -1,0 +1,30 @@
+---
+title: "Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ChIPbinner)
+```
+
+# Generating normalized bigwig files
+
+When you bin your files into windows, especially from aligned (bam or sam) files, they are typically raw counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the next two workflows.
+```{r}
+
+```
+
+# Workflow for generating density-based clusters
+
+# Workflow for only generating scatterplots with bins stratified into genic and intergenic regions
