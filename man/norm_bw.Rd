@@ -5,20 +5,21 @@
 \title{Title}
 \usage{
 norm_bw(
-  wd,
+  out_dir,
   chromSizes,
-  binned_files_path,
-  treatment,
-  control = NULL,
-  chipLibrarySize,
-  inputLibrarySize = NULL,
+  blacklist,
   cell_line,
   histone_mark,
-  blacklist,
-  addition,
-  raw_count_cutoff,
+  treated_samp_label,
+  treated_samp_file,
+  treated_samp_library_size,
+  control_label = NULL,
+  control_file = NULL,
+  control_library_size = NULL,
   use_input,
   window_size,
+  addition,
+  raw_count_cutoff,
   scaling_factor = NULL
 )
 }
