@@ -18,14 +18,18 @@ knitr::opts_chunk$set(
 library(ChIPbinner)
 ```
 
+```{r,include=FALSE}
+library(formatR)
+```
+
 # Generating normalized bigwig files
 
-When you bin your files into windows, especially from aligned (bam or sam) files, they are typically raw counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the rest of the workflow.
+When you bin your files into windows, especially from aligned (bam or sam) files, they are typically raw read counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like genome-wide modification percentage information obtained from mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the rest of the workflow.
 
 Here, we are generating normalized bigwig files for 10kb-binned files (in BED format) for a head and neck squamous cell carcinoma (HNSCC) line (Cal27) for the broad histone mark H3K36me2 generated via ChIP-seq. The lysine 36 methyl transferase NSD1 was knocked out in the sample (NSD1-KO) and is being compared to the wildtype (WT) cell line. Please see
-<a href="https://www.sciencedirect.com/science/article/pii/S2211124721000826?via%3Dihub">Farhangdoost et al. 2021</a> for more details. We will be using the reference genome hg38 for this analysis. 
+<a href="https://www.sciencedirect.com/science/article/pii/S2211124721000826?via%3Dihub">Farhangdoost et al. 2021</a> for more details. We will be using the <code>hg38</code> assembly for this analysis. 
 
-This code chunk assumes your files are binned in 10kb windows and in the format <code>cell_line.sample_label.histone_mark.window_size_in_kb.bed</code>. Additionally, it assumes the control/input files associated with your samples are also in the same format. For example, in the code chunk below, the four files are found in the directory <code>~/HNSCC_ChIPseq_H3K36me2/10kb_binned_files</code>:
+This code chunk assumes your files are binned in 10kb windows and in the format <code>cell_line.sample_label.histone_mark.window_size_in_kb.bed</code>. Additionally, it assumes the control/input files associated with your samples are also in the same format. Please see below for example formats. The files below are included with the package and can be accessed using <code>system.file("extdata","file.bed",package = "ChIPbinner")</code>:
 <ul>
 <li> Cal27.WT.H3K36me2.10kb.bed</li>
 <li> Cal27.WT_input.H3K36me2.10kb.bed</li>
@@ -33,8 +37,8 @@ This code chunk assumes your files are binned in 10kb windows and in the format 
 <li> Cal27.NSD1_KO_input.H3K36me2.10kb.bed</li>
 </ul>
 
-If you've ran the code chunk successfully, your resulting bigwig files will be found in the following directory: <code>/data/norm.bw/histone_mark/</code>. This directory is automatically created upon running the <code>norm_bw()</code> function.
-```{r,eval=FALSE}
+If you've ran the code chunk successfully, your resulting bigwig files will be found in the <code>output_directory</code> that you specified when running the function.
+```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # load chrom sizes for hg38 assembly
 hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes", package = "ChIPbinner")
 # load blacklisted regions
@@ -46,72 +50,78 @@ WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed", package =
 NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed", package = "ChIPbinner")
 NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed", package = "ChIPbinner")
 # generate normalized bigwig for WT sample
-norm_bw(out_dir = testthat::test_path("testdata"),
-        chromSizes = hg38_chrom_sizes,
-        blacklist = blacklisted_regions,
-        cell_line = "Cal27",
-        histone_mark = "H3K36me2",
-        treated_samp_label = "WT",
-        treated_samp_file= WT,
-        treated_samp_library_size = 64093770,
-        use_input = TRUE,
-        control_label = "WT_input",
-        control_file = WT_input,
-        control_library_size = 52047022,
-        raw_count_cutoff = 0,
-        window_size = 10,
-        addition = 1e-15,
-        scaling_factor = 0.450328805)
+norm_bw(
+  out_dir = "/output_directory",
+  chromSizes = hg38_chrom_sizes,
+  blacklist = blacklisted_regions,
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2",
+  treated_samp_label = "WT",
+  treated_samp_file = WT,
+  treated_samp_library_size = 64093770,
+  use_control = TRUE,
+  control_label = "WT_input",
+  control_file = WT_input,
+  control_library_size = 52047022,
+  raw_count_cutoff = 0,
+  window_size = 10,
+  pseudocount = 1e-15,
+  scaling_factor = 0.450328805
+)
 # generate normalized bigwig for NSD1-KO sample
-norm_bw(out_dir = testthat::test_path("testdata"),
-        chromSizes = hg38_chrom_sizes,
-        blacklist = blacklisted_regions,
-        cell_line = "Cal27",
-        histone_mark = "H3K36me2",
-        treated_samp_label = "NSD1_KO",
-        treated_samp_file= NSD1_KO,
-        treated_samp_library_size = 18598272,
-        use_input = TRUE,
-        control_label = "NSD1_KO_input",
-        control_file = NSD1_KO_input,
-        control_library_size = 18674189,
-        raw_count_cutoff = 0,
-        window_size = 10,
-        addition = 1e-15,
-        scaling_factor = 0.192272095)
+norm_bw(
+  out_dir = "/output_directory",
+  chromSizes = hg38_chrom_sizes,
+  blacklist = blacklisted_regions,
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2",
+  treated_samp_label = "NSD1_KO",
+  treated_samp_file = NSD1_KO,
+  treated_samp_library_size = 18598272,
+  use_control = TRUE,
+  control_label = "NSD1_KO_input",
+  control_file = NSD1_KO_input,
+  control_library_size = 18674189,
+  raw_count_cutoff = 0,
+  window_size = 10,
+  pseudocount = 1e-15,
+  scaling_factor = 0.192272095
+)
 ```
 
-# Workflow for generating density-based clusters
+# Generating scatterplots with bins stratified into genic and intergenic regions
 
-## 
+After normalizing and converting the binned BED files into bigwigs, we can read them in and generate a scatterplot comparing two cell lines. The scatterplot will annotate genic and intergenic regions accordingly. The resulting figures will be found in <code>/output_directory</code> for the code chunk below. The <code>/path_for_normalized_bigwig</code> will normally be the output directory you indicated when using the <code>norm_bw()</code> function. 
 
-# Workflow for only generating scatterplots with bins stratified into genic and intergenic regions
+Genic and intergenic regions for <code>hg38</code> and <code>mm10</code> are included with the package and can be accessed as indicated in the code chunk below. 
 
-After normalizing and converting the binned BED files into bigwigs, we can read them in and generate a scatterplot comparing two cell lines. The scatterplot will annotate genic and intergenic regions accordingly. The resulting figures should be found in the directory <code>/figs<code>.
-
-```{r,eval=FALSE}
+<b> Note: you will need to adjust the minimum and maximum values for the x- and y-axis accordingly. After you are satisfied with the values for the x- and y-axis, you can then turn off axis annotations by running the function again, but using the parameter <code>show_scales=FALSE</code></b>
+```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # load genic regions
 genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
 # load intergenic regions
 intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
-# generate genic/intergenic scatterplot
-genic_intergenic_scatterplots(
-                              gene = genic_regions,
-                              intergenic = intergenic_regions,
-                              cell_line = "Cal27",
-                              control = "WT",
-                              treatment = "NSD1_KO",
-                              histone_mark = "H3K36me2",
-                              window_size = 10,
-                              title_of_plot = "Cal27 ChIP-seq H3K36me2",
-                              xaxis_label = "WT",
-                              yaxis_label = "NSD1_KO",
-                              max_x = 2,
-                              max_y = 2,
-                              min_x = -5,
-                              min_y = -5,
-                              pow=1.25,
-                              show_scales = T)
+# generate genic/intergenic scatterplot. here, we are using the normalized bigwigs generated from the previous section. Hence, we will need to indicate the directory where these bigwigs are found.
+genic_intergenic_scatterplot(
+  path_for_norm_bw = "/path_for_normalized_bigwig",
+  out_dir = "/output_directory",
+  gene = gene,
+  intergenic = igr,
+  cell_line = "Cal27",
+  baseline_samp_label = "WT",
+  treated_samp_label = "NSD1_KO",
+  histone_mark = "H3K36me2",
+  window_size = 10,
+  title_of_plot = "Cal27 ChIP-seq H3K36me2",
+  xaxis_label = "WT",
+  yaxis_label = "NSD1_KO",
+  max_x = 1,
+  max_y = 1,
+  min_x = -5,
+  min_y = -5,
+  pow = 1.25,
+  show_scales = F,
+  show_legend = T,
+  legend_pos = "left"
+)
 ```
-
-

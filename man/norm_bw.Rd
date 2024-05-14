@@ -2,7 +2,7 @@
 % Please edit documentation in R/norm_bw.R
 \name{norm_bw}
 \alias{norm_bw}
-\title{Title}
+\title{Generate normalized bigWig files from binned BED files.}
 \usage{
 norm_bw(
   out_dir,
@@ -16,16 +16,52 @@ norm_bw(
   control_label = NULL,
   control_file = NULL,
   control_library_size = NULL,
-  use_input,
+  use_control,
   window_size,
-  addition,
-  raw_count_cutoff,
+  pseudocount = NULL,
+  raw_count_cutoff = NULL,
   scaling_factor = NULL
 )
 }
 \arguments{
-\item{scaling_factor}{}
+\item{out_dir}{The output directory for normalized bigWig files.}
+
+\item{chromSizes}{Chromosome sizes for a specific assembly. hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
+
+\item{blacklist}{Blacklisted regions to be removed. Blacklisted regions for hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
+
+\item{cell_line}{The cell line of the samples.}
+
+\item{histone_mark}{The broad histone mark used for the analysis.}
+
+\item{treated_samp_label}{The treated sample name/label.}
+
+\item{treated_samp_file}{The binned BED file associated with the treated sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed}
+
+\item{treated_samp_library_size}{The mapped library size for your treated sample.}
+
+\item{control_label}{The name/label for your control sample. This could be the input sample (for ChIP-seq) or IgG (for Cut & Run).}
+
+\item{control_file}{The binned BED file associated with the control sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed}
+
+\item{control_library_size}{The library size for the control sample.}
+
+\item{use_control}{This is a Boolean term, whether to use a control sample or not.}
+
+\item{window_size}{The window size in kilobytes. For example, use 10 for samples binned in 10 kilobyte (kb) bins.}
+
+\item{pseudocount}{Pseudocount to avoid division by 0. If not defined, defaults to 1e-3.}
+
+\item{raw_count_cutoff}{Raw read count cutoff to exclude bins depleted in signal across all tracks. For example, if 10 is inputted, this removes raw read count consistently lower than 10. Defaults to 0.}
+
+\item{scaling_factor}{Optional: quantatitive normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values.}
+}
+\value{
+a single normalized bigWig file with binned scores.
 }
 \description{
+Use this function to generate the normalized bigWig files needed for the rest of the package workflows.
+}
+\details{
 Title
 }

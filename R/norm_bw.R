@@ -1,33 +1,36 @@
 #!/usr/bin/env Rscript
 #+ message = FALSE, warning = FALSE
-library(tidyverse)
-library(rtracklayer)
-library(GenomicRanges)
-library(data.table)
-library(lattice)
-library(gridExtra)
-library(DiffBind)
-library(patchwork)
+# library(tidyverse)
+# library(rtracklayer)
+# library(GenomicRanges)
+# library(data.table)
+# library(lattice)
+# library(gridExtra)
+# library(DiffBind)
+# library(patchwork)
 #' Title
+#' @title Generate normalized bigWig files from binned BED files.
 #'
-#' @param out_dir
-#' @param chromSizes
-#' @param blacklist
-#' @param cell_line
-#' @param histone_mark
-#' @param treated_samp_label
-#' @param treated_samp_file
-#' @param treated_samp_library_size
-#' @param control_label
-#' @param control_file
-#' @param control_library_size
-#' @param use_input
-#' @param window_size
-#' @param addition
-#' @param raw_count_cutoff
-#' @param scaling_factor
+#' @description Use this function to generate the normalized bigWig files needed for the rest of the package workflows.
 #'
-#' @return
+#' @param out_dir The output directory for normalized bigWig files.
+#' @param chromSizes Chromosome sizes for a specific assembly. hg38 and mm10 are included in the package and can be accessed in 'extdata'.
+#' @param blacklist Blacklisted regions to be removed. Blacklisted regions for hg38 and mm10 are included in the package and can be accessed in 'extdata'.
+#' @param cell_line The cell line of the samples.
+#' @param histone_mark The broad histone mark used for the analysis.
+#' @param treated_samp_label The treated sample name/label.
+#' @param treated_samp_file The binned BED file associated with the treated sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed
+#' @param treated_samp_library_size The mapped library size for your treated sample.
+#' @param control_label The name/label for your control sample. This could be the input sample (for ChIP-seq) or IgG (for Cut & Run).
+#' @param control_file The binned BED file associated with the control sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed
+#' @param control_library_size The library size for the control sample.
+#' @param use_control This is a Boolean term, whether to use a control sample or not.
+#' @param window_size The window size in kilobytes. For example, use 10 for samples binned in 10 kilobyte (kb) bins.
+#' @param pseudocount Pseudocount to avoid division by 0. If not defined, defaults to 1e-3.
+#' @param raw_count_cutoff Raw read count cutoff to exclude bins depleted in signal across all tracks. For example, if 10 is inputted, this removes raw read count consistently lower than 10. Defaults to 0.
+#' @param scaling_factor Optional: quantatitive normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values.
+#'
+#' @return a single normalized bigWig file with binned scores.
 #' @export
 #'
 #' @examples
@@ -42,10 +45,10 @@ norm_bw <- function(out_dir,
                     control_label = NULL,
                     control_file = NULL,
                     control_library_size = NULL,
-                    use_input,
+                    use_control,
                     window_size,
-                    addition,
-                    raw_count_cutoff,
+                    pseudocount = NULL,
+                    raw_count_cutoff = NULL,
                     scaling_factor = NULL) {
   # reference files
   ## blacklist
@@ -59,10 +62,20 @@ norm_bw <- function(out_dir,
   treated_samp_label <- paste0(treated_samp_label) # watch spaces in names
   treated_samp_file <- import.bed(paste0(treated_samp_file))
   # other parameters
-  ## addition to avoid division by 0
-  addition <- as.numeric(paste0(addition))
+  ## pseudocount to avoid division by 0
+  # pseudocount <- as.numeric(paste0(pseudocount))
+  if (is.null(pseudocount)) {
+    pseudocount <- as.numeric(1e-3)
+  } else {
+    pseudocount <- as.numeric(paste0(pseudocount))
+  }
   ## raw count cut-off to remove bins with low counts across samples
-  raw_count_cutoff <- as.numeric(paste0(raw_count_cutoff))
+  # raw_count_cutoff <- as.numeric(paste0(raw_count_cutoff))
+  if (is.null(raw_count_cutoff)) {
+    raw_count_cutoff <- as.numeric(0)
+  } else {
+    raw_count_cutoff <- as.numeric(paste0(raw_count_cutoff))
+  }
   ## window size of the bins
   window_size <- paste0(".", window_size, "kb.")
   ## scaling factor
@@ -151,10 +164,10 @@ norm_bw <- function(out_dir,
   raw[[treated_samp_label]]$score <- as.numeric(raw[[treated_samp_label]]$score)
   raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
   # normalize scores per bin by the library depth and scale if necessary
-  if (use_input == TRUE) {
-    bw[[treated_samp_label]]$score <- (log2(((raw[[treated_samp_label]]$score * to_scale) / treated_samp_library_size + addition) / (raw[[control_label]]$score / control_library_size + addition)))
+  if (use_control == TRUE) {
+    bw[[treated_samp_label]]$score <- (log2(((raw[[treated_samp_label]]$score * to_scale) / treated_samp_library_size + pseudocount) / (raw[[control_label]]$score / control_library_size + pseudocount)))
   } else {
-    bw[[treated_samp_label]]$score <- (log2(((raw[[treated_samp_label]]$score * to_scale) / treated_samp_library_size) + addition))
+    bw[[treated_samp_label]]$score <- (log2(((raw[[treated_samp_label]]$score * to_scale) / treated_samp_library_size) + pseudocount))
   }
   bw[[treated_samp_label]] <- bw[[treated_samp_label]][!is.na(bw[[treated_samp_label]]$score)]
   # output directory

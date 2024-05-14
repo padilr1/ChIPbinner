@@ -12,7 +12,6 @@ RoxygenNote: 7.3.1
 Imports:
   tidyverse,
   dplyr,
-  rtracklayer,
   GenomicRanges,
   data.table,
   tidyverse,
@@ -32,11 +31,12 @@ Imports:
   hexbin,
   pals,
   gdata,
-  ggrastr
+  ggrastr,
+  rtracklayer
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Config/testthat/start-first: norm_bw, genic_intergenic_scatterplot*
+Config/testthat/start-first: norm_bw, genic_intergenic_scatterplot
