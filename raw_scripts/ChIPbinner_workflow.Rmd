@@ -1,0 +1,155 @@
+---
+title: "Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ChIPbinner)
+```
+
+```{r,include=FALSE}
+library(formatR)
+```
+
+# Generating normalized bigwig files
+
+When you bin your files into windows, especially from aligned (bam or sam) files, they are typically raw read counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like genome-wide modification percentage information obtained from mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the rest of the workflow.
+
+Here, we are generating normalized bigwig files for 10kb-binned files (in BED format) for a head and neck squamous cell carcinoma (HNSCC) line (Cal27) for the broad histone mark H3K36me2 generated via ChIP-seq. The lysine 36 methyl transferase NSD1 was knocked out in the sample (NSD1-KO) and is being compared to the wildtype (WT) cell line. Please see
+<a href="https://www.sciencedirect.com/science/article/pii/S2211124721000826?via%3Dihub">Farhangdoost et al. 2021</a> for more details. We will be using the <code>hg38</code> assembly for this analysis. 
+
+This code chunk assumes your files are binned in 10kb windows and in the format <code>cell_line.sample_label.histone_mark.window_size_in_kb.bed</code>. Additionally, it assumes the control/input files associated with your samples are also in the same format. Please see below for example formats. The files below are included with the package and can be accessed using <code>system.file("extdata","file.bed",package = "ChIPbinner")</code>:
+<ul>
+<li> Cal27.WT.H3K36me2.10kb.bed</li>
+<li> Cal27.WT_input.H3K36me2.10kb.bed</li>
+<li> Cal27.NSD1_KO.H3K36me2.10kb.bed</li>
+<li> Cal27.NSD1_KO_input.H3K36me2.10kb.bed</li>
+</ul>
+
+If you've ran the code chunk successfully, your resulting bigwig files will be found in the <code>output_directory</code> that you specified when running the function.
+```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# load chrom sizes for hg38 assembly
+hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes", package = "ChIPbinner")
+# load blacklisted regions
+blacklisted_regions <- system.file("extdata", "hg38_blacklist.bed", package = "ChIPbinner")
+# load WT sample and corresponding input
+WT <- system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed", package = "ChIPbinner")
+WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+# load NSD1_KO sample and corresponding input
+NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed", package = "ChIPbinner")
+NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+# generate normalized bigwig for WT sample
+norm_bw(
+  out_dir = "/output_directory",
+  chromSizes = hg38_chrom_sizes,
+  blacklist = blacklisted_regions,
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2",
+  treated_samp_label = "WT",
+  treated_samp_file = WT,
+  treated_samp_library_size = 64093770,
+  use_control = TRUE,
+  control_label = "WT_input",
+  control_file = WT_input,
+  control_library_size = 52047022,
+  raw_count_cutoff = 0,
+  window_size = 10,
+  pseudocount = 1e-15,
+  scaling_factor = 0.450328805
+)
+# generate normalized bigwig for NSD1-KO sample
+norm_bw(
+  out_dir = "/output_directory",
+  chromSizes = hg38_chrom_sizes,
+  blacklist = blacklisted_regions,
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2",
+  treated_samp_label = "NSD1_KO",
+  treated_samp_file = NSD1_KO,
+  treated_samp_library_size = 18598272,
+  use_control = TRUE,
+  control_label = "NSD1_KO_input",
+  control_file = NSD1_KO_input,
+  control_library_size = 18674189,
+  raw_count_cutoff = 0,
+  window_size = 10,
+  pseudocount = 1e-15,
+  scaling_factor = 0.192272095
+)
+```
+
+# Generating scatterplots with bins stratified into genic and intergenic regions
+
+After normalizing and converting the binned BED files into bigwigs, we can read them in and generate a scatterplot comparing two cell lines. The scatterplot will annotate genic and intergenic regions accordingly. The resulting figures will be found in <code>/output_directory</code> for the code chunk below. The <code>/path_for_normalized_bigwig</code> will normally be the output directory you indicated when using the <code>norm_bw()</code> function. 
+
+Genic and intergenic regions for <code>hg38</code> and <code>mm10</code> are included with the package and can be accessed as indicated in the code chunk below. 
+
+<b> Note: you will need to adjust the minimum and maximum values for the x- and y-axis accordingly. After you are satisfied with the values for the x- and y-axis, you can then turn off axis annotations by running the function again, but using the parameter <code>show_scales=FALSE</code></b>
+```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# load genic regions
+genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
+# load intergenic regions
+intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+# generate genic/intergenic scatterplot. here, we are using the normalized bigwigs generated from the previous section. Hence, we will need to indicate the directory where these bigwigs are found.
+genic_intergenic_scatterplot(
+  path_for_norm_bw = "/path_for_normalized_bigwig",
+  out_dir = "/output_directory",
+  gene = gene,
+  intergenic = igr,
+  cell_line = "Cal27",
+  baseline_samp_label = "WT",
+  treated_samp_label = "NSD1_KO",
+  histone_mark = "H3K36me2",
+  window_size = 10,
+  title_of_plot = "Cal27 ChIP-seq H3K36me2",
+  xaxis_label = "WT",
+  yaxis_label = "NSD1_KO",
+  max_x = 1,
+  max_y = 1,
+  min_x = -5,
+  min_y = -5,
+  pow = 1.25,
+  show_scales = F,
+  show_legend = T,
+  legend_pos = "left"
+)
+```
+
+# Generating clusters of similarly-behaving genomic bins
+
+## Processing bigwig files for clustering
+
+Prior to generating clusters, we need to pre-process the normalized bigWig files. This is accomplished using the <code>pre_clus()</code> function. 
+```{r}
+```
+
+## Running HDBSCAN to generate clusters
+
+The <code>clust()</code> function can be used to generate clusters of similarly-behaving genomic bins. It is based on an unsupervised learning algorithm to find clusters, or dense regions, of a dataset. More details on the Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm can be found <a href="https://hdbscan.readthedocs.io/en/latest/index.html">here</a>.
+
+However, it is important to consider this step will require substantial processing memory as well as time. Thus, it is recommended that you use the python-implementation of HDBSCAN in a High-performance Computing server instead. The workflow for either method is given below.
+
+### Using a python-implementation of HDBSCAN
+```{python,eval=FALSE}
+import 
+python clus.py --samp ${samp} 
+              --csvFile ${csvFile} --minpts 5000 --minsamps 5000 --xlab ${xlab} --ylab ${ylab} --logfile ${log}
+echo "DBSCAN end"
+```
+
+### Using HDBSCAN within R
+```{r,eval=FALSE}
+
+```
+

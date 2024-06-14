@@ -1,42 +1,46 @@
 Package: ChIPbinner
-Title: This package is designed for analyzing binned chip-seq data.
+Title: This package is designed for analyzing binned ChIP-seq or Cut&Run data for broad histone marks
 Version: 0.0.0.9000
 Authors@R: 
     person("Reinnier", "Padilla", , "reinnier.padilla@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package will analyze binned ChIP-seq/Cut&Run data. You can visualize global changes.
+Description: This package will analyze binned ChIP-seq/Cut&Run data. You can visualize genome-wide changes using this software and subsequently analyze clusters of similarly-behaving genomic regions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports:
-  tidyverse,
-  dplyr,
-  GenomicRanges,
-  data.table,
-  tidyverse,
-  lattice,
-  gridExtra,
-  rtracklayer,
-  DiffBind,
-  idr2d,
-  patchwork,
-  ggrepel,
-  matrixStats,
-  isoband,
-  sf,
-  viridis,
-  MASS,
-  lwgeom,
-  hexbin,
-  pals,
-  gdata,
-  ggrastr,
-  rtracklayer
+    tidyverse,
+    dplyr,
+    GenomicRanges,
+    rtracklayer,
+    data.table,
+    lattice,
+    gridExtra,
+    DiffBind,
+    idr2d,
+    patchwork,
+    ggrepel,
+    matrixStats,
+    isoband,
+    sf,
+    viridis,
+    MASS,
+    lwgeom,
+    hexbin,
+    pals,
+    gdata,
+    ggrastr,
+    reticulate,
+    readr,
+    SummarizedExperiment,
+    GenomeInfoDb,
+    IRanges
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Config/testthat/start-first: norm_bw, genic_intergenic_scatterplot
+Config/testthat/start-first: norm_bw, genic_intergenic_scatterplot,pre_clus,clust,density_based_scatterplot
+LazyData: yes

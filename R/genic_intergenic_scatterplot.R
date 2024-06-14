@@ -1,19 +1,5 @@
 #!/usr/bin/env Rscript
 #+ message = FALSE, warning = FALSE
-# library(data.table)
-# library(tidyverse)
-# library(matrixStats)
-# library(isoband)
-# library(sf)
-# library(ggrepel)
-# library(viridis)
-# library(MASS)
-# library(lwgeom)
-# library(hexbin)
-# library(pals)
-# library(patchwork)
-# library(gdata)
-# library(rtracklayer)
 #' Title
 #' @title Generate a scatterplot of bins annotated with genic and intergenic regions.
 #' @description Using two normalized bigWig files generated using 'norm.bw', the user can generate a scatterplot to compare bins across two conditions (treated sample versus baseline sample (such as wildtype)). The bins will be annotated according to their overlap with genic and intergenic regions.
@@ -43,7 +29,7 @@
 #' @return Returns a scatterplot of bins annotated genic or intergenic comparing across two conditions.
 #' @export
 #'
-#' @examples
+#' @example inst/examples/example_genic_intergenic_scatterplot.R
 genic_intergenic_scatterplot <- function(path_for_norm_bw,
                                          out_dir,
                                          gene,
@@ -72,7 +58,7 @@ genic_intergenic_scatterplot <- function(path_for_norm_bw,
   # reference files
   gene <- rtracklayer::import.bed(gene)
   igr <- rtracklayer::import.bed(intergenic)
-  # cell line info
+  # samples info
   cell_line <- paste0(cell_line)
   mark <- paste0(histone_mark)
   window_size <- paste0(".", window_size, "kb.")

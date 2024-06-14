@@ -51,7 +51,7 @@ NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed", package = "
 NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed", package = "ChIPbinner")
 # generate normalized bigwig for WT sample
 norm_bw(
-  out_dir = "/output_directory",
+  out_dir = "output_directory",
   chromSizes = hg38_chrom_sizes,
   blacklist = blacklisted_regions,
   cell_line = "Cal27",
@@ -70,7 +70,7 @@ norm_bw(
 )
 # generate normalized bigwig for NSD1-KO sample
 norm_bw(
-  out_dir = "/output_directory",
+  out_dir = "output_directory",
   chromSizes = hg38_chrom_sizes,
   blacklist = blacklisted_regions,
   cell_line = "Cal27",
@@ -103,8 +103,8 @@ genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
 intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
 # generate genic/intergenic scatterplot. here, we are using the normalized bigwigs generated from the previous section. Hence, we will need to indicate the directory where these bigwigs are found.
 genic_intergenic_scatterplot(
-  path_for_norm_bw = "/path_for_normalized_bigwig",
-  out_dir = "/output_directory",
+  path_for_norm_bw = "directory_for_normalized_bigwig",
+  out_dir = "output_directory",
   gene = gene,
   intergenic = igr,
   cell_line = "Cal27",
@@ -125,3 +125,80 @@ genic_intergenic_scatterplot(
   legend_pos = "left"
 )
 ```
+
+# Generating clusters of similarly-behaving genomic bins
+
+## Processing bigwig files for clustering
+
+Prior to generating clusters, we need to pre-process the normalized bigWig files. This is accomplished using the <code>pre_clus()</code> function. We will continue to use the samples from the previous steps above.
+```{r, eval=FALSE}
+pre_clus(path_for_norm_bw = "directory_for_normalized_bigwig",
+                       out_dir = "output_directory",
+                       window_size = 10,
+                       treated_samp_label = "NSD1_KO",
+                       baseline_samp_label = "WT",
+                       cell_line = "Cal27",
+                       histone_mark = "H3K36me2")
+```
+
+## Running HDBSCAN to generate clusters
+
+The <code>clus()</code> function can be used to generate clusters of similarly-behaving genomic bins. It is based on an unsupervised learning algorithm to find clusters, or dense regions, of a dataset. More details on the Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm can be found <a href="https://hdbscan.readthedocs.io/en/latest/index.html">here</a>. The function uses <code>reticulate</code> as an interface to a Python session. Python will need to be installed in your environment prior to running the function. No other actions are required from the user, as the minimal Python packages are automatically installed in an isolated virtual environment specifically designated for the ChIPbinner R package. This minimizes the risk of inadvertently disrupting another Python installation on the user’s system.
+
+<b>It is important to consider this step will require substantial processing memory as well as time </b>. Thus, it is recommended that you use the python-implementation of HDBSCAN in a High-performance Computing server instead. Nevertheless, an example workflow for running HDBSCAN is found below, albeit we are using a downsampled matrix file (10000 data pairs) and using a minimum cluster size of 100. Using the complete matrix file for the density-based scatterplot generated below required substantial processing memory and multiple parallel cores, typically found in a high-performance computing cluster.
+```{r,eval=FALSE}
+# using a downsampled matrix
+clust(
+    output_file_name = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
+    out_dir = "output_directory",
+    matrix_file = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+    minpts = 100,
+    minsamps = 100,
+    cores = 6
+  )
+# using the complete matrix
+clust(
+    output_file_name = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
+    out_dir = "output_directory",
+    matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+    minpts = 5000,
+    minsamps = 5000,
+    cores = 6
+  )
+```
+
+## Generating density-based scatterplots
+
+Finally, a density-based cluster scatterplot can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can be called using <code>system.file("extdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",package = "ChIPbinner")</code>
+```{r,eval=FALSE}
+# load genic regions
+genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
+# load intergenic regions
+intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+# generate density-based scatterplot
+density_based_scatterplot(path_for_norm_bw = "directory_for_normalized_bigwig",
+    out_dir = "output_directory",
+    treated_samp_label = "NSD1_KO",
+    baseline_samp_label = "WT",
+    cell_line = "Cal27",
+    histone_mark = "H3K36me2",
+    matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+    pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed",
+    hdbscan_output_file ="clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
+    number_of_clusters = 3,
+    gene = genic_regions,
+    intergenic = intergenic_regions,
+    title_of_plot = "H3K36me2",
+    window_size = 10,
+    pow = 1.25,
+    show_legend = TRUE,
+    min=-5,
+    max=2,
+    bin_size=50,
+    show_scales = FALSE,
+    xaxis_label="WT",
+    yaxis_label="NSD1_KO",
+    height_of_figure=6,
+    width_of_figure=15)
+```
+

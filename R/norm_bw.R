@@ -1,13 +1,5 @@
 #!/usr/bin/env Rscript
 #+ message = FALSE, warning = FALSE
-# library(tidyverse)
-# library(rtracklayer)
-# library(GenomicRanges)
-# library(data.table)
-# library(lattice)
-# library(gridExtra)
-# library(DiffBind)
-# library(patchwork)
 #' Title
 #' @title Generate normalized bigWig files from binned BED files.
 #'
@@ -33,7 +25,7 @@
 #' @return a single normalized bigWig file with binned scores.
 #' @export
 #'
-#' @examples
+#' @example inst/examples/example_norm_bw.R
 norm_bw <- function(out_dir,
                     chromSizes,
                     blacklist,
@@ -53,14 +45,14 @@ norm_bw <- function(out_dir,
   # reference files
   ## blacklist
   blacklist <- paste0(blacklist)
-  bl <- import.bed(blacklist)
+  bl <- rtracklayer::import.bed(blacklist)
   ## chrom sizes
   chrom.sizes <- paste0(chromSizes)
-  # cell line info
+  # samples info
   cell_line <- paste0(cell_line)
   mark <- paste0(histone_mark)
   treated_samp_label <- paste0(treated_samp_label) # watch spaces in names
-  treated_samp_file <- import.bed(paste0(treated_samp_file))
+  treated_samp_file <- rtracklayer::import.bed(paste0(treated_samp_file))
   # other parameters
   ## pseudocount to avoid division by 0
   # pseudocount <- as.numeric(paste0(pseudocount))
@@ -107,7 +99,7 @@ norm_bw <- function(out_dir,
     setNames(c("chr", "seqlength"))
   gn <- keep %>%
     {
-      Seqinfo(.$chr, .$seqlength)
+      GenomeInfoDb::Seqinfo(.$chr, .$seqlength)
     }
   # loop through each file and keep only signal for each 10kb bin
   raw <- lapply(d, function(x) {
@@ -135,17 +127,9 @@ norm_bw <- function(out_dir,
     inp <- as.data.frame(x) %>% dplyr::select("seqnames", "start", "end", "name")
     colnames(inp) <- c("chr", "start", "end", "score")
     out <- dplyr::semi_join(inp, keep, by = "chr")
-    out <- makeGRangesFromDataFrame(out, keep.extra.columns = TRUE)
+    out <- GenomicRanges::makeGRangesFromDataFrame(out, keep.extra.columns = TRUE)
     out <- out[k_final]
   })
-  # pre_bl <- lapply(d,function(x){
-  #   inp <- as.data.frame(x) %>% dplyr::select("seqnames","start","end","name")
-  #   colnames(inp) <-c('chr', 'start', 'end', 'score')
-  #   imd <- dplyr::semi_join(inp,keep,by="chr")
-  #   out <- imd[,1:3] %>% mutate(start = start + 1)
-  #   out <- makeGRangesFromDataFrame(out,keep.extra.columns = TRUE,seqinfo = gn)
-  #   out <- out[k_final]
-  # })
   # final bins without the score. we will merge the scores after they are normalized and scaled
   bw <- lapply(d, function(x) {
     inp <- as.data.frame(x) %>% dplyr::select("seqnames", "start", "end", "name")
@@ -153,10 +137,8 @@ norm_bw <- function(out_dir,
     imd <- dplyr::semi_join(inp, keep, by = "chr")
     out <- imd[, 1:3] %>% mutate(start = start + 1)
     out <- out %>%
-      makeGRangesFromDataFrame(seqinfo = gn)
+      GenomicRanges::makeGRangesFromDataFrame(seqinfo = gn)
     out <- out[k_final]
-    # out <- out %>%
-    #   makeGRangesFromDataFrame(seqinfo = gn)
     k <- !overlapsAny(out, bl)
     out <- out[!overlapsAny(out, bl)]
   })
@@ -173,6 +155,6 @@ norm_bw <- function(out_dir,
   # output directory
   out_dir <- paste0(out_dir)
   # output bigwig file
-  return(export.bw(bw[[treated_samp_label]], con = sprintf("%s/%s.%s.%s%snorm.bw", out_dir, cell_line, treated_samp_label, mark, window_size)))
+  return(rtracklayer::export.bw(bw[[treated_samp_label]], con = sprintf("%s/%s.%s.%s%snorm.bw", out_dir, cell_line, treated_samp_label, mark, window_size)))
   print("Normalized bigWig file created!")
 }
