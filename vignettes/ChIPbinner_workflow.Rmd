@@ -20,6 +20,21 @@ library(ChIPbinner)
 
 ```{r,include=FALSE}
 library(formatR)
+library(knitr)
+```
+
+# Example workflow for generating binned BED files
+
+For input into ChIPbinner, the sequenced samples will need to be binned into windows, and formatted as a <a href="https://genome.ucsc.edu/FAQ/FAQformat">BED</a> file. One of the tools that can be used to perform this task is using <a href="https://bedtools.readthedocs.io/en/latest/">BEDtools</a> to convert an aligned sequence file, which is typically found in a <a href="https://genome.ucsc.edu/goldenPath/help/bam.html">BAM</a> format, into a binned BED file as demonstrated below.
+
+```{bash,eval=FALSE}
+# convert aligned BAM file to BED file
+bedtools bamtobed -i ${sample}.sorted.bam | sort -k1,1 -k2,2n > ${sample}.bed
+# intersect sample BED file with binned reference files
+bedtools intersect -a $WINDOW_REF -b ${sample}.bed -sorted -c -nonamecheck > $OUTPUT_NAME.binned.bed
+# example for binning Cal27 WT sample into 10kb windows
+bedtools bamtobed -i Cal27.WT.H3K36me2.sorted.bam | sort -k1,1 -k2,2n > Cal27.WT.H3K36me2.bed
+bedtools intersect -a hg38.10kb.windows.bed -b Cal27.WT.H3K36me2.bed -sorted -c -nonamecheck > Cal27.WT.H3K36me2.10kb.bed
 ```
 
 # Generating normalized bigwig files
@@ -40,15 +55,15 @@ This code chunk assumes your files are binned in 10kb windows and in the format 
 If you've ran the code chunk successfully, your resulting bigwig files will be found in the <code>output_directory</code> that you specified when running the function.
 ```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # load chrom sizes for hg38 assembly
-hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes", package = "ChIPbinner")
+hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes.gz", package = "ChIPbinner")
 # load blacklisted regions
-blacklisted_regions <- system.file("extdata", "hg38_blacklist.bed", package = "ChIPbinner")
+blacklisted_regions <- system.file("extdata", "hg38_blacklist.bed.gz", package = "ChIPbinner")
 # load WT sample and corresponding input
-WT <- system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed", package = "ChIPbinner")
-WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+WT <- system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
+WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
 # load NSD1_KO sample and corresponding input
-NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed", package = "ChIPbinner")
-NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
+NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
 # generate normalized bigwig for WT sample
 norm_bw(
   out_dir = "output_directory",
@@ -98,9 +113,9 @@ Genic and intergenic regions for <code>hg38</code> and <code>mm10</code> are inc
 <b> Note: you will need to adjust the minimum and maximum values for the x- and y-axis accordingly. After you are satisfied with the values for the x- and y-axis, you can then turn off axis annotations by running the function again, but using the parameter <code>show_scales=FALSE</code></b>
 ```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # load genic regions
-genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
+genic_regions <- system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner")
 # load intergenic regions
-intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+intergenic_regions <- system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner")
 # generate genic/intergenic scatterplot. here, we are using the normalized bigwigs generated from the previous section. Hence, we will need to indicate the directory where these bigwigs are found.
 genic_intergenic_scatterplot(
   path_for_norm_bw = "directory_for_normalized_bigwig",
@@ -132,13 +147,15 @@ genic_intergenic_scatterplot(
 
 Prior to generating clusters, we need to pre-process the normalized bigWig files. This is accomplished using the <code>pre_clus()</code> function. We will continue to use the samples from the previous steps above.
 ```{r, eval=FALSE}
-pre_clus(path_for_norm_bw = "directory_for_normalized_bigwig",
-                       out_dir = "output_directory",
-                       window_size = 10,
-                       treated_samp_label = "NSD1_KO",
-                       baseline_samp_label = "WT",
-                       cell_line = "Cal27",
-                       histone_mark = "H3K36me2")
+pre_clust(
+  path_for_norm_bw = "directory_for_normalized_bigwig",
+  out_dir = "output_directory",
+  window_size = 10,
+  treated_samp_label = "NSD1_KO",
+  baseline_samp_label = "WT",
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2"
+)
 ```
 
 ## Running HDBSCAN to generate clusters
@@ -148,57 +165,100 @@ The <code>clus()</code> function can be used to generate clusters of similarly-b
 <b>It is important to consider this step will require substantial processing memory as well as time </b>. Thus, it is recommended that you use the python-implementation of HDBSCAN in a High-performance Computing server instead. Nevertheless, an example workflow for running HDBSCAN is found below, albeit we are using a downsampled matrix file (10000 data pairs) and using a minimum cluster size of 100. Using the complete matrix file for the density-based scatterplot generated below required substantial processing memory and multiple parallel cores, typically found in a high-performance computing cluster.
 ```{r,eval=FALSE}
 # using a downsampled matrix
-clust(
-    output_file_name = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
-    out_dir = "output_directory",
-    matrix_file = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
-    minpts = 100,
-    minsamps = 100,
-    cores = 6
-  )
+generate_clust(
+  output_file_name = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
+  out_dir = "output_directory",
+  matrix_file = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+  minpts = 100,
+  minsamps = 100,
+  cores = 6
+)
 # using the complete matrix
-clust(
-    output_file_name = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
-    out_dir = "output_directory",
-    matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
-    minpts = 5000,
-    minsamps = 5000,
-    cores = 6
-  )
+generate_clust(
+  output_file_name = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
+  out_dir = "output_directory",
+  matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+  minpts = 5000,
+  minsamps = 5000,
+  cores = 6
+)
+```
+
+## Annotating clusters
+
+After identifying clusters using HDBSCAN, these clusters need to be annotated for use in downstream analysis.
+```{r,eval=FALSE}
+annotate_clust(
+  histone_mark = "H3K36me2",
+  window_size = 10,
+  cell_line = "Cal27",
+  baseline_samp_label = "WT",
+  treated_samp_label = "NSD1_KO",
+  number_of_clusters = 3,
+  matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+  pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed",
+  hdbscan_output_file = "clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
+  out_dir = "/output_directory"
+)
 ```
 
 ## Generating density-based scatterplots
 
-Finally, a density-based cluster scatterplot can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can be called using <code>system.file("extdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",package = "ChIPbinner")</code>
+Finally, a density-based cluster scatterplot can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can be called using <code>system.file("extdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt.gz",package = "ChIPbinner")</code>
 ```{r,eval=FALSE}
 # load genic regions
 genic_regions <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
 # load intergenic regions
 intergenic_regions <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
 # generate density-based scatterplot
-density_based_scatterplot(path_for_norm_bw = "directory_for_normalized_bigwig",
-    out_dir = "output_directory",
-    treated_samp_label = "NSD1_KO",
-    baseline_samp_label = "WT",
-    cell_line = "Cal27",
-    histone_mark = "H3K36me2",
-    matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
-    pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed",
-    hdbscan_output_file ="clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
-    number_of_clusters = 3,
-    gene = genic_regions,
-    intergenic = intergenic_regions,
-    title_of_plot = "H3K36me2",
-    window_size = 10,
-    pow = 1.25,
-    show_legend = TRUE,
-    min=-5,
-    max=2,
-    bin_size=50,
-    show_scales = FALSE,
-    xaxis_label="WT",
-    yaxis_label="NSD1_KO",
-    height_of_figure=6,
-    width_of_figure=15)
+density_based_scatterplot(
+  path_for_norm_bw = "directory_for_normalized_bigwig",
+  out_dir = "output_directory",
+  treated_samp_label = "NSD1_KO",
+  baseline_samp_label = "WT",
+  cell_line = "Cal27",
+  histone_mark = "H3K36me2",
+  annotated_clusters = "annotated_clusters.Cal27.WT.NSD1_KO.H3K36me2.10kb.rda",
+  number_of_clusters = 3,
+  gene = genic_regions,
+  intergenic = intergenic_regions,
+  title_of_plot = "H3K36me2",
+  window_size = 10,
+  pow = 1.25,
+  show_legend = TRUE,
+  min = -5,
+  max = 2,
+  bin_size = 50,
+  show_scales = FALSE,
+  xaxis_label = "WT",
+  yaxis_label = "NSD1_KO",
+  height_of_figure = 6,
+  width_of_figure = 15
+)
 ```
 
+# Overlap enrichment/depletion analysis with annotated clusters of bins
+
+After identifying and annotating clusters of bins, a Fisher's exact test can be used to determine whether these bins overlap a specific class of annotated regions against a background of all bins. The underlying algorithm is based on <a href="https://bioconductor.org/packages/release/bioc/html/LOLA.html">LOLA - locus overlap analysis for enrichment of genomic ranges</a>. The examples below evaluate overlap with <a href="https://useast.ensembl.org/info/genome/index.html">Ensembl</a> annotations genome-wide. However, the user can also evaluate overlap with other functional annotations by changing the <code>functional_db</code> parameter to <code>repeat</code> or <code>ccre</code>. These databases refer to repeats from <a href="https://www.repeatmasker.org/">RepeatMasker</a> and candidate cis-regulatory elements (cCREs) from <a href="https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=mm10&g=encodeCcreCombined">ENCODE</a> respectively. Furthermore, by specifying the <code>region</code> to be either <code>genic</code> or <code>intergenic</code>, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization. 
+
+Below is an example of how to calculate overlap enrichment & depletion result of Ensembl annotations with bins found in cluster B identified from the previous analyses. Note that the size of the dots corresponds to the number of bins overlapping the corresponding annotation. The p-value is based on Fisher's exact test of bins overlapping a specific class of annotated regions versus a background of all bins found in both cell lines being compared.
+```{r,eval=FALSE}
+enrich_clust(
+  gene = system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner"),
+  intergenic = system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner"),
+  assembly = "hg38",
+  annotated_clusters = "annotated_clusters.Cal27.WT.NSD1_KO.H3K36me2.10kb.rda",
+  query_cluster = "B",
+  pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed",
+  functional_db = "ensembl",
+  region = "genome_wide",
+  cores = 6,
+  n_elements = 7,
+  cutoff_for_overlap = 100,
+  file_plot_name = "genome_wide.enrichment_depletion",
+  output_table_name = "genome_wide.enrichment_depletion",
+  width_of_plot = 7,
+  height_of_plot = 3,
+  out_dir = "/output_directory"
+)
+```

@@ -1,0 +1,10 @@
+filename	size
+CTCF-only.bed.gz	1891
+DNase-H3K4me3.bed.gz	547
+DNase-H3K4me3_CTCF.bed.gz	273
+PLS.bed.gz	252
+PLS_CTCF.bed.gz	811
+dELS.bed.gz	13599
+dELS_CTCF.bed.gz	6517
+pELS.bed.gz	1917
+pELS_CTCF.bed.gz	2202

@@ -11,9 +11,7 @@ density_based_scatterplot(
   baseline_samp_label,
   cell_line,
   histone_mark,
-  matrix_file,
-  pooled_bed_file,
-  hdbscan_output_file,
+  annotated_clusters,
   number_of_clusters,
   gene,
   intergenic,
@@ -44,11 +42,7 @@ density_based_scatterplot(
 
 \item{histone_mark}{The broad histone mark used for the analysis.}
 
-\item{matrix_file}{The matrix file generated from 'pre_clus()', consisting of only the enrichment scores per bin for each of the two samples being compared.}
-
-\item{pooled_bed_file}{The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared.}
-
-\item{hdbscan_output_file}{The HDBSCAN output which specifies whether each bin falls into a specific cluster or not.}
+\item{annotated_clusters}{The annotated clusters generated using annotate_clust(), which is an R object that needs to be loaded.}
 
 \item{number_of_clusters}{The total number of clusters identified by the HDBSCAN algorithm.}
 
@@ -113,12 +107,10 @@ density_based_scatterplot(path_for_norm_bw = system.file("extdata/norm_bw", pack
                           baseline_samp_label = "WT",
                           cell_line = "Cal27",
                           histone_mark = "H3K36me2",
-                          matrix_file = system.file("extdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv", package = "ChIPbinner"),
-                          pooled_bed_file = system.file("extdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed", package = "ChIPbinner"),
-                          hdbscan_output_file = system.file("extdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt", package = "ChIPbinner"),
+                          annotated_clusters = system.file("extdata","cons.Cal27.WT.NSD1_KO.H3K36me2.10kb.rda", package = "ChIPbinner"),
                           number_of_clusters = 3,
-                          gene = system.file("extdata", "hg38_gene.bed", package = "ChIPbinner"),
-                          intergenic = system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner"),
+                          gene = system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner"),
+                          intergenic = system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner"),
                           title_of_plot = "H3K36me2",
                           window_size = 10,
                           pow = 1.25,

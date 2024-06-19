@@ -1,25 +1,27 @@
 test_that("Generating density-based scatterplots work", {
   # load libraries
-  library(tidyverse)
-  library(rtracklayer)
-  library(GenomicRanges)
+  ## required libs
   library(data.table)
+  library(tidyverse)
+  library(GenomicRanges)
+  library(rtracklayer)
+  library(ggrepel)
+  library(hexbin)
+  library(viridis)
+  library(lwgeom)
+  library(patchwork)
+  library(pals)
+  library(MASS)
   library(lattice)
   library(gridExtra)
   library(DiffBind)
-  library(patchwork)
   library(sf)
-  library(MASS)
   library(lwgeom)
-  library(ggrepel)
-  library(hexbin)
   library(ggrastr)
-  library(viridis)
-  library(pals)
   library(isoband)
   # load genic and intergenic regions
-  gene <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
-  igr <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+  gene <- system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner")
+  igr <- system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner")
   # generate density-based scatterplot
   density_based_scatterplot(path_for_norm_bw = testthat::test_path("testdata"),
     out_dir = testthat::test_path("testdata"),
@@ -27,18 +29,13 @@ test_that("Generating density-based scatterplots work", {
     baseline_samp_label = "WT",
     cell_line = "Cal27",
     histone_mark = "H3K36me2",
-    # matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv"
-    matrix_file = testthat::test_path("testdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv"),
-    # pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed"
-    pooled_bed_file = testthat::test_path("testdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed"),
-    # hdbscan_output_file ="clus.Cal27.WT.NSD1_KO.H3K36me2.5000.5000.txt"
-    hdbscan_output_file = testthat::test_path("testdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt"),
+    annotated_clusters = testthat::test_path("testdata","cons.Cal27.WT.NSD1_KO.H3K36me2.10kb.rda"),
     number_of_clusters = 3,
     gene = gene,
     intergenic = igr,
     title_of_plot = "H3K36me2",
     window_size = 10,
-    pow = 1.25,
+    pow = 1.1,
     show_legend = TRUE,
     min=-5,
     max=2,

@@ -1,0 +1,15 @@
+filename	size
+DNA.bed	160369
+LINE.bed	860033
+LTR.bed	851646
+Low_complexity.bed	384227
+RC.bed	344
+RNA.bed	686
+SINE.bed	1444512
+Satellite.bed	36822
+Simple_repeat.bed	959757
+rRNA.bed	1553
+scRNA.bed	8330
+snRNA.bed	3006
+srpRNA.bed	437
+tRNA.bed	4768

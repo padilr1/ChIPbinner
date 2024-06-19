@@ -4,23 +4,23 @@ test_that("generating normalized bigwig files from binned BED files works", {
   library(rtracklayer)
   library(GenomicRanges)
   library(data.table)
-  library(lattice)
-  library(gridExtra)
-  library(DiffBind)
-  library(patchwork)
+  # library(lattice)
+  # library(gridExtra)
+  # library(DiffBind)
+  # library(patchwork)
   # load chrom sizes for hg38 assembly
-  hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes", package = "ChIPbinner")
+  hg38_chrom_sizes <- system.file("extdata", "hg38_chrom.sizes.gz", package = "ChIPbinner")
   # load blacklisted regions
-  blacklisted_regions <- system.file("extdata", "hg38_blacklist.bed", package = "ChIPbinner")
+  blacklisted_regions <- system.file("extdata", "hg38_blacklist.bed.gz", package = "ChIPbinner")
   # load WT sample and corresponding input
-  WT <- system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed", package = "ChIPbinner")
-  WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+  WT <- system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
+  WT_input <- system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
   # load NSD1_KO sample and corresponding input
-  NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed", package = "ChIPbinner")
-  NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed", package = "ChIPbinner")
+  NSD1_KO <- system.file("extdata", "Cal27.NSD1_KO.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
+  NSD1_KO_input <- system.file("extdata", "Cal27.NSD1_KO_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
   # load genic and intergenic regions
-  gene <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
-  igr <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+  gene <- system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner")
+  igr <- system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner")
   # generate normalized bigwig for WT sample
   norm_bw(out_dir = testthat::test_path("testdata"),
           chromSizes = hg38_chrom_sizes,

@@ -1,10 +1,10 @@
 Package: ChIPbinner
-Title: This package is designed for analyzing binned ChIP-seq or Cut&Run data for broad histone marks
+Title: Cluster and analyze ChIP-seq or Cut&Run data in binned windows for broad histone marks
 Version: 0.0.0.9000
 Authors@R: 
     person("Reinnier", "Padilla", , "reinnier.padilla@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package will analyze binned ChIP-seq/Cut&Run data. You can visualize genome-wide changes using this software and subsequently analyze clusters of similarly-behaving genomic regions.
+Description: A system for clustering and analyzing ChIP-seq or Cut&Run data that has been binned in windows. You provide two samples for comparison, input information regarding the samples and follow the workflow. ChIPbinner will identify clusters of similarly behaving bins, assign bins and clusters of bins as genic or intergenic and finally, run enrichment and depletion analysis for the annotated clusters. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -23,24 +23,38 @@ Imports:
     ggrepel,
     matrixStats,
     isoband,
-    sf,
     viridis,
-    MASS,
     lwgeom,
     hexbin,
     pals,
-    gdata,
+    MASS,
+    sf,
     ggrastr,
     reticulate,
     readr,
     SummarizedExperiment,
     GenomeInfoDb,
-    IRanges
+    IRanges,
+    LOLA
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    highcharter,
+    ggplot2,
+    reshape2,
+    scales,
+    tibble
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Config/testthat/start-first: norm_bw, genic_intergenic_scatterplot,pre_clus,clust,density_based_scatterplot
-LazyData: yes
+Config/testthat/start-first: norm_bw,genic_intergenic_scatterplot,pre_clust,generate_clust,annotate_clust,density_based_scatterplot,enrich_clust
+Collate: 
+    'ChIPbinner-package.R'
+    'norm_bw.R'
+    'pre_clust.R'
+    'generate_clust.R'
+    'annotate_clust.R'
+    'density_based_scatterplot.R'
+    'enrich_clust.R'
+    'genic_intergenic_scatterplot.R'
+    'merge_norm_bw.R'

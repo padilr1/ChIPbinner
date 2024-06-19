@@ -40,11 +40,11 @@ merge_norm_bw <- function(path_for_norm_bw,
   s <- list.files(path = path, pattern = window_size, full.names = FALSE, recursive = FALSE) %>%
     tibble(f = .) %>%
     separate(f, c("line", "samp", "mark", NA, NA, NA), "\\.", F) %>%
-    mutate(f = file.path(path, f))
+    dplyr::mutate(f = file.path(path, f))
   d <- deframe(s[, c("samp", "f")])
   # loop through each file
   bw <- lapply(d, function(x) {
-    inp <- import.bw(x)
+    inp <- rtracklayer::import.bw(x)
     return(inp)
   })
   # use one of the replicates' regions as a template
@@ -57,5 +57,5 @@ merge_norm_bw <- function(path_for_norm_bw,
   # Assign the mean values to the 'score' column in 'merged_bw'; the score for the merged bigWig file is now the mean of the the two replicates
   merged_bw$score <- row_means
   # export bw
-  export.bw(merged_bw, con = sprintf("%s/%s.%s.%s%snorm.bw", out_dir, cell_line, merged_sample_name, mark, window_size))
+  rtracklayer::export.bw(merged_bw, con = sprintf("%s/%s.%s.%s%snorm.bw", out_dir, cell_line, merged_sample_name, mark, window_size))
 }

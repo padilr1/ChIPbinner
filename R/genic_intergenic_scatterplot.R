@@ -29,6 +29,7 @@
 #' @return Returns a scatterplot of bins annotated genic or intergenic comparing across two conditions.
 #' @export
 #'
+#' @include norm_bw.R
 #' @example inst/examples/example_genic_intergenic_scatterplot.R
 genic_intergenic_scatterplot <- function(path_for_norm_bw,
                                          out_dir,
@@ -97,7 +98,7 @@ genic_intergenic_scatterplot <- function(path_for_norm_bw,
   s <- s %>%
     dplyr::slice(match(odr, samp))
   d <- deframe(s[, c("samp", "f")]) %>%
-    lapply(import.bw)
+    lapply(rtracklayer::import.bw)
   # only keep regions found in both
   d[[baseline_samp_label]] <- subsetByOverlaps(d[[baseline_samp_label]], d[[treated_samp_label]])
   d[[treated_samp_label]] <- subsetByOverlaps(d[[treated_samp_label]], d[[baseline_samp_label]])
@@ -216,13 +217,6 @@ genic_intergenic_scatterplot <- function(path_for_norm_bw,
           logcount = log10(count),
           ttl = t1
         )
-      # lim <- data.frame(x = c(min(pdat2$x[pdat2$count > 5]),
-      #                         max(pdat2$x[pdat2$count > 5])) %>%
-      #                     scales::expand_range(mul = .05),
-      #                   y = c(min(pdat2$y[pdat2$count > 5]),
-      #                         max(pdat2$y[pdat2$count > 5])) %>%
-      #                     scales::expand_range(mul = .05))
-      # max and min for x and y axes
       if (is.null(min_x)) {
         min_x <- as.numeric(min(pdat2$x[pdat2$count > 10]))
       } else {
@@ -363,7 +357,7 @@ genic_intergenic_scatterplot <- function(path_for_norm_bw,
             axis.title = element_text(family = "Arial", color = "black")
           )
       }
-      pdat <- kde2d(x = pdat$x, y = pdat$y, n = 100)
+      pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
       brks <- pretty(c(pdat$z), 30)
       nbrks <- length(brks)
       fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)

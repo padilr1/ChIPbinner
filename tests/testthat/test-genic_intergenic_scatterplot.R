@@ -2,22 +2,21 @@ test_that("generating genic/intergenic scatterplots works", {
   # load libraries
   library(data.table)
   library(tidyverse)
+  library(GenomicRanges)
+  library(rtracklayer)
+  library(ggrepel)
+  library(hexbin)
+  library(viridis)
+  library(lwgeom)
+  library(patchwork)
   library(matrixStats)
   library(isoband)
   library(sf)
-  library(ggrepel)
-  library(viridis)
   library(MASS)
-  library(lwgeom)
-  library(hexbin)
   library(pals)
-  library(patchwork)
-  library(gdata)
-  library(GenomicRanges)
-  library(rtracklayer)
   # load genic and intergenic regions
-  gene <- system.file("extdata", "hg38_gene.bed", package = "ChIPbinner")
-  igr <- system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner")
+  gene <- system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner")
+  igr <- system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner")
   # generate genic/intergenic scatterplot
   genic_intergenic_scatterplot(path_for_norm_bw = testthat::test_path("testdata"),
                                out_dir = testthat::test_path("testdata"),

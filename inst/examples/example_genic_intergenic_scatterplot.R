@@ -10,13 +10,12 @@ library(lwgeom)
 library(hexbin)
 library(pals)
 library(patchwork)
-library(gdata)
 library(GenomicRanges)
 library(rtracklayer)
 genic_intergenic_scatterplot(path_for_norm_bw = system.file("extdata/norm_bw", package = "ChIPbinner"),
                              out_dir = system.file("extdata", package = "ChIPbinner"),
-                             gene = system.file("extdata", "hg38_gene.bed", package = "ChIPbinner"),
-                             intergenic = system.file("extdata", "hg38_intergenic.bed", package = "ChIPbinner"),
+                             gene = system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner"),
+                             intergenic = system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner"),
                              cell_line = "Cal27",
                              baseline_samp_label = "WT",
                              treated_samp_label = "NSD1_KO",
