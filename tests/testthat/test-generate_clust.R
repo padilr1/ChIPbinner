@@ -3,10 +3,19 @@ test_that("Density-based clustering works using HDBSCAN", {
   # use_python("/Users/padilr1/opt/anaconda3/envs/r_env_V2/bin/python")
   # reticulate::source_python("~/Documents/ChIPbinner/inst/python/clus.py")
   # run HDBSCAN
+  # generate_clust(
+  #   output_file_name = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
+  #   out_dir = testthat::test_path("testdata"),
+  #   matrix_file = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+  #   minpts = 100,
+  #   minsamps = 100,
+  #   cores = 6
+  # )
+  # run downsampled
   generate_clust(
-    output_file_name = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
+    output_file_name = "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
     out_dir = testthat::test_path("testdata"),
-    matrix_file = "sampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv",
+    matrix_file = "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv",
     minpts = 100,
     minsamps = 100,
     cores = 6

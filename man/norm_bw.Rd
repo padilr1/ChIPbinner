@@ -2,53 +2,35 @@
 % Please edit documentation in R/norm_bw.R
 \name{norm_bw}
 \alias{norm_bw}
-\title{Generate normalized bigWig files from binned BED files.}
+\title{Generate normalized bigWig files.}
 \usage{
 norm_bw(
   out_dir,
-  chromSizes,
-  blacklist,
-  cell_line,
-  histone_mark,
-  treated_samp_label,
-  treated_samp_file,
-  treated_samp_library_size,
-  control_label = NULL,
-  control_file = NULL,
+  genome_assembly,
+  chip_samp_binned_file,
+  chip_samp_library_size,
+  control_binned_file = NULL,
   control_library_size = NULL,
   use_control,
-  window_size,
   pseudocount = NULL,
   raw_count_cutoff = NULL,
   scaling_factor = NULL
 )
 }
 \arguments{
-\item{out_dir}{The output directory for normalized bigWig files.}
+\item{out_dir}{Output directory for normalized bigWig files.}
 
-\item{chromSizes}{Chromosome sizes for a specific assembly. hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
+\item{genome_assembly}{Must of be one of hg38 or mm10.}
 
-\item{blacklist}{Blacklisted regions to be removed. Blacklisted regions for hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
+\item{chip_samp_binned_file}{Binned BED file associated with the sample with ChIP-seq or Cut&Run signal.}
 
-\item{cell_line}{The cell line of the samples.}
+\item{chip_samp_library_size}{Mapped library size for the sample with ChIP-seq or Cut&Run signal.}
 
-\item{histone_mark}{The broad histone mark used for the analysis.}
+\item{control_binned_file}{Binned BED file associated with the control sample.}
 
-\item{treated_samp_label}{The treated sample name/label.}
+\item{control_library_size}{Mapped library size for the control sample.}
 
-\item{treated_samp_file}{The binned BED file associated with the treated sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed}
-
-\item{treated_samp_library_size}{The mapped library size for your treated sample.}
-
-\item{control_label}{The name/label for your control sample. This could be the input sample (for ChIP-seq) or IgG (for Cut & Run).}
-
-\item{control_file}{The binned BED file associated with the control sample. This function assumes your file is named according to the following format: cell_line.sample_label.histone_mark.window_size_in_kb.bed}
-
-\item{control_library_size}{The library size for the control sample.}
-
-\item{use_control}{This is a Boolean term, whether to use a control sample or not.}
-
-\item{window_size}{The window size in kilobytes. For example, use 10 for samples binned in 10 kilobyte (kb) bins.}
+\item{use_control}{Boolean term, whether to use a control sample or not.}
 
 \item{pseudocount}{Pseudocount to avoid division by 0. If not defined, defaults to 1e-3.}
 
@@ -57,10 +39,10 @@ norm_bw(
 \item{scaling_factor}{Optional: quantatitive normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values.}
 }
 \value{
-a single normalized bigWig file with binned scores.
+a single bigWig file with normalized binned scores.
 }
 \description{
-Use this function to generate the normalized bigWig files needed for the rest of the package workflows.
+Generate bigWig files with normalized bin scores needed for subsequent functions in the package workflow.
 }
 \details{
 Title
@@ -70,24 +52,14 @@ library(tidyverse)
 library(rtracklayer)
 library(GenomicRanges)
 library(data.table)
-# library(lattice)
-# library(gridExtra)
-# library(DiffBind)
-# library(patchwork)
-norm_bw(out_dir = system.file("extdata/norm_bw",package = "ChIPbinner"),
-        chromSizes = system.file("extdata", "hg38_chrom.sizes.gz", package = "ChIPbinner"),
-        blacklist = system.file("extdata", "hg38_blacklist.bed.gz", package = "ChIPbinner"),
-        cell_line = "Cal27",
-        histone_mark = "H3K36me2",
-        treated_samp_label = "WT",
-        treated_samp_file= system.file("extdata", "Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
-        treated_samp_library_size = 64093770,
+norm_bw(out_dir = system.file("extdata",package = "ChIPbinner"),
+        genome_assembly = "hg38",
+        chip_samp_binned_file = system.file("extdata", "downsampled.Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
+        chip_samp_library_size = 64093770,
         use_control = TRUE,
-        control_label = "WT_input",
-        control_file = system.file("extdata", "Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
+        control_binned_file = system.file("extdata", "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
         control_library_size = 52047022,
         raw_count_cutoff = 0,
-        window_size = 10,
         pseudocount = 1e-15,
         scaling_factor = 0.450328805)
 }

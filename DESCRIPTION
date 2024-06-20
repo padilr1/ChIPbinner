@@ -35,7 +35,8 @@ Imports:
     SummarizedExperiment,
     GenomeInfoDb,
     IRanges,
-    LOLA
+    LOLA,
+    tools
 Suggests: 
     knitr,
     rmarkdown,
@@ -58,3 +59,6 @@ Collate:
     'enrich_clust.R'
     'genic_intergenic_scatterplot.R'
     'merge_norm_bw.R'
+Depends: 
+    R (>= 2.10)
+LazyData: true

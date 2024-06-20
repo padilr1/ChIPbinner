@@ -5,29 +5,15 @@
 \title{Annotate clusters.}
 \usage{
 annotate_clust(
-  histone_mark,
-  window_size,
-  cell_line,
-  baseline_samp_label,
-  treated_samp_label,
   number_of_clusters,
   matrix_file,
   pooled_bed_file,
   hdbscan_output_file,
+  output_filename,
   out_dir
 )
 }
 \arguments{
-\item{histone_mark}{The broad histone mark used for the analysis.}
-
-\item{window_size}{The window size in kilobytes. For example, use 10 for samples binned in 10 kilobyte (kb) bins.}
-
-\item{cell_line}{The cell line of the samples.}
-
-\item{baseline_samp_label}{The baseline sample name/label to which to compare the treated sample. This is usually the wildtype (WT) sample.}
-
-\item{treated_samp_label}{The treated sample name/label.}
-
 \item{number_of_clusters}{The total number of clusters identified by the HDBSCAN algorithm.}
 
 \item{matrix_file}{The matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.}
@@ -35,6 +21,8 @@ annotate_clust(
 \item{pooled_bed_file}{The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared.}
 
 \item{hdbscan_output_file}{The HDBSCAN output which specifies whether each bin falls into a specific cluster or not.}
+
+\item{output_filename}{Name for the matrix file and pooled BED file.}
 
 \item{out_dir}{The output directory.}
 }
@@ -58,15 +46,11 @@ library(gridExtra)
 library(DiffBind)
 library(idr2d)
 library(patchwork)
-annotate_clust(histone_mark = "H3K36me2",
-               window_size=10,
-               cell_line = "Cal27",
-               baseline_samp_label = "WT",
-               treated_samp_label = "NSD1_KO",
-               number_of_clusters = 3,
-               matrix_file = system.file("extdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.mat.csv", package = "ChIPbinner"),
-               pooled_bed_file = system.file("extdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed", package = "ChIPbinner"),
-               hdbscan_output_file= system.file("extdata","clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt.gz", package = "ChIPbinner"),
-               out_dir = system.file("extdata", package = "ChIPbinner"))
-
+# system.file("extdata", "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
+annotate_clust(number_of_clusters = 3,
+               matrix_file = system.file("extdata", "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv", package = "ChIPbinner"),
+               pooled_bed_file = system.file("extdata", "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_pooled.bed.gz", package = "ChIPbinner"),
+               hdbscan_output_file= system.file("extdata", "clus.downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb.100.100.txt", package = "ChIPbinner"),
+               output_filename = "downsampled",
+               out_dir=system.file("extdata",package = "ChIPbinner"))
 }

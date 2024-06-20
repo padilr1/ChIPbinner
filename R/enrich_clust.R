@@ -2,9 +2,7 @@
 #' Title
 #' @title Enrichment & depletion analysis for clusters of bins.
 #' @description Using LOLA, performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
-#' @param gene Annotated genic regions in BED format. hg38 and mm10 are included in the package and can be accessed in 'extdata'.
-#' @param intergenic Annotated intergenic regions in BED format. hg38 and mm10 are included in the package and can be accessed in 'extdata'.
-#' @param assembly Must of be one of hg38 or mm10.
+#' @param genome_assembly Must of be one of hg38 or mm10.
 #' @param annotated_clusters The R object containing annotated clusters, generated from the annotate_clust() function.
 #' @param query_cluster The specific cluster being tested - normally, the clusters are label alphabetically from A to Z.
 #' @param pooled_bed_file The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared. Used for the background.
@@ -25,9 +23,7 @@
 #' @include annotate_clust.R
 #'
 #' @example inst/examples/example_enrich_clust.R
-enrich_clust <- function(gene,
-                         intergenic,
-                         assembly,
+enrich_clust <- function(genome_assembly,
                          annotated_clusters,
                          query_cluster,
                          pooled_bed_file,
@@ -44,11 +40,22 @@ enrich_clust <- function(gene,
   suppressWarnings({
     # out dir
     out_dir <- paste0(out_dir)
-    # load reference files
-    gene <- rtracklayer::import.bed(gene)
-    igr <- rtracklayer::import.bed(intergenic)
+    # gene and intergenic reference files
+    if (genome_assembly == "hg38") {
+      gene <- hg38_gene
+      igr <- hg38_igr
+    } else if (genome_assembly == "mm10") {
+      gene <- mm10_gene
+      igr <- mm10_igr
+    }
+    # loading function
+    loadRData <- function(fileName){
+      #loads an RData file, and returns it
+      load(fileName)
+      get(ls()[ls() != "fileName"])
+    }
     # load annotated clusters
-    load(paste0(annotated_clusters))
+    cons <- loadRData(paste0(annotated_clusters))
     # the cluster being analyzed, for example cluster A, B or C...
     cluster <- as.character(paste0(query_cluster))
     # load pooled BED file from pre_clus(), comprising of genomic coordinates found in the two samples being compared.
@@ -65,35 +72,7 @@ enrich_clust <- function(gene,
     }
     # collection of functional annotations
     ## database of functional annotations to use
-    functional_db <- paste0(functional_db, "DB")
-    if (assembly == "hg38") {
-      if (functional_db == "ensemblDB") {
-        ensemblDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/hg38", package = "ChIPbinner"), collections = "ensembl")
-        DB <- ensemblDB
-      } else if (functional_db == "ccreDB") {
-        ccreDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/hg38", package = "ChIPbinner"), collections = "ccre")
-        DB <- ccreDB
-      } else if (functional_db == "repeatDB") {
-        repeatDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/hg38", package = "ChIPbinner"), collections = "repeats")
-        DB <- repeatDB
-      }
-      print("Using hg38 assembly for functional annotations.")
-    } else if (assembly == "mm10") {
-      if (functional_db == "ensemblDB") {
-        ensemblDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/mm10", package = "ChIPbinner"), collections = "ensembl")
-        DB <- ensemblDB
-      } else if (functional_db == "ccreDB") {
-        ccreDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/mm10", package = "ChIPbinner"), collections = "ccre")
-        DB <- ccreDB
-      } else if (functional_db == "repeatDB") {
-        repeatDB <- LOLA::loadRegionDB(system.file("extdata/regionDB/mm10", package = "ChIPbinner"), collections = "repeats")
-        DB <- repeatDB
-      }
-      print("Using mm10 assembly for functional annotations.")
-    } else {
-      print("Please use hg38 or mm10 for genome assembly.")
-      break
-    }
+    DB <- loadRData(paste0(functional_db))
     # background
     uni <- pooled_BED
     uni_igr <- uni[overlapsAny(uni, igr) & !overlapsAny(uni, gene)]

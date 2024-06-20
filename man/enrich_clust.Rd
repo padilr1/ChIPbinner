@@ -5,9 +5,7 @@
 \title{Enrichment & depletion analysis for clusters of bins.}
 \usage{
 enrich_clust(
-  gene,
-  intergenic,
-  assembly,
+  genome_assembly,
   annotated_clusters,
   query_cluster,
   pooled_bed_file,
@@ -24,11 +22,7 @@ enrich_clust(
 )
 }
 \arguments{
-\item{gene}{Annotated genic regions in BED format. hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
-
-\item{intergenic}{Annotated intergenic regions in BED format. hg38 and mm10 are included in the package and can be accessed in 'extdata'.}
-
-\item{assembly}{Must of be one of hg38 or mm10.}
+\item{genome_assembly}{Must of be one of hg38 or mm10.}
 
 \item{annotated_clusters}{The R object containing annotated clusters, generated from the annotate_clust() function.}
 
@@ -73,20 +67,20 @@ library(rtracklayer)
 library(GenomicRanges)
 library(LOLA)
 library(highcharter)
-enrich_clust(gene=system.file("extdata", "hg38_gene.bed.gz", package = "ChIPbinner"),
-             intergenic=system.file("extdata", "hg38_intergenic.bed.gz", package = "ChIPbinner"),
-             assembly="hg38",
-             annotated_clusters=system.file("extdata","cons.Cal27.WT.NSD1_KO.H3K36me2.10kb.rda", package = "ChIPbinner"),
-             query_cluster="B",
-             pooled_bed_file=system.file("extdata","Cal27.WT.NSD1_KO.H3K36me2.10kb.pooled.bed", package = "ChIPbinner"),
-             functional_db="ccre",
-             region="genic",
-             cores=1,
-             n_elements=7,
-             cutoff_for_overlap = 100,
-             file_plot_name="ccre.genic.enrichment_depletion",
-             output_table_name="ccre.genic.enrichment_depletion",
-             width_of_plot=7,
-             height_of_plot=3,
-             out_dir=system.file("extdata", package = "ChIPbinner"))
+enrich_clust(
+  genome_assembly = "hg38",
+  annotated_clusters = system.file("extdata/data","downsampled_annotated_clusters.rda", package = "ChIPbinner"),
+  query_cluster = "B",
+  pooled_bed_file = system.file("extdata", "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_pooled.bed.gz", package = "ChIPbinner"),
+  functional_db = system.file("extdata/data","downsampled_hg38_ccreDB.rda", package = "ChIPbinner"),
+  region = "genome_wide",
+  cores = 1,
+  n_elements = 7,
+  cutoff_for_overlap = 10,
+  file_plot_name = "downsampled.ccre.genome_wide.enrichment_depletion",
+  output_table_name = "downsampled.ccre.genome_wide.enrichment_depletion",
+  width_of_plot = 7,
+  height_of_plot = 3,
+  out_dir = system.file("extdata", package = "ChIPbinner")
+)
 }
