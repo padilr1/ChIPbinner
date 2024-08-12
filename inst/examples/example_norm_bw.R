@@ -1,7 +1,3 @@
-library(tidyverse)
-library(rtracklayer)
-library(GenomicRanges)
-library(data.table)
 norm_bw(out_dir = system.file("extdata",package = "ChIPbinner"),
         genome_assembly = "hg38",
         chip_samp_binned_file = system.file("extdata", "downsampled.Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),

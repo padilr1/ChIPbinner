@@ -24,9 +24,11 @@
 #' @param show_scales Boolean term whether to show scales or not.
 #' @param xaxis_label Label for the x-axis. This is normally the baseline label (i.e. WT)
 #' @param yaxis_label Label for the y-axis. This is normally the treated sample label.
-#' @param height_of_figure The height of the plot.
-#' @param width_of_figure The width of the plot.
-#'
+#' @param height_of_figure A numeric specifying the height of the plots.
+#' @param width_of_figure A numeric specifying the width of the plots.
+#' @param plot_title_font_size An integer specifying the font size for each plot title.
+#' @param legend_font_size An integer specifying the font size for the legends.
+#' @param axis_title_font_size An integer specifying the font size for the axis titles.
 #' @return a plot of density-based clusters.
 #' @export
 #'
@@ -45,16 +47,19 @@ density_based_scatterplot <- function(out_dir,
                                       number_of_clusters,
                                       output_filename,
                                       title_of_plot,
+                                      plot_title_font_size=12,
                                       pow = NULL,
                                       show_legend = FALSE,
+                                      legend_font_size = 7,
                                       min,
                                       max,
                                       bin_size,
                                       show_scales = TRUE,
                                       xaxis_label,
                                       yaxis_label,
-                                      height_of_figure,
-                                      width_of_figure) {
+                                      axis_title_font_size=10,
+                                      height_of_figure=6,
+                                      width_of_figure=15) {
   suppressWarnings({
     # directory parameters
     out_dir <- paste0(out_dir)
@@ -83,6 +88,10 @@ density_based_scatterplot <- function(out_dir,
     height_of_figure <- as.numeric(paste0(height_of_figure))
     width_of_figure <- as.numeric(paste0(width_of_figure))
     title_of_plot <- paste0(title_of_plot)
+    # font sizes
+    plot_title_font_size = as.integer(plot_title_font_size)
+    legend_font_size = as.integer(legend_font_size)
+    axis_title_font_size = as.integer(axis_title_font_size)
     # pow
     if (is.null(pow)) {
       pow <- as.numeric(1.25)
@@ -142,7 +151,7 @@ density_based_scatterplot <- function(out_dir,
 
     # colours for the clusters
     cclr <- setNames(
-      alphabet((number_of_clusters))[seq(1:number_of_clusters)],
+      pals::alphabet((number_of_clusters))[seq(1:number_of_clusters)],
       # c("C", "B", "A")
       clust_labs
     )
@@ -160,7 +169,7 @@ density_based_scatterplot <- function(out_dir,
 
     lineclr <- "black"
     horz <- FALSE
-    gradientn1 <- brewer.rdylbu(50)
+    gradientn1 <- pals::brewer.rdylbu(50)
     cramp <- colorRampPalette(c("#000000ff", "#ffffff00"), alpha = T)(5)
 
     leg.brks <- seq(-1, 1, length.out = 19)[seq(2, 18, by = 2)]
@@ -169,7 +178,7 @@ density_based_scatterplot <- function(out_dir,
       rep("", 3), sprintf("Genic\u25b2")
     )
     len <- 9
-    pal <- brewer.rdylbu(len)
+    pal <- pals::brewer.rdylbu(len)
     cmat <- seq(0, 255, length.out = len + 1) %>%
       {
         .[-1]
@@ -204,11 +213,17 @@ density_based_scatterplot <- function(out_dir,
         panel.border = element_rect(colour = "white", fill = NA, size = 0.5),
         axis.ticks = element_blank(),
         axis.text = element_blank(),
-        axis.title = element_text(
-          family = "Arial",
-          color = "white",
-          size = 7
-        )
+        axis.title.x=element_text(family = "Helvetica",
+                                  color = "white",
+                                  size = legend_font_size,vjust=1.5,hjust=0.25),
+        axis.title.y=element_text(family = "Helvetica",
+                                  color = "white",
+                                  size = legend_font_size,vjust=-1.5,hjust=0.25)
+        # axis.title = element_text(
+        #   family = "Helvetica",
+        #   color = "white",
+        #   size = 6,vjust=-3,hjust=0.5
+        # )
       )
 
     ps <- split(d, c(cell_line, cell_line)) %>%
@@ -232,9 +247,9 @@ density_based_scatterplot <- function(out_dir,
           )
 
 
-        hex <- hexbin(pdat$x, pdat$y, xbins = 75, IDs = T)
+        hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = 75, IDs = T)
         pdat$cell <- hex@cID
-        hex <- data.frame(hcell2xy(hex),
+        hex <- data.frame(hexbin::hcell2xy(hex),
           cell = hex@cell,
           count = hex@count
         )
@@ -317,26 +332,27 @@ density_based_scatterplot <- function(out_dir,
               legend.position = "none",
               panel.grid = element_blank(),
               plot.background = element_blank(),
+              text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
               legend.background = element_blank(),
               legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
               axis.line = element_blank(),
               plot.title = element_blank(),
               strip.text = element_text(color = "white"),
               strip.background = element_rect(fill = "black"),
-              axis.title = element_text(family = "Arial", color = "black")
+              axis.title = element_text(family = "Helvetica", color = "black",size=axis_title_font_size)
             )
 
-          pdat <- kde2d(x = pdat$x, y = pdat$y, n = 100)
+          pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
           brks <- pretty(c(pdat$z), 30)
           nbrks <- length(brks)
           fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
-          b <- isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
-          bands <- iso_to_sfg(b)
-          bdat <- sf::st_sf(level = 1:length(bands), geometry = st_sfc(bands))
-          if (!all(st_is_valid(bdat))) {
-            bdat <- lwgeom::st_make_valid(bdat)
+          b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
+          bands <- isoband::iso_to_sfg(b)
+          bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
+          if (!all(sf::st_is_valid(bdat))) {
+            bdat <- sf::st_make_valid(bdat)
           }
-          bnds <- st_bbox(bdat %>% filter(level > 1))
+          bnds <- sf::st_bbox(bdat %>% filter(level > 1))
 
           bdat$ttl <- title_of_plot
           if (show_legend == FALSE) {
@@ -357,10 +373,12 @@ density_based_scatterplot <- function(out_dir,
               ) +
               facet_grid(. ~ ttl) +
               guides(fill = guide_colorbar(
-                barwidth = 3, barheight = 0.5,
+                ticks.colour = NA,
+                frame.colour = "white", frame.linewidth = 0.25,
+                barwidth = 2.5, barheight = 0.5,
                 title.position = "top", title.hjust = 0.5,
-                frame.colour = "white", frame.linewidth = 1,
-                ticks = FALSE
+                title.vjust = -1,
+                alpha = 0.8
               )) +
               annotate("segment",
                 x = -Inf, xend = Inf, y = Inf,
@@ -370,10 +388,10 @@ density_based_scatterplot <- function(out_dir,
                 panel.background = element_rect(fill = "black"),
                 panel.grid = element_blank(),
                 plot.background = element_blank(),
-                text = element_text(color = "black"),
+                text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
                 legend.title = element_text(
-                  color = "white", family = "Arial",
-                  size = 7
+                  color = "white", family = "Helvetica",
+                  size = legend_font_size
                 ),
                 legend.justification = c(0, 1),
                 legend.background = element_blank(),
@@ -383,7 +401,7 @@ density_based_scatterplot <- function(out_dir,
                 plot.title = element_blank(),
                 strip.text = element_text(color = "white"),
                 strip.background = element_rect(fill = "black"),
-                axis.title = element_text(family = "Arial")
+                axis.title = element_text(family = "Helvetica",size = axis_title_font_size)
               )
           } else {
             pl <- ggplot() +
@@ -403,10 +421,12 @@ density_based_scatterplot <- function(out_dir,
               ) +
               facet_grid(. ~ ttl) +
               guides(fill = guide_colorbar(
-                barwidth = 3, barheight = 0.5,
+                ticks.colour = NA,
+                frame.colour = "white", frame.linewidth = 0.25,
+                barwidth = 2.5, barheight = 0.5,
                 title.position = "top", title.hjust = 0.5,
-                frame.colour = "white", frame.linewidth = 1,
-                ticks = FALSE
+                title.vjust = -1,
+                alpha = 0.8
               )) +
               annotate("segment",
                 x = -Inf, xend = Inf, y = Inf,
@@ -416,10 +436,10 @@ density_based_scatterplot <- function(out_dir,
                 panel.background = element_rect(fill = "black"),
                 panel.grid = element_blank(),
                 plot.background = element_blank(),
-                text = element_text(color = "black"),
+                text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
                 legend.title = element_text(
-                  color = "white", family = "Arial",
-                  size = 7
+                  color = "white", family = "Helvetica",
+                  size = legend_font_size
                 ),
                 legend.justification = c(0, 1),
                 legend.background = element_blank(),
@@ -429,7 +449,7 @@ density_based_scatterplot <- function(out_dir,
                 plot.title = element_blank(),
                 strip.text = element_text(color = "white"),
                 strip.background = element_rect(fill = "black"),
-                axis.title = element_text(family = "Arial")
+                axis.title = element_text(family = "Helvetica",size = axis_title_font_size)
               )
           }
           pl$coordinates$aspect <- function(f) {
@@ -471,12 +491,12 @@ density_based_scatterplot <- function(out_dir,
           gradientn <- paste0("#FFFFFF", sprintf("%02X", c(0, round(seq(0, 255, length.out = nbrks - 1)))))
           pr <- ggplot() +
             geom_sf(data = bdat2, aes(fill = level), color = NA) +
-            geom_point_rast(
+            ggrastr::geom_point_rast(
               data = d, aes(x = x, y = y, color = clu),
               alpha = .1, size = .02, raster.dpi = 300,
               raster.height = 5, raster.width = 5
             ) +
-            geom_label_repel(
+            ggrepel::geom_label_repel(
               aes(
                 label = clu, x = x, y = y,
                 color = clu
@@ -507,13 +527,13 @@ density_based_scatterplot <- function(out_dir,
               legend.position = "none",
               panel.grid = element_blank(),
               plot.background = element_blank(),
-              text = element_text(color = "black"),
+              text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
               legend.background = element_blank(),
               plot.title = element_blank(),
               strip.text = element_text(color = "white"),
               strip.background = element_rect(fill = "black"),
               legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
-              axis.title = element_text(family = "Arial")
+              axis.title = element_text(family = "Helvetica",size=axis_title_font_size)
             )
           if (show_legend == FALSE) {
             pr$coordinates$aspect <- function(f) {
@@ -585,6 +605,7 @@ density_based_scatterplot <- function(out_dir,
               legend.position = "none",
               panel.grid = element_blank(),
               plot.background = element_blank(),
+              text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
               legend.background = element_blank(),
               legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
               axis.text = element_blank(),
@@ -593,20 +614,20 @@ density_based_scatterplot <- function(out_dir,
               plot.title = element_blank(),
               strip.text = element_text(color = "white"),
               strip.background = element_rect(fill = "black"),
-              axis.title = element_text(family = "Arial", color = "black")
+              axis.title = element_text(family = "Helvetica", color = "black",size = axis_title_font_size)
             )
 
-          pdat <- kde2d(x = pdat$x, y = pdat$y, n = 100)
+          pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
           brks <- pretty(c(pdat$z), 30)
           nbrks <- length(brks)
           fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
-          b <- isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
-          bands <- iso_to_sfg(b)
-          bdat <- sf::st_sf(level = 1:length(bands), geometry = st_sfc(bands))
-          if (!all(st_is_valid(bdat))) {
-            bdat <- lwgeom::st_make_valid(bdat)
+          b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
+          bands <- isoband::iso_to_sfg(b)
+          bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
+          if (!all(sf::st_is_valid(bdat))) {
+            bdat <- sf::st_make_valid(bdat)
           }
-          bnds <- st_bbox(bdat %>% filter(level > 1))
+          bnds <- sf::st_bbox(bdat %>% filter(level > 1))
 
           bdat$ttl <- title_of_plot
           if (show_legend == FALSE) {
@@ -627,10 +648,12 @@ density_based_scatterplot <- function(out_dir,
               ) +
               facet_grid(. ~ ttl) +
               guides(fill = guide_colorbar(
-                barwidth = 3, barheight = 0.5,
+                ticks.colour = NA,
+                frame.colour = "white", frame.linewidth = 0.25,
+                barwidth = 2.5, barheight = 0.5,
                 title.position = "top", title.hjust = 0.5,
-                frame.colour = "white", frame.linewidth = 1,
-                ticks = FALSE
+                title.vjust = -1,
+                alpha = 0.8
               )) +
               annotate("segment",
                 x = -Inf, xend = Inf, y = Inf,
@@ -642,10 +665,10 @@ density_based_scatterplot <- function(out_dir,
                 plot.background = element_blank(),
                 axis.text = element_blank(),
                 axis.ticks = element_blank(),
-                text = element_text(color = "black"),
+                text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
                 legend.title = element_text(
-                  color = "white", family = "Arial",
-                  size = 7
+                  color = "white", family = "Helvetica",
+                  size = legend_font_size
                 ),
                 legend.justification = c(0.1, 1),
                 legend.background = element_blank(),
@@ -655,12 +678,12 @@ density_based_scatterplot <- function(out_dir,
                 plot.title = element_blank(),
                 strip.text = element_text(color = "white"),
                 strip.background = element_rect(fill = "black"),
-                axis.title = element_text(family = "Arial")
+                axis.title = element_text(family = "Helvetica",size = axis_title_font_size)
               )
           } else {
             pl <- ggplot() +
               geom_sf(data = bdat, aes(fill = level), color = NA) +
-              scale_fill_gradientn(
+              ggplot2::scale_fill_gradientn(
                 colors = pals::magma(10),
                 name = "# of bins \u25ba"
               ) +
@@ -675,10 +698,13 @@ density_based_scatterplot <- function(out_dir,
               ) +
               facet_grid(. ~ ttl) +
               guides(fill = guide_colorbar(
-                barwidth = 3, barheight = 0.5,
+                ticks.colour = NA,
+                frame.colour = "white", frame.linewidth = 0.25,
+                barwidth = 2.5,
+                barheight = 0.5,
                 title.position = "top", title.hjust = 0.5,
-                frame.colour = "white", frame.linewidth = 1,
-                ticks = FALSE
+                title.vjust = -1,
+                alpha = 0.8
               )) +
               annotate("segment",
                 x = -Inf, xend = Inf, y = Inf,
@@ -690,10 +716,10 @@ density_based_scatterplot <- function(out_dir,
                 plot.background = element_blank(),
                 axis.text = element_blank(),
                 axis.ticks = element_blank(),
-                text = element_text(color = "black"),
+                text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
                 legend.title = element_text(
-                  color = "white", family = "Arial",
-                  size = 7
+                  color = "white", family = "Helvetica",
+                  size = legend_font_size
                 ),
                 legend.justification = c(0.1, 1),
                 legend.background = element_blank(),
@@ -703,7 +729,7 @@ density_based_scatterplot <- function(out_dir,
                 plot.title = element_blank(),
                 strip.text = element_text(color = "white"),
                 strip.background = element_rect(fill = "black"),
-                axis.title = element_text(family = "Arial")
+                axis.title = element_text(family = "Helvetica",size=axis_title_font_size)
               )
           }
           pl$coordinates$aspect <- function(f) {
@@ -745,12 +771,12 @@ density_based_scatterplot <- function(out_dir,
           gradientn <- paste0("#FFFFFF", sprintf("%02X", c(0, round(seq(0, 255, length.out = nbrks - 1)))))
           pr <- ggplot() +
             geom_sf(data = bdat2, aes(fill = level), color = NA) +
-            geom_point_rast(
+            ggrastr::geom_point_rast(
               data = d, aes(x = x, y = y, color = clu),
               alpha = .1, size = .02, raster.dpi = 300,
               raster.height = 5, raster.width = 5
             ) +
-            geom_label_repel(
+            ggrepel::geom_label_repel(
               aes(
                 label = clu, x = x, y = y,
                 color = clu
@@ -783,13 +809,13 @@ density_based_scatterplot <- function(out_dir,
               plot.background = element_blank(),
               axis.text = element_blank(),
               axis.ticks = element_blank(),
-              text = element_text(color = "black"),
+              text = element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
               legend.background = element_blank(),
               plot.title = element_blank(),
               strip.text = element_text(color = "white"),
               strip.background = element_rect(fill = "black"),
               legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
-              axis.title = element_text(family = "Arial")
+              axis.title = element_text(family = "Helvetica",size=axis_title_font_size)
             )
           if (show_legend == FALSE) {
             pr$coordinates$aspect <- function(f) {
@@ -819,7 +845,8 @@ density_based_scatterplot <- function(out_dir,
         }
       })
     # ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.pdf", out_dir, output_filename)), ps[[cell_line]], height = 2.4, width = 6.2, device = cairo_pdf)
-    ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.png", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = "png", dpi = 600, units = "cm")
+    ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.pdf", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = cairo_pdf, units = "cm")
+    # ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.png", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = "png", dpi = 600, units = "cm")
     print("Density-based scatterplots generated!")
   })
 }

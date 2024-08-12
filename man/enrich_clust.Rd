@@ -22,39 +22,39 @@ enrich_clust(
 )
 }
 \arguments{
-\item{genome_assembly}{Must of be one of hg38 or mm10.}
+\item{genome_assembly}{A character string specifying the genome assembly. Allowed values include "hg38" or "mm10".}
 
-\item{annotated_clusters}{The R object containing annotated clusters, generated from the annotate_clust() function.}
+\item{annotated_clusters}{An R object containing annotated clusters, generated from the annotate_clust() function.}
 
-\item{query_cluster}{The specific cluster being tested - normally, the clusters are label alphabetically from A to Z.}
+\item{query_cluster}{A character string specifying the cluster being to be tested. Normally, the clusters are label alphabetically from A to Z. For example, "B" to specify cluster B.}
 
-\item{pooled_bed_file}{The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared. Used for the background.}
+\item{pooled_bed_file}{A BED file generated from 'pre_clus()' consisting of pooled genomic coordinates found in both samples being compared. Used for the background.}
 
-\item{functional_db}{Must be one of ensembl, ccre or repeat. These are the curated databases of functional annotations available for testing.}
+\item{functional_db}{An R object consisting of a curated database of functional annotations.}
 
-\item{region}{Must be one of genome_wide, genic or intergenic. Genome_wide indicates global testing of bins, including those found in both intergenic and genic regions. By specifying the region to be either genic or intergenic, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization.}
+\item{region}{A string specifying the region to be tested. Must be one of "genome_wide", "genic" or "intergenic". Genome_wide indicates global testing of bins, including those found in both intergenic and genic regions. By specifying the region to be either genic or intergenic, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization.}
 
-\item{cores}{The number of parallel cores to be used.}
+\item{cores}{An integer specifying the number of parallel cores to be used.}
 
-\item{n_elements}{The number of elements to be plotted. This will not affect the output table.}
+\item{n_elements}{An integer specifying the number of elements to be plotted. This will not affect the output table.}
 
-\item{cutoff_for_overlap}{An integer indicating the minimum number of overlap between the bins in the specified cluster and the class of annotated regions.}
+\item{cutoff_for_overlap}{An integer specifying the minimum number of overlap between the bins in the specified cluster and the class of annotated regions.}
 
-\item{file_plot_name}{The name/label for the output plot.}
+\item{file_plot_name}{A character string specifying the filename of the output plot.}
 
-\item{output_table_name}{The name/label for the output table.}
+\item{output_table_name}{A character string specifying the filename for the output table.}
 
-\item{width_of_plot}{The width of the plot.}
+\item{width_of_plot}{A numeric specifying the width of the plot.}
 
-\item{height_of_plot}{The height of the plot.}
+\item{height_of_plot}{A numeric specifying the height of the plot.}
 
-\item{out_dir}{Output directory.}
+\item{out_dir}{A character string specifying the output directory.}
 }
 \value{
 A table and plot of the results of the enrichment & depletion analysis.
 }
 \description{
-Using LOLA, performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
+Performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
 }
 \details{
 Title

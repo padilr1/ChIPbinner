@@ -1,21 +1,21 @@
 #!/usr/bin/env Rscript
 #' Title
 #' @title Enrichment & depletion analysis for clusters of bins.
-#' @description Using LOLA, performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
-#' @param genome_assembly Must of be one of hg38 or mm10.
-#' @param annotated_clusters The R object containing annotated clusters, generated from the annotate_clust() function.
-#' @param query_cluster The specific cluster being tested - normally, the clusters are label alphabetically from A to Z.
-#' @param pooled_bed_file The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared. Used for the background.
-#' @param functional_db Must be one of ensembl, ccre or repeat. These are the curated databases of functional annotations available for testing.
-#' @param region Must be one of genome_wide, genic or intergenic. Genome_wide indicates global testing of bins, including those found in both intergenic and genic regions. By specifying the region to be either genic or intergenic, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization.
-#' @param cores The number of parallel cores to be used.
-#' @param n_elements The number of elements to be plotted. This will not affect the output table.
-#' @param cutoff_for_overlap An integer indicating the minimum number of overlap between the bins in the specified cluster and the class of annotated regions.
-#' @param file_plot_name The name/label for the output plot.
-#' @param output_table_name The name/label for the output table.
-#' @param width_of_plot The width of the plot.
-#' @param height_of_plot The height of the plot.
-#' @param out_dir Output directory.
+#' @description Performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
+#' @param genome_assembly A character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
+#' @param annotated_clusters An R object containing annotated clusters, generated from the annotate_clust() function.
+#' @param query_cluster A character string specifying the cluster being to be tested. Normally, the clusters are label alphabetically from A to Z. For example, "B" to specify cluster B.
+#' @param pooled_bed_file A BED file generated from 'pre_clus()' consisting of pooled genomic coordinates found in both samples being compared. Used for the background.
+#' @param functional_db An R object consisting of a curated database of functional annotations.
+#' @param region A string specifying the region to be tested. Must be one of "genome_wide", "genic" or "intergenic". Genome_wide indicates global testing of bins, including those found in both intergenic and genic regions. By specifying the region to be either genic or intergenic, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization.
+#' @param cores An integer specifying the number of parallel cores to be used.
+#' @param n_elements An integer specifying the number of elements to be plotted. This will not affect the output table.
+#' @param cutoff_for_overlap An integer specifying the minimum number of overlap between the bins in the specified cluster and the class of annotated regions.
+#' @param file_plot_name A character string specifying the filename of the output plot.
+#' @param output_table_name A character string specifying the filename for the output table.
+#' @param width_of_plot A numeric specifying the width of the plot.
+#' @param height_of_plot A numeric specifying the height of the plot.
+#' @param out_dir A character string specifying the output directory.
 #'
 #' @return A table and plot of the results of the enrichment & depletion analysis.
 #' @export
@@ -38,6 +38,8 @@ enrich_clust <- function(genome_assembly,
                          height_of_plot,
                          out_dir) {
   suppressWarnings({
+    # function to filter
+    '%!in%' <- function(x,y)!('%in%'(x,y))
     # out dir
     out_dir <- paste0(out_dir)
     # gene and intergenic reference files
@@ -89,7 +91,7 @@ enrich_clust <- function(genome_assembly,
     ## cut off for overlaps
     cutoff_for_overlap <- as.integer(paste0(cutoff_for_overlap))
     ## plot attributes
-    file_plot_name <- paste0(file_plot_name, ".png")
+    file_plot_name <- paste0(file_plot_name)
     width_of_plot <- as.integer(paste0(width_of_plot))
     height_of_plot <- as.integer(paste0(height_of_plot))
     output_table_name <- paste0(output_table_name)
@@ -148,7 +150,8 @@ enrich_clust <- function(genome_assembly,
     } else if (region == "genic") {
       ## GENIC ##
       ### enrichment
-      enrichment <- LOLA::runLOLA(qSet_g, uni_g, DB, cores = cores) %>% as.data.frame()
+      enrichment <- LOLA::runLOLA(qSet_g, uni_g, DB, cores = cores) %>% as.data.frame() %>%
+        dplyr::filter(filename %!in% c("gene.bed.gz"))
       if (as.integer(nrow(enrichment)) == 0 | !("qValue" %in% names(enrichment))) {
         print("No overlap enrichment with specified database.")
         enrichment <- NULL
@@ -172,7 +175,8 @@ enrich_clust <- function(genome_assembly,
         }
       }
       ### depletion
-      depletion <- LOLA::runLOLA(qSet_g, uni_g, DB, cores = cores, direction = "depletion")
+      depletion <- LOLA::runLOLA(qSet_g, uni_g, DB, cores = cores, direction = "depletion") %>%
+        dplyr::filter(filename %!in% c("gene.bed.gz"))
       if (as.integer(nrow(depletion)) == 0 | !("qValue" %in% names(depletion))) {
         print("No depletion with specified database.")
         depletion <- NULL
@@ -198,7 +202,8 @@ enrich_clust <- function(genome_assembly,
     } else if (region == "intergenic") {
       ## INTERGENIC ##
       ### enrichment
-      enrichment <- LOLA::runLOLA(qSet_igr, uni_igr, DB, cores = cores) %>% as.data.frame()
+      enrichment <- LOLA::runLOLA(qSet_igr, uni_igr, DB, cores = cores) %>% as.data.frame() %>%
+        dplyr::filter(filename %!in% c("intergenic.bed.gz"))
       if (as.integer(nrow(enrichment)) == 0 | !("qValue" %in% names(enrichment))) {
         print("No overlap enrichment with specified database.")
         enrichment <- NULL
@@ -222,7 +227,8 @@ enrich_clust <- function(genome_assembly,
         }
       }
       ### depletion
-      depletion <- LOLA::runLOLA(qSet_igr, uni_igr, DB, cores = cores, direction = "depletion")
+      depletion <- LOLA::runLOLA(qSet_igr, uni_igr, DB, cores = cores, direction = "depletion") %>%
+        dplyr::filter(filename %!in% c("intergenic.bed.gz"))
       if (as.integer(nrow(depletion)) == 0 | !("qValue" %in% names(depletion))) {
         print("No depletion with specified database.")
         depletion <- NULL
@@ -294,7 +300,7 @@ enrich_clust <- function(genome_assembly,
         ) +
         scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = file_plot_name, path = out_dir, units = "in", width = width_of_plot, height = height_of_plot)
+      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(agg, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Enrichment/depletion output successfully generated!")
@@ -343,7 +349,7 @@ enrich_clust <- function(genome_assembly,
         ) +
         scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = file_plot_name, path = out_dir, units = "in", width = width_of_plot, height = height_of_plot)
+      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(enrichment, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Enrichment output successfully generated! No significant depletion found.")
@@ -392,7 +398,7 @@ enrich_clust <- function(genome_assembly,
         ) +
         scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = file_plot_name, path = out_dir, units = "in", width = width_of_plot, height = height_of_plot)
+      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(depletion, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Depletion output successfully generated! No significant enrichment found.")

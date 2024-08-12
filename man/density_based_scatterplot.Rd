@@ -16,16 +16,19 @@ density_based_scatterplot(
   number_of_clusters,
   output_filename,
   title_of_plot,
+  plot_title_font_size = 12,
   pow = NULL,
   show_legend = FALSE,
+  legend_font_size = 7,
   min,
   max,
   bin_size,
   show_scales = TRUE,
   xaxis_label,
   yaxis_label,
-  height_of_figure,
-  width_of_figure
+  axis_title_font_size = 10,
+  height_of_figure = 6,
+  width_of_figure = 15
 )
 }
 \arguments{
@@ -51,9 +54,13 @@ density_based_scatterplot(
 
 \item{title_of_plot}{The title of the plot.}
 
+\item{plot_title_font_size}{An integer specifying the font size for each plot title.}
+
 \item{pow}{The power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
 
 \item{show_legend}{Boolean term whether to show legend or not.}
+
+\item{legend_font_size}{An integer specifying the font size for the legends.}
 
 \item{min}{The min for the x and y axis.}
 
@@ -67,9 +74,11 @@ density_based_scatterplot(
 
 \item{yaxis_label}{Label for the y-axis. This is normally the treated sample label.}
 
-\item{height_of_figure}{The height of the plot.}
+\item{axis_title_font_size}{An integer specifying the font size for the axis titles.}
 
-\item{width_of_figure}{The width of the plot.}
+\item{height_of_figure}{A numeric specifying the height of the plots.}
+
+\item{width_of_figure}{A numeric specifying the width of the plots.}
 }
 \value{
 a plot of density-based clusters.

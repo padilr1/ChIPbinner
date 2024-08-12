@@ -107,18 +107,18 @@ genic_intergenic_scatterplot <- function(out_dir,
   d <- list(treated_samp,wildtype_samp)
   names(d) <- c(treated_samp_label,wildtype_samp_label)
   # only keep regions found in both
-  d[[wildtype_samp_label]] <- subsetByOverlaps(d[[wildtype_samp_label]], d[[treated_samp_label]])
-  d[[treated_samp_label]] <- subsetByOverlaps(d[[treated_samp_label]], d[[wildtype_samp_label]])
+  d[[wildtype_samp_label]] <- IRanges::subsetByOverlaps(d[[wildtype_samp_label]], d[[treated_samp_label]])
+  d[[treated_samp_label]] <- IRanges::subsetByOverlaps(d[[treated_samp_label]], d[[wildtype_samp_label]])
   lapply(d, length)
   r <- lapply(d, function(y) y[y$score != 0]) %>%
-    Reduce(function(a, b) a[overlapsAny(a, b)], .) %>%
-    granges()
+    Reduce(function(a, b) a[IRanges::overlapsAny(a, b)], .) %>%
+    GenomicRanges::granges()
   # overlaps
   olap <- tibble(
-    gene = overlapsAny(r, gene),
-    igr = overlapsAny(r, igr)
+    gene = IRanges::overlapsAny(r, gene),
+    igr = IRanges::overlapsAny(r, igr)
   ) %>%
-    mutate(out = case_when(
+    dplyr::mutate(out = dplyr::case_when(
       gene & !igr ~ 1,
       !gene & igr ~ -1,
       TRUE ~ 0
@@ -127,7 +127,7 @@ genic_intergenic_scatterplot <- function(out_dir,
   # parameters for the plot
   lineclr <- "black"
   horz <- F
-  gradientn1 <- brewer.rdylbu(50)
+  gradientn1 <- pals::brewer.rdylbu(50)
   cramp <- colorRampPalette(c("#000000ff", "#ffffff00"), alpha = T)(5)
   leg.brks <- seq(-1, 1, length.out = 19)[seq(2, 18, by = 2)]
   leg.labs <- c(
@@ -135,7 +135,7 @@ genic_intergenic_scatterplot <- function(out_dir,
     rep("", 3), sprintf("Genic\u25b2")
   )
   len <- 9
-  pal <- brewer.rdylbu(len)
+  pal <- pals::brewer.rdylbu(len)
   cmat <- seq(0, 255, length.out = len + 1) %>%
     {
       .[-1]
@@ -172,7 +172,7 @@ genic_intergenic_scatterplot <- function(out_dir,
       axis.ticks = element_blank(),
       axis.text = element_blank(),
       axis.title = element_text(
-        family = "Arial",
+        family = "Helvetica",
         color = "black",
         size = 10
       )
@@ -206,9 +206,9 @@ genic_intergenic_scatterplot <- function(out_dir,
           y < quantile(y, .99)
         )
       # colour gradient for bins
-      hex <- hexbin(pdat$x, pdat$y, xbins = 100, IDs = T)
+      hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = 100, IDs = T)
       pdat$cell <- hex@cID
-      hex <- data.frame(hcell2xy(hex),
+      hex <- data.frame(hexbin::hcell2xy(hex),
         cell = hex@cell,
         count = hex@count
       )
@@ -302,10 +302,10 @@ genic_intergenic_scatterplot <- function(out_dir,
             plot.background = element_blank(),
             legend.background = element_blank(),
             legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
-            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Arial"),
+            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
             strip.text = element_text(color = "black"),
             strip.background = element_rect(fill = "black"),
-            axis.title = element_text(family = "Arial", color = "black")
+            axis.title = element_text(family = "Helvetica", color = "black")
           )
       } else {
         pm <- ggplot() +
@@ -357,23 +357,23 @@ genic_intergenic_scatterplot <- function(out_dir,
             axis.text = element_blank(),
             axis.ticks = element_blank(),
             axis.line = element_blank(),
-            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Arial"),
+            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
             strip.text = element_text(color = "black"),
             strip.background = element_rect(fill = "black"),
-            axis.title = element_text(family = "Arial", color = "black")
+            axis.title = element_text(family = "Helvetica", color = "black")
           )
       }
       pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
       brks <- pretty(c(pdat$z), 30)
       nbrks <- length(brks)
       fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
-      b <- isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
-      bands <- iso_to_sfg(b)
-      bdat <- st_sf(level = 1:length(bands), geometry = st_sfc(bands))
-      if (!all(st_is_valid(bdat))) {
-        bdat <- lwgeom::st_make_valid(bdat)
+      b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
+      bands <- isoband::iso_to_sfg(b)
+      bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
+      if (!all(sf::st_is_valid(bdat))) {
+        bdat <- sf::st_make_valid(bdat)
       }
-      bnds <- st_bbox(bdat %>% filter(level > 1))
+      bnds <- sf::st_bbox(bdat %>% filter(level > 1))
 
       bdat$ttl <- title_of_plot
       if (show_legend == TRUE) {
@@ -397,7 +397,8 @@ genic_intergenic_scatterplot <- function(out_dir,
     })
   ps[[cell_line]]
   # save plot
-  ggsave((sprintf("%s/%s.scatterplot.png",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = "png", dpi = 600)
+  # ggsave((sprintf("%s/%s.scatterplot.png",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = "png", dpi = 600)
+  ggsave((sprintf("%s/%s.scatterplot.pdf",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = cairo_pdf)
   # print completed statement
   print("Generated genic/intergenic scatterplot!")
 }

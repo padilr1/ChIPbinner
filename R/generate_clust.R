@@ -30,7 +30,7 @@ generate_clust <- function(output_file_name,
 
       if(new_env && virtualenv_exists(envname))
         virtualenv_remove(envname)
-
+      #reticulate::install_python(version = '3.9.19')
       reticulate::py_install(packages = "hdbscan", envname = envname,python_version="3.9",...)
 
       # .onLoad <- function(...) {

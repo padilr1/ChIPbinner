@@ -2,27 +2,34 @@
 % Please edit documentation in R/merge_norm_bw.R
 \name{merge_norm_bw}
 \alias{merge_norm_bw}
-\title{Merge normalized bigWig files.}
+\title{Merging of normalized bigWig files.}
 \usage{
-merge_norm_bw(rep1, rep2, are_R_objects = FALSE, merged_samples_label, out_dir)
+merge_norm_bw(are_R_objects = FALSE, rep1, rep2, merged_samples_label, out_dir)
 }
 \arguments{
-\item{rep1}{Replicate 1 to be merged. can be a bigWig file or an R object.}
+\item{are_R_objects}{a logical indicating whether the inputs are bigWig files or R objects.}
 
-\item{rep2}{Replicate 2 to be merged. can be a bigWig file or an R object.}
+\item{rep1}{a character string specifying the first bigWig file or R object to be merged. Usually the first replicate.}
 
-\item{are_R_objects}{Boolean term (true or false) to indicate if the inputted replicates are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.}
+\item{rep2}{a character string specifying the second bigWig file or R object to be merged. Usually the second replicate.}
 
-\item{merged_samples_label}{Sample label of the merged bigWig file.}
+\item{merged_samples_label}{a character string specifying the filename of the merged bigWig file.}
 
-\item{out_dir}{Output directory for merged bigWig files.}
+\item{out_dir}{a character string specifying the output directory for the merged bigWig file.}
 }
 \value{
 a single merged bigWig file.
 }
 \description{
-Merge normalized bigWig files, which are normally replicates. This function should be used after implementing the 'norm_bw()' function.
+Performs merging of normalized bigWig files, which are normally replicates.
 }
 \details{
 Title
+}
+\examples{
+merge_norm_bw(are_R_objects = TRUE,
+              rep1 = system.file("extdata/data","PA_1.rda", package = "ChIPbinner"),
+              rep2 = system.file("extdata/data","PA_2.rda", package = "ChIPbinner"),
+              merged_samples_label = "merged_PA",
+              out_dir = system.file("extdata",package = "ChIPbinner"))
 }
