@@ -1,16 +1,16 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Pre-processing the normalized bigWig files prior to generating clusters.
+#' @title Pre-processing of normalized bigWig files.
 #'
-#' @description This function pre-processes the bigWig files: it finds overlapping regions between two bigWig files, removes the bottom and top 1% of bins across the two samples and finally generates a matrix of scores and BED file of coordinates to be used with HDBscan for generating clusters of bins with similar scores.
+#' @description Finds overlapping regions between two bigWig files, removes the bottom and top 1% of bins across the two samples and finally generates a matrix of scores and BED file of coordinates to be used with HDBScan for generating clusters of bins with similar scores.
 #'
-#' @param out_dir Output directory for the matrix, BED file and preliminary scatterplot.
-#' @param treated_samp_norm_bw The normalized bigwig file for the treated sample.
-#' @param wildtype_samp_norm_bw The normalized bigwig file for the wildtype sample.
-#' @param output_filename Name for the matrix file and pooled BED file.
-#' @param are_R_objects Boolean term (true or false) to indicate if the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.
+#' @param out_dir a character string specifying the output directory for the matrix of scores, BED file of genomic coordinates and preliminary density-based scatterplot.
+#' @param treated_samp_norm_bw a character string specifying the normalized bigWig file for the treated sample.
+#' @param wildtype_samp_norm_bw a character string specifying the normalized bigWig file for the wildtype sample.
+#' @param output_filename a character string specifying the file-name for the matrix and pooled BED file.
+#' @param are_R_objects a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.
 #'
-#' @return a matrix file of scores for the two samples being compared, a pooled BED file of genomic coordinates for the bins and a preliminary scatterplot of the comparison.
+#' @return a matrix file of scores, a pooled BED file of genomic coordinates for the bins and a preliminary density-based scatterplot for the two samples being compared.
 #' @export
 #'
 #' @include norm_bw.R

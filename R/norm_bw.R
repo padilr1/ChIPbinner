@@ -15,7 +15,7 @@
 #' @param pseudocount a numeric specifying the pseudocount to avoid division by 0. If NULL (the default), the pseudocount is 1e-3.
 #' @param raw_count_cutoff a numeric specifying the raw read count cutoff to exclude bins depleted in signal across all tracks. For example, if 10 is inputted, this removes raw read count consistently lower than 10. If NULL (the default), the raw count cutoff is 0.
 #' @param scaling_factor a numeric specifying the quantitative normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values. If NULL(the default), no quantitative scaling is performed.
-#' @param per_million a logical indicating whether to scale the normalized scores by millions.
+#' @param per_million a logical indicating whether to scale the normalized scores by millions. Only available when not using input as control. Defaults to FALSE.
 #'
 #' @return a single bigWig file with normalized binned scores.
 #' @export

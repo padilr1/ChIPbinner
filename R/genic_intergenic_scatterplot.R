@@ -1,31 +1,31 @@
 #!/usr/bin/env Rscript
 #+ message = FALSE, warning = FALSE
 #' Title
-#' @title Generate a scatterplot of bins annotated with genic and intergenic regions.
+#' @title Plot a scatterplot bins annotated as genic and intergenic.
 #' @description Using two normalized bigWig files generated using 'norm.bw', the user can generate a scatterplot to compare bins across two conditions (treated sample versus baseline sample (such as wildtype)). The bins will be annotated according to their overlap with genic and intergenic regions.
-#' @param out_dir Output directory for the scatterplot.
-#' @param genome_assembly Must of be one of hg38 or mm10.
-#' @param cell_line The cell line of the samples.
-#' @param histone_mark The broad histone mark used for the analysis.
-#' @param treated_samp_norm_bw The normalized bigwig file for the treated sample.
-#' @param wildtype_samp_norm_bw The normalized bigwig file for the wildtype sample.
-#' @param are_R_objects Boolean term (true or false) to indicate if the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.
-#' @param output_filename Filename for the resuting scatterplot.
-#' @param title_of_plot The title of the plot.
-#' @param max_x The maximum value for the x-axis.
-#' @param max_y The maximum value for the y-axis.
-#' @param min_x The minimum value for the x-axis.
-#' @param min_y The minimum value for the y-axis.
-#' @param pow The power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
-#' @param xaxis_label Label for the x-axis. This is normally the baseline label (i.e. WT)
-#' @param yaxis_label Label for the y-axis. This is normally the treated sample label.
-#' @param show_scales Boolean term whether to show scales or not.
-#' @param show_legend Boolean term whether to show legend or not.
-#' @param legend_pos Legend position. The only two options are "left" or "right". Defaults to "left".
-#' @param height_of_plot The height of the scatterplot.
-#' @param width_of_plot The width of the scatterplot.
+#' @param out_dir a character string specifying the output directory for the scatterplot.
+#' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
+#' @param cell_line a character string specifying the cell line of the samples.
+#' @param histone_mark a character string specifying the broad histone mark being analyzed.
+#' @param treated_samp_norm_bw a character string specifying the normalized bigwig file for the treated sample.
+#' @param wildtype_samp_norm_bw a character string specifying the normalized bigwig file for the wildtype sample.
+#' @param are_R_objects a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.
+#' @param output_filename a character string specifying the file name for the resuting scatterplot to be saved on disk.
+#' @param title_of_plot a character string specifying title of the plot.
+#' @param max_x a numeric specifying the maximum value for the x-axis.
+#' @param max_y a numeric specifying the maximum value for the y-axis.
+#' @param min_x a numeric specifying the minimum value for the x-axis.
+#' @param min_y a numeric specifying the minimum value for the y-axis.
+#' @param pow a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
+#' @param xaxis_label a character string specifying the label for the x-axis. This is normally the wildtype sample.
+#' @param yaxis_label a character string specifying the label for the y-axis. This is normally the treated sample.
+#' @param show_scales a logical indicating whether to show scales or not. Defaults to TRUE.
+#' @param show_legend a logical indicating whether to show legend or not. Defaults to false.
+#' @param legend_pos a character string specifying the legend position. Allowed values include "left" or "right". Defaults to "left".
+#' @param height_of_plot a numeric specifying the height of the scatterplot. If not supplied, defaults to 5.
+#' @param width_of_plot a numeric specifying the width of the scatterplot. If not supplied, defaults to 5.
 #'
-#' @return Returns a scatterplot of bins annotated genic or intergenic comparing across two conditions.
+#' @return Returns a scatterplot of bins annotated as genic or intergenic comparing two samples.
 #' @export
 #'
 #' @include norm_bw.R
@@ -78,13 +78,13 @@ genic_intergenic_scatterplot <- function(out_dir,
   # parameters for plot dimension
   ## height
   if (is.null(height_of_plot)) {
-    height_of_plot <- as.numeric(4)
+    height_of_plot <- as.numeric(5)
   } else {
     height_of_plot <- as.numeric(paste0(height_of_plot))
   }
   ## width
   if (is.null(width_of_plot)) {
-    width_of_plot <- as.numeric(4)
+    width_of_plot <- as.numeric(5)
   } else {
     width_of_plot <- as.numeric(paste0(width_of_plot))
   }

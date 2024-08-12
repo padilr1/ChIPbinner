@@ -25,13 +25,11 @@ library(knitr)
 
 # Database for ChIPbinner
 
-Only toy datasets, which have been largely downsampled, are included with the package. For complete example datasets please see <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>. Included in the ChIPbinner database are complete H3K36me2 ChIP-seq samples binned into 10kb windows, normalized bigWig files, the complete pooled BED file of genomic coordinates, the complete matrix file and finally, the complete clustering results from running HDBSCAN on the whole dataset. 
-
-Also included in the ChIPbinner database are reference windows that can be used to transform aligned BAM files into binned BED files as well as curated databases for input into later sections of the workflow.
+Only toy datasets, which have been largely downsampled, are included with the package. For complete example datasets please see <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
 
 # Example workflow for generating binned BED files
 
-For input into ChIPbinner, the sequenced samples will need to be binned into windows, and formatted as a <a href="https://genome.ucsc.edu/FAQ/FAQformat">BED</a> file. One of the tools that can be used to perform this task is using <a href="https://bedtools.readthedocs.io/en/latest/">BEDtools</a> to convert an aligned sequence file, which is typically found in a <a href="https://genome.ucsc.edu/goldenPath/help/bam.html">BAM</a> format, into a binned BED file as demonstrated below.
+For input into ChIPbinner, the sequenced samples will need to be binned into windows, and formatted as a <a href="https://genome.ucsc.edu/FAQ/FAQformat">BED</a> file. One of the tools that can be used to perform this task is <a href="https://bedtools.readthedocs.io/en/latest/">BEDtools</a>, which can convert an aligned sequence file, typically found in a <a href="https://genome.ucsc.edu/goldenPath/help/bam.html">BAM</a> format, into a binned BED file as demonstrated below.
 
 Reference windows ($WINDOW_REF) can be found in the <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
 
@@ -47,7 +45,7 @@ bedtools intersect -a hg38.10kb.windows.bed -b Cal27.WT.H3K36me2.bed -sorted -c 
 
 # Generating normalized bigwig files
 
-When you bin your files into windows, especially from aligned (bam or sam) files, they are typically raw read counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like genome-wide modification percentage information obtained from mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the rest of the workflow.
+When you bin your files into windows, especially from aligned (BAM or SAM) files, they are typically raw read counts. They will need to be normalized by the input (highly recommended for ChIP-seq data) and likely scaled by some factor (we recommend using a normalization scaling factor like genome-wide modification percentage information obtained from mass spectrometry, Drosophila spike-in or any other types of spike-in). This step will have to be performed prior to moving on to the rest of the workflow.
 
 Here, we are generating normalized bigwig files for 10kb-binned files (in BED format) for a head and neck squamous cell carcinoma (HNSCC) line (Cal27) for the broad histone mark H3K36me2 generated via ChIP-seq. The lysine 36 methyl transferase NSD1 was knocked out in the sample (NSD1-KO) and is being compared to the wildtype (WT) cell line. Please see
 <a href="https://www.sciencedirect.com/science/article/pii/S2211124721000826?via%3Dihub">Farhangdoost et al. 2021</a> for more details. 
@@ -82,10 +80,10 @@ norm_bw(out_dir = "output_directory",
 
 # Generating scatterplots with bins stratified into genic and intergenic regions
 
-After normalizing and converting the binned BED files into bigwigs, we can read them in and generate a scatterplot comparing two cell lines. The scatterplot will annotate genic and intergenic regions accordingly. The resulting figures will be found in <code>/output_directory</code> for the code chunk below. The <code>/path_for_normalized_bigwig</code> will normally be the output directory you indicated when using the <code>norm_bw()</code> function. 
+After normalizing and converting the binned BED files into bigwigs, we can read them in and generate a scatterplot comparing two cell lines. The scatterplot will annotate genic and intergenic regions accordingly. The resulting figures will be found in <code>/output_directory</code> for the code chunk below.
 
 Genic and intergenic regions for <code>hg38</code> and <code>mm10</code> are included with the package and can be accessed as indicated in the code chunk below. 
-<b> Note: you will need to adjust the minimum and maximum values for the x- and y-axis accordingly. After you are satisfied with the values for the x- and y-axis, you can then turn off axis annotations by running the function again, but using the parameter <code>show_scales=FALSE</code></b>
+<b> Note: you will need to adjust the minimum and maximum values for the x- and y-axis accordingly.</b>.
 ```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 genic_intergenic_scatterplot(
   out_dir = "output_directory",
@@ -114,7 +112,7 @@ genic_intergenic_scatterplot(
 
 ## Processing bigwig files for clustering
 
-Prior to generating clusters, we need to pre-process the normalized bigWig files. This is accomplished using the <code>pre_clus()</code> function. We will continue to use the samples from the previous steps above.
+Prior to generating clusters, we need to pre-process the normalized bigWig files, which entails finding overlapping regions between two bigWig files, removing the bottom and top 1% of bins across the two samples (trimming to make the graphics more visible) and finally generating a matrix of scores as well as a BED file of coordinates to be used with HDBScan for generating clusters of similarly-behaving bins. This is accomplished using the <code>pre_clus()</code> function. We will continue to use the samples from the previous steps above.
 
 <b>Important note: Normally, bigWig files are used as input throughout the workflow. However, R objects of the bigWig files can also be used, but must specified by setting <code>are_R_objects=TRUE</code></b>.
 ```{r, eval=FALSE}
@@ -129,9 +127,9 @@ pre_clust(
 
 ## Running HDBSCAN to generate clusters
 
-The <code>clus()</code> function can be used to generate clusters of similarly-behaving genomic bins. It is based on an unsupervised learning algorithm to find clusters, or dense regions, of a dataset. More details on the Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm can be found <a href="https://hdbscan.readthedocs.io/en/latest/index.html">here</a>. The function uses <code>reticulate</code> as an interface to a Python session. Python will need to be installed in your environment prior to running the function. No other actions are required from the user, as the minimal Python packages are automatically installed in an isolated virtual environment specifically designated for the ChIPbinner R package. This minimizes the risk of inadvertently disrupting another Python installation on the user’s system.
+The <code>clus()</code> function can be used to generate clusters of similarly-behaving genomic bins. It is based on an unsupervised learning algorithm to find clusters, or dense regions, of a dataset. More details on the Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm can be found <a href="https://hdbscan.readthedocs.io/en/latest/index.html">here</a>. The function uses <code>reticulate</code> as an interface to a Python session. <b>Python version 3.9 will need to be installed in your environment prior to running the function.</b> No other actions are required from the user, as the minimal Python packages are automatically installed in an isolated virtual environment specifically designated for the ChIPbinner R package. This minimizes the risk of inadvertently disrupting another Python installation on the user’s system.
 
-<b>It is important to consider this step will require substantial processing memory as well as time </b>. Thus, it is recommended that you use the python-implementation of HDBSCAN in a High-performance Computing server instead. Nevertheless, an example workflow for running HDBSCAN is found below. Using the complete matrix file for the density-based scatterplot generated below required substantial processing memory and multiple parallel cores, typically found in a high-performance computing cluster. The complete matrix file can be found at the <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
+<b>It is important to consider this step will require substantial processing memory as well as time </b>. Thus, it is recommended that you use the python-implementation of HDBSCAN in a High-performance Computing server instead. Nevertheless, an example workflow for running HDBSCAN is found below. Here, we use the complete matrix file, which required substantial processing memory and multiple parallel cores, typically found in a high-performance computing cluster. The complete matrix file can be found at the <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
 ```{r,eval=FALSE}
 # using the complete matrix
 generate_clust(
@@ -158,12 +156,12 @@ annotate_clust(number_of_clusters = 3,
 
 ## Generating density-based scatterplots
 
-Finally, a density-based cluster scatterplot can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can found at <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
+Finally, a density-based cluster scatterplot (along with the genic/intergenic scatterplot) can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can found at <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
 ```{r,eval=FALSE}
 density_based_scatterplot(
   out_dir = "output_directory",
   genome_assembly = "hg38",
-  are_R_objects = TRUE,
+  are_R_objects = FALSE,
   output_filename = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
   wildtype_samp_norm_bw ="Cal27_WT_H3K36me2_10kb.norm.bw",
   treated_samp_norm_bw = "Cal27_NSD1_KO_H3K36me2_10kb.norm.bw",
@@ -189,13 +187,7 @@ density_based_scatterplot(
 
 After identifying and annotating clusters of bins, a Fisher's exact test can be used to determine whether these bins overlap a specific class of annotated regions against a background of all bins. The underlying algorithm is based on <a href="https://bioconductor.org/packages/release/bioc/html/LOLA.html">LOLA - locus overlap analysis for enrichment of genomic ranges</a>. The example below evaluates overlap with <a href="https://useast.ensembl.org/info/genome/index.html">Ensembl</a> annotations genome-wide. However, the user can also evaluate overlap with other functional annotations by inputting an R object of the database of their choice in the parameter <code>functional_db</code>. 
 
-The <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a> contains curated databases ready for input into ChIPbinner. These databases are intended for input into the parameter <code>functional_db</code> within the <code>enrich_clust()</code> function.
-
-<ul>
-<li><code>ensemblDB</code> from <a href="https://useast.ensembl.org/info/genome/index.html">Ensembl</a></li>
-<li> <code>ccreDB</code> from <a href="https://useast.ensembl.org/info/genome/index.html">ENCODE</a>,which are candidate cis-regulatory elements (cCREs)</li>
-<li> <code>repeatsDB</code> from <a href="https://www.repeatmasker.org/">RepeatMasker</a></li>
-</ul>
+The <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a> contains curated databases ready for input into the parameter <code>functional_db</code> within the <code>enrich_clust()</code> function.
 
 Nevertheless, by specifying the <code>region</code> to be either <code>genic</code> or <code>intergenic</code>, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization. 
 

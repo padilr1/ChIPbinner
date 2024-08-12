@@ -2,7 +2,7 @@
 % Please edit documentation in R/pre_clust.R
 \name{pre_clust}
 \alias{pre_clust}
-\title{Pre-processing the normalized bigWig files prior to generating clusters.}
+\title{Pre-processing of normalized bigWig files.}
 \usage{
 pre_clust(
   out_dir,
@@ -13,21 +13,21 @@ pre_clust(
 )
 }
 \arguments{
-\item{out_dir}{Output directory for the matrix, BED file and preliminary scatterplot.}
+\item{out_dir}{a character string specifying the output directory for the matrix of scores, BED file of genomic coordinates and preliminary density-based scatterplot.}
 
-\item{treated_samp_norm_bw}{The normalized bigwig file for the treated sample.}
+\item{treated_samp_norm_bw}{a character string specifying the normalized bigWig file for the treated sample.}
 
-\item{wildtype_samp_norm_bw}{The normalized bigwig file for the wildtype sample.}
+\item{wildtype_samp_norm_bw}{a character string specifying the normalized bigWig file for the wildtype sample.}
 
-\item{output_filename}{Name for the matrix file and pooled BED file.}
+\item{output_filename}{a character string specifying the file-name for the matrix and pooled BED file.}
 
-\item{are_R_objects}{Boolean term (true or false) to indicate if the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.}
+\item{are_R_objects}{a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). The default is FALSE.}
 }
 \value{
-a matrix file of scores for the two samples being compared, a pooled BED file of genomic coordinates for the bins and a preliminary scatterplot of the comparison.
+a matrix file of scores, a pooled BED file of genomic coordinates for the bins and a preliminary density-based scatterplot for the two samples being compared.
 }
 \description{
-This function pre-processes the bigWig files: it finds overlapping regions between two bigWig files, removes the bottom and top 1\% of bins across the two samples and finally generates a matrix of scores and BED file of coordinates to be used with HDBscan for generating clusters of bins with similar scores.
+Finds overlapping regions between two bigWig files, removes the bottom and top 1\% of bins across the two samples and finally generates a matrix of scores and BED file of coordinates to be used with HDBScan for generating clusters of bins with similar scores.
 }
 \details{
 Title

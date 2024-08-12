@@ -1,14 +1,14 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Generate density-based clusters using the HDBSCAN algorithm.
+#' @title Computation of density-based clusters based on the HDBSCAN algorithm.
 #'
-#' @description This function generates density-based clusters needed to generate the density-based scatterplots and furhter downstream analysis.
-#' @param output_file_name The name/label for the output from HDBSCAN.
-#' @param out_dir The output directory.
-#' @param matrix_file The matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.
-#' @param minpts The minimum number of data points for a cluster size. Set it to the smallest size grouping that you wish to consider a cluster
-#' @param minsamps This provides a measure of how conservative you want your clustering to be. The larger the value of min_samps you provide, the more conservative the clustering – more points will be declared as noise, and clusters will be restricted to progressively more dense areas.
-#' @param cores The number of parallel cores to be used.
+#' @description Computes density-based clusters needed to generate the density-based scatterplots and for other downstream analysis within the package. Python version 3.9 required to run HDBSCAN, which is the underlying software used to identify clusters of bins.
+#' @param output_file_name a character string specifying the output file name.
+#' @param out_dir a character string specifying the output directory.
+#' @param matrix_file a character string specifying the matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.
+#' @param minpts an integer specifying the minimum number of data points for a cluster size. Set it to the smallest size grouping that you wish to consider a cluster.
+#' @param minsamps an integer indicating how conservative you want your clustering to be. The larger the value of 'min_samps' you provide, the more conservative the clustering – more points will be declared as noise, and clusters will be restricted to progressively more dense areas.
+#' @param cores an integer specifying the number of parallel cores to be used.
 #'
 #' @return A text (.txt) output designating each bin from the matrix file as belonging to a specific cluster or not.
 #' @export

@@ -1,35 +1,35 @@
 #!/usr/bin/env Rscript
 #' Title
 #'
-#' @title Generate density-based clusters.
+#' @title Plot scatterplots of annotated genic/intergenic regions and density-based clusters.
 #'
-#' @description This function identifies similarly-behaving genomic compartments, such as regions with the highest loss or gain of a specific histone mark.
+#' @description Plots scatterplots of annotated genic/intergenic regions and previously identified clusters of similar-behaving genomic regions.
 #'
-#' @param out_dir Output directory for the scatterplot.
-#' @param genome_assembly Must of be one of hg38 or mm10.
-#' @param treated_samp_norm_bw The normalized bigwig file for the treated sample.
-#' @param wildtype_samp_norm_bw The normalized bigwig file for the wildtype sample.
-#' @param cell_line The cell line of the samples.
-#' @param histone_mark The broad histone mark used for the analysis.
-#' @param number_of_clusters The total number of clusters identified by the HDBSCAN algorithm.
-#' @param annotated_clusters The annotated clusters generated using annotate_clust(), which is an R object that needs to be loaded.
-#' @param are_R_objects Boolean term (true or false) to indicate if the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.
-#' @param output_filename Filename for the resuting scatterplot.
-#' @param title_of_plot The title of the plot.
-#' @param pow The power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
-#' @param show_legend Boolean term whether to show legend or not.
-#' @param min The min for the x and y axis.
-#' @param max The max for the x and y axis
-#' @param bin_size The number of bins represented by each hexagonal shape.
-#' @param show_scales Boolean term whether to show scales or not.
-#' @param xaxis_label Label for the x-axis. This is normally the baseline label (i.e. WT)
-#' @param yaxis_label Label for the y-axis. This is normally the treated sample label.
-#' @param height_of_figure A numeric specifying the height of the plots.
-#' @param width_of_figure A numeric specifying the width of the plots.
-#' @param plot_title_font_size An integer specifying the font size for each plot title.
-#' @param legend_font_size An integer specifying the font size for the legends.
-#' @param axis_title_font_size An integer specifying the font size for the axis titles.
-#' @return a plot of density-based clusters.
+#' @param out_dir a character string specifying the output directory for the scatterplot.
+#' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
+#' @param treated_samp_norm_bw a character string specifying the normalized bigwig file for the treated sample.
+#' @param wildtype_samp_norm_bw a character string specifying the normalized bigwig file for the wildtype sample.
+#' @param cell_line a character string specifying the cell line of the samples.
+#' @param histone_mark a character string specifying the broad histone mark being analyzed.
+#' @param number_of_clusters an integer specifying the total number of clusters identified by the HDBSCAN algorithm.
+#' @param annotated_clusters a character string specifying the R object containing the annotated clusters generated using annotate_clust().
+#' @param are_R_objects a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.
+#' @param output_filename a character string specifying the file name for the resuting scatterplots to be saved on disk.
+#' @param title_of_plot a character string specifying title of the plot.
+#' @param powa numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
+#' @param show_legend a logical indicating whether to show legend or not. Defaults to false.
+#' @param min a numeric specifying the minimum value for the x and y axis.
+#' @param max a numeric specifying the maximum value for the x and y axis
+#' @param bin_size an integer specifying the number of bins represented by each hexagonal shape.
+#' @param show_scales a logical indicating whether to show scales or not. Defaults to TRUE.
+#' @param xaxis_label a character string specifying the label for the x-axis. This is normally the wildtype sample.
+#' @param yaxis_label a character string specifying the label for the y-axis. This is normally the treated sample.
+#' @param height_of_figure A numeric specifying the height of the plots. If not supplied, defaults to 5.
+#' @param width_of_figure A numeric specifying the width of the plots. If not supplied, defaults to 5.
+#' @param plot_title_font_size An integer specifying the font size for each plot title. If not supplied, defaults to 12.
+#' @param legend_font_size An integer specifying the font size for the legends. If not supplied, defaults to 7.
+#' @param axis_title_font_size An integer specifying the font size for the axis titles. If not supplied, defaults to 10.
+#' @return plots of annotated genic/intergenic bins and previously identified density-based clusters.
 #' @export
 #'
 #' @include annotate_clust.R
@@ -821,19 +821,12 @@ density_based_scatterplot <- function(out_dir,
             pr$coordinates$aspect <- function(f) {
               NULL
             }
-            # lo <- c(
-            #   patchwork::area(t = 1, l = 1, b = 20, r = 20),
-            #   patchwork::area(t = 2, l = 2, b = 8, r = 8)
-            # )
-            # pm_leg <- pm + leg + plot_layout(design = lo)
             patchwork::wrap_plots(pl, pm, pr, nrow = 1)
           } else {
             pr$coordinates$aspect <- function(f) {
               NULL
             }
             lo <- c(
-              # patchwork::area(t = 1, l = 1, b = 20, r = 20)
-              # patchwork::area(t = 2, l = 2, b = 8, r = 8)
               # https://patchwork.data-imaginist.com/reference/area.html
               # This means that t and l should always be less or equal to b and r respectively
               patchwork::area(t = 1, l = 1, b = 20, r = 20),
@@ -844,9 +837,7 @@ density_based_scatterplot <- function(out_dir,
           }
         }
       })
-    # ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.pdf", out_dir, output_filename)), ps[[cell_line]], height = 2.4, width = 6.2, device = cairo_pdf)
     ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.pdf", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = cairo_pdf, units = "cm")
-    # ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.png", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = "png", dpi = 600, units = "cm")
     print("Density-based scatterplots generated!")
   })
 }
