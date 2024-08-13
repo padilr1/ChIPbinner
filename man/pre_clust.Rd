@@ -21,7 +21,7 @@ pre_clust(
 
 \item{output_filename}{a character string specifying the file-name for the matrix and pooled BED file.}
 
-\item{are_R_objects}{a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). The default is FALSE.}
+\item{are_R_objects}{a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.}
 }
 \value{
 a matrix file of scores, a pooled BED file of genomic coordinates for the bins and a preliminary density-based scatterplot for the two samples being compared.

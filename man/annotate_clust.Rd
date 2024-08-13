@@ -14,20 +14,20 @@ annotate_clust(
 )
 }
 \arguments{
-\item{number_of_clusters}{The total number of clusters identified by the HDBSCAN algorithm.}
+\item{number_of_clusters}{an integer specifying the total number of clusters identified by the HDBSCAN algorithm.}
 
-\item{matrix_file}{The matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.}
+\item{matrix_file}{a character string specifying the matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.}
 
-\item{pooled_bed_file}{The pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared.}
+\item{pooled_bed_file}{a character string specifying the pooled BED file generated from 'pre_clus()' consisting of genomic coordinates found in both samples being compared.}
 
-\item{hdbscan_output_file}{The HDBSCAN output which specifies whether each bin falls into a specific cluster or not.}
+\item{hdbscan_output_file}{a character string specifying the HDBSCAN output (.txt) file which specifies whether each bin falls into a specific cluster or not.}
 
-\item{output_filename}{Name for the matrix file and pooled BED file.}
+\item{output_filename}{a character string specifying the output file name.}
 
-\item{out_dir}{The output directory.}
+\item{out_dir}{a character string specifying the output directory.}
 }
 \value{
-a R object consisting of multiple annotated clusters, each with their set of bins.
+a R object consisting of annotated clusters and their respective set of bins.
 }
 \description{
 Annotates clusters identified after using HDBSCAN.

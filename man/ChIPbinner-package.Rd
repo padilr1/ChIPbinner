@@ -4,7 +4,7 @@
 \name{ChIPbinner-package}
 \alias{ChIPbinner}
 \alias{ChIPbinner-package}
-\title{ChIPbinner: Cluster and analyze ChIP-seq or Cut&Run data in binned windows for broad histone marks}
+\title{ChIPbinner: Analyze ChIP-seq/Cut&Run data in binned windows for broad histone marks}
 \description{
 A system for clustering and analyzing ChIP-seq or Cut&Run data that has been binned in windows. You provide two samples for comparison, input information regarding the samples and follow the workflow. ChIPbinner will identify clusters of similarly behaving bins, assign bins and clusters of bins as genic or intergenic and finally, run enrichment and depletion analysis for the annotated clusters.
 }

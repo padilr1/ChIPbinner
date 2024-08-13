@@ -2,28 +2,28 @@
 % Please edit documentation in R/generate_clust.R
 \name{generate_clust}
 \alias{generate_clust}
-\title{Generate density-based clusters using the HDBSCAN algorithm.}
+\title{Computation of density-based clusters based on the HDBSCAN algorithm.}
 \usage{
 generate_clust(output_file_name, out_dir, matrix_file, minpts, minsamps, cores)
 }
 \arguments{
-\item{output_file_name}{The name/label for the output from HDBSCAN.}
+\item{output_file_name}{a character string specifying the output file name.}
 
-\item{out_dir}{The output directory.}
+\item{out_dir}{a character string specifying the output directory.}
 
-\item{matrix_file}{The matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.}
+\item{matrix_file}{a character string specifying the matrix file of enrichment scores for the two samples being compared, generated from the pre_clus() function.}
 
-\item{minpts}{The minimum number of data points for a cluster size. Set it to the smallest size grouping that you wish to consider a cluster}
+\item{minpts}{an integer specifying the minimum number of data points for a cluster size. Set it to the smallest size grouping that you wish to consider a cluster.}
 
-\item{minsamps}{This provides a measure of how conservative you want your clustering to be. The larger the value of min_samps you provide, the more conservative the clustering – more points will be declared as noise, and clusters will be restricted to progressively more dense areas.}
+\item{minsamps}{an integer indicating how conservative you want your clustering to be. The larger the value of 'min_samps' you provide, the more conservative the clustering – more points will be declared as noise, and clusters will be restricted to progressively more dense areas.}
 
-\item{cores}{The number of parallel cores to be used.}
+\item{cores}{an integer specifying the number of parallel cores to be used.}
 }
 \value{
 A text (.txt) output designating each bin from the matrix file as belonging to a specific cluster or not.
 }
 \description{
-This function generates density-based clusters needed to generate the density-based scatterplots and furhter downstream analysis.
+Computes density-based clusters needed to generate the density-based scatterplots and for other downstream analysis within the package. Python version 3.9 required to run HDBSCAN, which is the underlying software used to identify clusters of bins.
 }
 \details{
 Title

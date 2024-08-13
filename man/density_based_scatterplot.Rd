@@ -2,7 +2,7 @@
 % Please edit documentation in R/density_based_scatterplot.R
 \name{density_based_scatterplot}
 \alias{density_based_scatterplot}
-\title{Generate density-based clusters.}
+\title{Plot scatterplots of annotated genic/intergenic regions and density-based clusters.}
 \usage{
 density_based_scatterplot(
   out_dir,
@@ -32,59 +32,59 @@ density_based_scatterplot(
 )
 }
 \arguments{
-\item{out_dir}{Output directory for the scatterplot.}
+\item{out_dir}{a character string specifying the output directory for the scatterplot.}
 
-\item{genome_assembly}{Must of be one of hg38 or mm10.}
+\item{genome_assembly}{a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".}
 
-\item{treated_samp_norm_bw}{The normalized bigwig file for the treated sample.}
+\item{treated_samp_norm_bw}{a character string specifying the normalized bigwig file for the treated sample.}
 
-\item{wildtype_samp_norm_bw}{The normalized bigwig file for the wildtype sample.}
+\item{wildtype_samp_norm_bw}{a character string specifying the normalized bigwig file for the wildtype sample.}
 
-\item{are_R_objects}{Boolean term (true or false) to indicate if the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Default to FALSE.}
+\item{are_R_objects}{a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.}
 
-\item{cell_line}{The cell line of the samples.}
+\item{cell_line}{a character string specifying the cell line of the samples.}
 
-\item{histone_mark}{The broad histone mark used for the analysis.}
+\item{histone_mark}{a character string specifying the broad histone mark being analyzed.}
 
-\item{annotated_clusters}{The annotated clusters generated using annotate_clust(), which is an R object that needs to be loaded.}
+\item{annotated_clusters}{a character string specifying the R object containing the annotated clusters generated using annotate_clust().}
 
-\item{number_of_clusters}{The total number of clusters identified by the HDBSCAN algorithm.}
+\item{number_of_clusters}{an integer specifying the total number of clusters identified by the HDBSCAN algorithm.}
 
-\item{output_filename}{Filename for the resuting scatterplot.}
+\item{output_filename}{a character string specifying the file name for the resuting scatterplots to be saved on disk.}
 
-\item{title_of_plot}{The title of the plot.}
+\item{title_of_plot}{a character string specifying title of the plot.}
 
-\item{plot_title_font_size}{An integer specifying the font size for each plot title.}
+\item{plot_title_font_size}{An integer specifying the font size for each plot title. If not supplied, defaults to 12.}
 
-\item{pow}{The power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
+\item{show_legend}{a logical indicating whether to show legend or not. Defaults to false.}
 
-\item{show_legend}{Boolean term whether to show legend or not.}
+\item{legend_font_size}{An integer specifying the font size for the legends. If not supplied, defaults to 7.}
 
-\item{legend_font_size}{An integer specifying the font size for the legends.}
+\item{min}{a numeric specifying the minimum value for the x and y axis.}
 
-\item{min}{The min for the x and y axis.}
+\item{max}{a numeric specifying the maximum value for the x and y axis}
 
-\item{max}{The max for the x and y axis}
+\item{bin_size}{an integer specifying the number of bins represented by each hexagonal shape.}
 
-\item{bin_size}{The number of bins represented by each hexagonal shape.}
+\item{show_scales}{a logical indicating whether to show scales or not. Defaults to TRUE.}
 
-\item{show_scales}{Boolean term whether to show scales or not.}
+\item{xaxis_label}{a character string specifying the label for the x-axis. This is normally the wildtype sample.}
 
-\item{xaxis_label}{Label for the x-axis. This is normally the baseline label (i.e. WT)}
+\item{yaxis_label}{a character string specifying the label for the y-axis. This is normally the treated sample.}
 
-\item{yaxis_label}{Label for the y-axis. This is normally the treated sample label.}
+\item{axis_title_font_size}{An integer specifying the font size for the axis titles. If not supplied, defaults to 10.}
 
-\item{axis_title_font_size}{An integer specifying the font size for the axis titles.}
+\item{height_of_figure}{A numeric specifying the height of the plots. If not supplied, defaults to 5.}
 
-\item{height_of_figure}{A numeric specifying the height of the plots.}
+\item{width_of_figure}{A numeric specifying the width of the plots. If not supplied, defaults to 5.}
 
-\item{width_of_figure}{A numeric specifying the width of the plots.}
+\item{powa}{numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
 }
 \value{
-a plot of density-based clusters.
+plots of annotated genic/intergenic bins and previously identified density-based clusters.
 }
 \description{
-This function identifies similarly-behaving genomic compartments, such as regions with the highest loss or gain of a specific histone mark.
+Plots scatterplots of annotated genic/intergenic regions and previously identified clusters of similar-behaving genomic regions.
 }
 \details{
 Title

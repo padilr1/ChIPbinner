@@ -39,7 +39,7 @@ norm_bw(
 
 \item{scaling_factor}{a numeric specifying the quantitative normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values. If NULL(the default), no quantitative scaling is performed.}
 
-\item{per_million}{a logical indicating whether to scale the normalized scores by millions.}
+\item{per_million}{a logical indicating whether to scale the normalized scores by millions. Only available when not using input as control. Defaults to FALSE.}
 }
 \value{
 a single bigWig file with normalized binned scores.
