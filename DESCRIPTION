@@ -1,6 +1,6 @@
 Package: ChIPbinner
 Title: Cluster and analyze ChIP-seq or Cut&Run data in binned windows for broad histone marks
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Reinnier", "Padilla", , "reinnier.padilla@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
