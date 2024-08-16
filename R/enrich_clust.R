@@ -253,7 +253,7 @@ enrich_clust <- function(genome_assembly,
       }
     } else {
       print("Please use genome_wide, genic or intergenic region.")
-      break
+     # break
     }
     if (is.null(nrow(enrichment)) == FALSE & is.null(nrow(depletion)) == FALSE) {
       ### aggregate

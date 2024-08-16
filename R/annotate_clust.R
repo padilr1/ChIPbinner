@@ -53,7 +53,7 @@ annotate_clust <- function(number_of_clusters,
       })
   } else {
     print("Too few or too many clusters indicated. Minimum number of clusters is 2 and maximum number is 25.")
-    break
+    #break
   }
   save(cons, file = (sprintf("%s/%s.annotated_clusters.rda", out_dir, output_filename)))
   print("Clusters annotated!")

@@ -28,6 +28,7 @@ Imports:
     SummarizedExperiment
 Suggests: 
     knitr,
+    formatR,
     rmarkdown,
     testthat (>= 3.0.0),
     highcharter,
