@@ -1,22 +1,3 @@
-library(tidyverse)
-library(rtracklayer)
-library(GenomicRanges)
-library(data.table)
-library(lattice)
-library(gridExtra)
-library(DiffBind)
-library(patchwork)
-library(sf)
-library(MASS)
-library(lwgeom)
-library(ggrepel)
-library(hexbin)
-library(ggrastr)
-library(viridis)
-library(pals)
-library(isoband)
-# using data in /extdata folder
-# system.file("extdata", "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
 density_based_scatterplot(
   out_dir = system.file("extdata", package = "ChIPbinner"),
   genome_assembly = "hg38",

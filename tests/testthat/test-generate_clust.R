@@ -1,5 +1,5 @@
 test_that("Density-based clustering works using HDBSCAN", {
-  library(reticulate)
+  # library(reticulate)
   # use_python("/Users/padilr1/opt/anaconda3/envs/r_env_V2/bin/python")
   # reticulate::source_python("~/Documents/ChIPbinner/inst/python/clus.py")
   # run HDBSCAN

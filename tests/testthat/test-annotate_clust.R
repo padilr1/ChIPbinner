@@ -1,8 +1,8 @@
 test_that("annotating clusters works", {
-  library(tidyverse)
-  library(rtracklayer)
-  library(GenomicRanges)
-  library(data.table)
+  # library(tidyverse)
+  # library(rtracklayer)
+  # library(GenomicRanges)
+  # library(data.table)
   # downsampled
   annotate_clust(number_of_clusters = 3,
                  matrix_file = system.file("extdata", "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv", package = "ChIPbinner"),

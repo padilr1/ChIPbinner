@@ -1,9 +1,9 @@
 test_that("processing bigWig files prior to clustering works", {
-  library(tidyverse)
-  library(rtracklayer)
-  library(GenomicRanges)
-  library(data.table)
-  library(ChIPbinner)
+  # library(tidyverse)
+  # library(rtracklayer)
+  # library(GenomicRanges)
+  # library(data.table)
+  # library(ChIPbinner)
   # downsampled norm bigwigs
   pre_clust(
     out_dir = testthat::test_path("testdata"),

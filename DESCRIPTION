@@ -10,42 +10,42 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports:
-    tidyverse,
+    ggplot2,
     dplyr,
     GenomicRanges,
+    IRanges,
     rtracklayer,
     data.table,
-    lattice,
-    gridExtra,
-    DiffBind,
-    idr2d,
     patchwork,
-    ggrepel,
-    matrixStats,
     isoband,
-    viridis,
-    lwgeom,
     hexbin,
     pals,
     MASS,
     sf,
-    ggrastr,
     reticulate,
-    readr,
-    SummarizedExperiment,
-    GenomeInfoDb,
-    IRanges,
     LOLA,
-    tools
+    readr,
+    SummarizedExperiment
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
     highcharter,
-    ggplot2,
     reshape2,
     scales,
-    tibble
+    tibble,
+    DiffBind,
+    gridExtra,
+    idr2d,
+    lattice,
+    lwgeom,
+    matrixStats,
+    tidyverse,
+    ggrepel,
+    ggrastr,
+    GenomeInfoDb,
+    tools,
+    forcats
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/start-first: norm_bw,genic_intergenic_scatterplot,pre_clust,generate_clust,annotate_clust,density_based_scatterplot,enrich_clust
@@ -60,5 +60,5 @@ Collate:
     'genic_intergenic_scatterplot.R'
     'merge_norm_bw.R'
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 LazyData: true

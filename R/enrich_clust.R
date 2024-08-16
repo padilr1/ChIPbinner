@@ -77,12 +77,12 @@ enrich_clust <- function(genome_assembly,
     DB <- loadRData(paste0(functional_db))
     # background
     uni <- pooled_BED
-    uni_igr <- uni[overlapsAny(uni, igr) & !overlapsAny(uni, gene)]
-    uni_g <- uni[overlapsAny(uni, gene) & !overlapsAny(uni, igr)]
+    uni_igr <- uni[IRanges::overlapsAny(uni, igr) & !IRanges::overlapsAny(uni, gene)]
+    uni_g <- uni[IRanges::overlapsAny(uni, gene) & !IRanges::overlapsAny(uni, igr)]
     # user set
     qSet <- cons[[cluster]]
-    qSet_igr <- qSet[overlapsAny(qSet, igr) & !overlapsAny(qSet, gene)]
-    qSet_g <- qSet[overlapsAny(qSet, gene) & !overlapsAny(qSet, igr)]
+    qSet_igr <- qSet[IRanges::overlapsAny(qSet, igr) & !IRanges::overlapsAny(qSet, gene)]
+    qSet_g <- qSet[IRanges::overlapsAny(qSet, gene) & !IRanges::overlapsAny(qSet, igr)]
     # run LOLA
     ## genome-wide, genic or intergenic can be set for the region
     region <- paste0(region)
@@ -106,15 +106,15 @@ enrich_clust <- function(genome_assembly,
         enrichment <- NULL
       } else {
         enrichment <- enrichment %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "enrichment")
         if (nrow(enrichment %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -130,15 +130,15 @@ enrich_clust <- function(genome_assembly,
         depletion <- NULL
       } else {
         depletion <- depletion %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "depletion")
         if (nrow(depletion %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -157,15 +157,15 @@ enrich_clust <- function(genome_assembly,
         enrichment <- NULL
       } else {
         enrichment <- enrichment %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "enrichment")
         if (nrow(enrichment %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -182,15 +182,15 @@ enrich_clust <- function(genome_assembly,
         depletion <- NULL
       } else {
         depletion <- depletion %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "depletion")
         if (nrow(depletion %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -209,15 +209,15 @@ enrich_clust <- function(genome_assembly,
         enrichment <- NULL
       } else {
         enrichment <- enrichment %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "enrichment")
         if (nrow(enrichment %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -234,15 +234,15 @@ enrich_clust <- function(genome_assembly,
         depletion <- NULL
       } else {
         depletion <- depletion %>%
-          mutate(
+          dplyr::mutate(
             reg = sub(".bed.gz", "", filename),
             sig = as.character(signif.num(qValue)),
-            q = case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
+            q = dplyr::case_when(qValue > 0 ~ qValue, T ~ min(qValue[qValue > 0])),
             q = -log10(q),
             info = sprintf("Odds ratio: %.3g <br>FDR: %.3g<br>Overlap: %d<br>|Annotation|: %d", oddsRatio, qValue, support, size),
-            oddsRatio = case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
+            oddsRatio = dplyr::case_when(oddsRatio > 0 ~ oddsRatio, T ~ min(oddsRatio[oddsRatio > 0]))
           ) %>%
-          mutate(overlap = .$support) %>%
+          dplyr::mutate(overlap = .$support) %>%
           dplyr::select(c("oddsRatio", "reg", "qValue", "overlap", "sig")) %>%
           dplyr::mutate(type = "depletion")
         if (nrow(depletion %>% dplyr::filter(sig %!in% "ns")) == 0){
@@ -260,145 +260,145 @@ enrich_clust <- function(genome_assembly,
       agg <- rbind(enrichment, depletion)
       ### plot only the top selected elements
       rbind(enrichment %>%
-        arrange(desc(oddsRatio)) %>% dplyr::filter(overlap > cutoff_for_overlap) %>% dplyr::filter(sig %!in% "ns") %>% dplyr::slice(1:n_elements), depletion %>%
-        arrange(desc(oddsRatio)) %>% dplyr::filter(overlap > cutoff_for_overlap) %>% dplyr::filter(sig %!in% "ns") %>% dplyr::slice(1:n_elements)) %>%
-        mutate(reg = fct_inorder(reg)) %>%
-        ggplot(aes(x = oddsRatio, y = reg)) +
-        geom_segment(aes(
+        dplyr::arrange(dplyr::desc(oddsRatio)) %>% dplyr::filter(overlap > cutoff_for_overlap) %>% dplyr::filter(sig %!in% "ns") %>% dplyr::slice(1:n_elements), depletion %>%
+        dplyr::arrange(dplyr::desc(oddsRatio)) %>% dplyr::filter(overlap > cutoff_for_overlap) %>% dplyr::filter(sig %!in% "ns") %>% dplyr::slice(1:n_elements)) %>%
+        dplyr::mutate(reg = forcats::fct_inorder(reg)) %>%
+        ggplot2::ggplot(ggplot2::aes(x = oddsRatio, y = reg)) +
+        ggplot2::geom_segment(ggplot2::aes(
           x = oddsRatio, y = reg, xend = oddsRatio, yend = reg,
           color = overlap
         )) +
-        geom_point(aes(size = overlap), color = "#ff8c00", stat = "identity") +
-        geom_text(aes(label = sig), vjust = -0.4, size = 4) +
-        scale_size(name = "# overlaps") +
-        labs(y = "Region", x = "Odds ratio") +
-        scale_color_viridis_c(
+        ggplot2::geom_point(ggplot2::aes(size = overlap), color = "#ff8c00", stat = "identity") +
+        ggplot2::geom_text(ggplot2::aes(label = sig), vjust = -0.4, size = 4) +
+        ggplot2::scale_size(name = "# overlaps") +
+        ggplot2::labs(y = "Region", x = "Odds ratio") +
+        ggplot2::scale_color_viridis_c(
           name = "# overlaps",
           begin = 0.2, end = 0.8,
           option = "A", guide = "legend",
           direction = 1
         ) +
-        facet_wrap(. ~ type, scales = "free") +
-        coord_cartesian(clip = "off") +
-        theme(
-          panel.background = element_rect(fill = "white"),
-          axis.line.y = element_blank(),
-          axis.title.y = element_blank(),
-          axis.line.x = element_line(size = 0.5, color = "black"),
-          axis.text = element_text(color = "black", size = 9),
-          axis.text.x = element_text(color = "black", size = 9),
-          axis.text.y = element_text(color = "black", size = 9),
-          axis.title = element_text(color = "black", size = 9),
-          panel.grid.major.y = element_line(color = "grey", linetype = "solid"),
-          axis.ticks.y = element_line(color = "grey", linetype = "solid"),
-          panel.grid.major.x = element_line(color = "grey", linetype = "dashed"),
-          legend.key = element_rect(fill = "white"),
-          legend.background = element_rect(fill = "white"),
-          strip.text.x = element_text(color = "white", size = 9),
-          strip.background.x = element_rect(fill = "black"),
+        ggplot2::facet_wrap(. ~ type, scales = "free") +
+        ggplot2::coord_cartesian(clip = "off") +
+        ggplot2::theme(
+          panel.background = ggplot2::element_rect(fill = "white"),
+          axis.line.y = ggplot2::element_blank(),
+          axis.title.y = ggplot2::element_blank(),
+          axis.line.x = ggplot2::element_line(size = 0.5, color = "black"),
+          axis.text = ggplot2::element_text(color = "black", size = 9),
+          axis.text.x = ggplot2::element_text(color = "black", size = 9),
+          axis.text.y = ggplot2::element_text(color = "black", size = 9),
+          axis.title = ggplot2::element_text(color = "black", size = 9),
+          panel.grid.major.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          axis.ticks.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          panel.grid.major.x = ggplot2::element_line(color = "grey", linetype = "dashed"),
+          legend.key = ggplot2::element_rect(fill = "white"),
+          legend.background = ggplot2::element_rect(fill = "white"),
+          strip.text.x = ggplot2::element_text(color = "white", size = 9),
+          strip.background.x = ggplot2::element_rect(fill = "black"),
           legend.position = "none"
         ) +
-        scale_size_continuous(range = c(4, 8))
+        ggplot2::scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
+      ggplot2::ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(agg, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Enrichment/depletion output successfully generated!")
     } else if (is.null(nrow(enrichment)) == FALSE & is.null(nrow(depletion)) == TRUE) {
       enrichment %>%
-        arrange(desc(oddsRatio)) %>%
+        dplyr::arrange(dplyr::desc(oddsRatio)) %>%
         dplyr::filter(overlap > cutoff_for_overlap) %>%
         dplyr::filter(sig %!in% "ns") %>%
         dplyr::slice(1:n_elements) %>%
-        mutate(reg = fct_inorder(reg)) %>%
-        ggplot(aes(x = oddsRatio, y = reg)) +
-        geom_segment(aes(
+        dplyr::mutate(reg = forcats::fct_inorder(reg)) %>%
+        ggplot2::ggplot(ggplot2::aes(x = oddsRatio, y = reg)) +
+        ggplot2::geom_segment(ggplot2::aes(
           x = oddsRatio, y = reg, xend = oddsRatio, yend = reg,
           color = overlap
         )) +
-        geom_point(aes(size = overlap), color = "#ff8c00", stat = "identity") +
-        geom_text(aes(label = sig), vjust = -0.4, size = 4) +
-        scale_size(name = "# overlaps") +
-        labs(y = "Region", x = "Odds ratio",title="Enrichment") +
-        scale_color_viridis_c(
+        ggplot2::geom_point(ggplot2::aes(size = overlap), color = "#ff8c00", stat = "identity") +
+        ggplot2::geom_text(ggplot2::aes(label = sig), vjust = -0.4, size = 4) +
+        ggplot2::scale_size(name = "# overlaps") +
+        ggplot2::labs(y = "Region", x = "Odds ratio",title="Enrichment") +
+        ggplot2::scale_color_viridis_c(
           name = "# overlaps",
           begin = 0.2, end = 0.8,
           option = "A", guide = "legend",
           direction = 1
         ) +
         # facet_wrap(. ~ type, scales = "free") +
-        coord_cartesian(clip = "off") +
-        theme(
-          panel.background = element_rect(fill = "white"),
-          plot.title = element_text(color="black",size=10,hjust=0.5),
-          axis.line.y = element_blank(),
-          axis.title.y = element_blank(),
-          axis.line.x = element_line(size = 0.5, color = "black"),
-          axis.text = element_text(color = "black", size = 9),
-          axis.text.x = element_text(color = "black", size = 9,hjust=1),
-          axis.text.y = element_text(color = "black", size = 9,hjust = 1),
-          axis.title = element_text(color = "black", size = 9),
-          panel.grid.major.y = element_line(color = "grey", linetype = "solid"),
-          axis.ticks.y = element_line(color = "grey", linetype = "solid"),
-          panel.grid.major.x = element_line(color = "grey", linetype = "dashed"),
-          legend.key = element_rect(fill = "white"),
-          legend.background = element_rect(fill = "white"),
-          strip.text.x = element_text(color = "white", size = 9),
-          strip.background.x = element_rect(fill = "black"),
+        ggplot2::coord_cartesian(clip = "off") +
+        ggplot2::theme(
+          panel.background = ggplot2::element_rect(fill = "white"),
+          plot.title = ggplot2::element_text(color="black",size=10,hjust=0.5),
+          axis.line.y = ggplot2::element_blank(),
+          axis.title.y = ggplot2::element_blank(),
+          axis.line.x = ggplot2::element_line(size = 0.5, color = "black"),
+          axis.text = ggplot2::element_text(color = "black", size = 9),
+          axis.text.x = ggplot2::element_text(color = "black", size = 9,hjust=1),
+          axis.text.y = ggplot2::element_text(color = "black", size = 9,hjust = 1),
+          axis.title = ggplot2::element_text(color = "black", size = 9),
+          panel.grid.major.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          axis.ticks.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          panel.grid.major.x = ggplot2::element_line(color = "grey", linetype = "dashed"),
+          legend.key = ggplot2::element_rect(fill = "white"),
+          legend.background = ggplot2::element_rect(fill = "white"),
+          strip.text.x = ggplot2::element_text(color = "white", size = 9),
+          strip.background.x = ggplot2::element_rect(fill = "black"),
           legend.position = "none"
         ) +
-        scale_size_continuous(range = c(4, 8))
+        ggplot2::scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
+      ggplot2::ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(enrichment, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Enrichment output successfully generated! No significant depletion found.")
     } else if (is.null(nrow(enrichment)) == TRUE & is.null(nrow(depletion)) == FALSE) {
       depletion %>%
-        arrange(desc(oddsRatio)) %>%
+        dplyr::arrange(dplyr::desc(oddsRatio)) %>%
         dplyr::filter(overlap > cutoff_for_overlap) %>%
         dplyr::filter(sig %!in% "ns") %>%
         dplyr::slice(1:n_elements) %>%
-        mutate(reg = fct_inorder(reg)) %>%
-        ggplot(aes(x = oddsRatio, y = reg)) +
-        geom_segment(aes(
+        dplyr::mutate(reg = forcats::fct_inorder(reg)) %>%
+        ggplot2::ggplot(ggplot2::aes(x = oddsRatio, y = reg)) +
+        ggplot2::geom_segment(ggplot2::aes(
           x = oddsRatio, y = reg, xend = oddsRatio, yend = reg,
           color = overlap
         )) +
-        geom_point(aes(size = overlap), color = "#ff8c00", stat = "identity") +
-        geom_text(aes(label = sig), vjust = -0.4, size = 4) +
-        scale_size(name = "# overlaps") +
-        labs(y = "Region", x = "Odds ratio",title = "Depletion") +
-        scale_color_viridis_c(
+        ggplot2::geom_point(ggplot2::aes(size = overlap), color = "#ff8c00", stat = "identity") +
+        ggplot2::geom_text(ggplot2::aes(label = sig), vjust = -0.4, size = 4) +
+        ggplot2::scale_size(name = "# overlaps") +
+        ggplot2::labs(y = "Region", x = "Odds ratio",title = "Depletion") +
+        ggplot2::scale_color_viridis_c(
           name = "# overlaps",
           begin = 0.2, end = 0.8,
           option = "A", guide = "legend",
           direction = 1
         ) +
-        facet_wrap(. ~ type, scales = "free") +
-        coord_cartesian(clip = "off") +
-        theme(
-          panel.background = element_rect(fill = "white"),
-          plot.title = element_text(color="black",size=10,hjust=0.5),
-          axis.line.y = element_blank(),
-          axis.title.y = element_blank(),
-          axis.line.x = element_line(size = 0.5, color = "black"),
-          axis.text = element_text(color = "black", size = 9),
-          axis.text.x = element_text(color = "black", size = 9,hjust=1),
-          axis.text.y = element_text(color = "black", size = 9,hjust=1),
-          axis.title = element_text(color = "black", size = 9),
-          panel.grid.major.y = element_line(color = "grey", linetype = "solid"),
-          axis.ticks.y = element_line(color = "grey", linetype = "solid"),
-          panel.grid.major.x = element_line(color = "grey", linetype = "dashed"),
-          legend.key = element_rect(fill = "white"),
-          legend.background = element_rect(fill = "white"),
-          strip.text.x = element_text(color = "white", size = 9),
-          strip.background.x = element_rect(fill = "black"),
+        ggplot2::facet_wrap(. ~ type, scales = "free") +
+        ggplot2::coord_cartesian(clip = "off") +
+        ggplot2::theme(
+          panel.background = ggplot2::element_rect(fill = "white"),
+          plot.title = ggplot2::element_text(color="black",size=10,hjust=0.5),
+          axis.line.y = ggplot2::element_blank(),
+          axis.title.y = ggplot2::element_blank(),
+          axis.line.x = ggplot2::element_line(size = 0.5, color = "black"),
+          axis.text = ggplot2::element_text(color = "black", size = 9),
+          axis.text.x = ggplot2::element_text(color = "black", size = 9,hjust=1),
+          axis.text.y = ggplot2::element_text(color = "black", size = 9,hjust=1),
+          axis.title = ggplot2::element_text(color = "black", size = 9),
+          panel.grid.major.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          axis.ticks.y = ggplot2::element_line(color = "grey", linetype = "solid"),
+          panel.grid.major.x = ggplot2::element_line(color = "grey", linetype = "dashed"),
+          legend.key = ggplot2::element_rect(fill = "white"),
+          legend.background = ggplot2::element_rect(fill = "white"),
+          strip.text.x = ggplot2::element_text(color = "white", size = 9),
+          strip.background.x = ggplot2::element_rect(fill = "black"),
           legend.position = "none"
         ) +
-        scale_size_continuous(range = c(4, 8))
+        ggplot2::scale_size_continuous(range = c(4, 8))
       # save plot
-      ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
+      ggplot2::ggsave(dpi = 600, filename = paste0(file_plot_name,".pdf"), path = out_dir, units = "in", width = width_of_plot, height = height_of_plot,device = cairo_pdf)
       # write csv of matrix
       readr::write_csv(depletion, file = sprintf("%s/%s.csv", out_dir, output_table_name))
       print("Depletion output successfully generated! No significant enrichment found.")

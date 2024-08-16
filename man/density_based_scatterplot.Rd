@@ -56,6 +56,8 @@ density_based_scatterplot(
 
 \item{plot_title_font_size}{An integer specifying the font size for each plot title. If not supplied, defaults to 12.}
 
+\item{pow}{a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
+
 \item{show_legend}{a logical indicating whether to show legend or not. Defaults to false.}
 
 \item{legend_font_size}{An integer specifying the font size for the legends. If not supplied, defaults to 7.}
@@ -77,8 +79,6 @@ density_based_scatterplot(
 \item{height_of_figure}{A numeric specifying the height of the plots. If not supplied, defaults to 5.}
 
 \item{width_of_figure}{A numeric specifying the width of the plots. If not supplied, defaults to 5.}
-
-\item{powa}{numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
 }
 \value{
 plots of annotated genic/intergenic bins and previously identified density-based clusters.
@@ -90,25 +90,6 @@ Plots scatterplots of annotated genic/intergenic regions and previously identifi
 Title
 }
 \examples{
-library(tidyverse)
-library(rtracklayer)
-library(GenomicRanges)
-library(data.table)
-library(lattice)
-library(gridExtra)
-library(DiffBind)
-library(patchwork)
-library(sf)
-library(MASS)
-library(lwgeom)
-library(ggrepel)
-library(hexbin)
-library(ggrastr)
-library(viridis)
-library(pals)
-library(isoband)
-# using data in /extdata folder
-# system.file("extdata", "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner")
 density_based_scatterplot(
   out_dir = system.file("extdata", package = "ChIPbinner"),
   genome_assembly = "hg38",

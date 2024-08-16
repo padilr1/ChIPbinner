@@ -21,6 +21,7 @@ pre_clust <- function(out_dir,
                      wildtype_samp_norm_bw,
                      output_filename,
                      are_R_objects=FALSE) {
+  suppressWarnings({
   # directory parameters
   out_dir <- paste0(out_dir)
   # samples labels
@@ -56,13 +57,13 @@ pre_clust <- function(out_dir,
     lapply(function(x) {
       o <- lapply(x, function(y) {
         IRanges::findOverlaps(r, y) %>%
-          to() %>%
+          IRanges::to() %>%
           {
             y[.]
           } %>%
-          score()
+          GenomicRanges::score()
       }) %>%
-        bind_cols() %>%
+        dplyr::bind_cols() %>%
         `names<-`(c("x", "y"))
       ok <- o$x > quantile(o$x, .01) &
         o$x < quantile(o$x, .99) &
@@ -81,4 +82,5 @@ pre_clust <- function(out_dir,
   dev.off()
   # print output message
   print("bigWig files pre-processed. Output files ready for input into clustering algorithm!")
+  })
 }

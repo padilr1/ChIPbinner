@@ -19,6 +19,7 @@ merge_norm_bw <- function(are_R_objects=FALSE,
                           rep2,
                           merged_samples_label,
                           out_dir) {
+  suppressWarnings({
   # example = inst/examples/example_merged_norm_bw.R
   # output dir
   out_dir <- paste0(out_dir)
@@ -57,4 +58,5 @@ merge_norm_bw <- function(are_R_objects=FALSE,
   rtracklayer::export.bw(merged_bw, con = sprintf("%s/%s.bw", out_dir,merged_samples_label))
   # save bw as R object
   save(merged_bw, file = sprintf("%s/%s.rda", out_dir,merged_samples_label))
+  })
 }

@@ -21,6 +21,7 @@ annotate_clust <- function(number_of_clusters,
                            hdbscan_output_file,
                            output_filename,
                            out_dir) {
+  suppressWarnings({
   # out dir
   out_dir <- paste0(out_dir)
   # number of cluster
@@ -38,7 +39,7 @@ annotate_clust <- function(number_of_clusters,
       dplyr::group_by(clu) %>%
       dplyr::summarise_all(mean) %>%
       dplyr::mutate(mu = 0.5 * (X1 + X2)) %>%
-      arrange(mu)
+      dplyr::arrange(mu)
     results_list <- list()
     for (i in 1:number_of_clusters) {
       results_list[[paste0(toupper(letters[i]))]] <- list(pooled_BED[mat$clu == ctr$clu[i]])
@@ -56,4 +57,5 @@ annotate_clust <- function(number_of_clusters,
   }
   save(cons, file = (sprintf("%s/%s.annotated_clusters.rda", out_dir, output_filename)))
   print("Clusters annotated!")
+  })
 }

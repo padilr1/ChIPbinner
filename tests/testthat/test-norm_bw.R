@@ -1,9 +1,9 @@
 test_that("generating normalized bigwig files from binned BED files works", {
   # load libraries
-  library(tidyverse)
-  library(rtracklayer)
-  library(GenomicRanges)
-  library(data.table)
+  # library(tidyverse)
+  # library(rtracklayer)
+  # library(GenomicRanges)
+  # library(data.table)
   # generate normalized bigwig for WT sample
   norm_bw(out_dir = testthat::test_path("testdata"),
           genome_assembly = "hg38",

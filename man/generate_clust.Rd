@@ -29,7 +29,6 @@ Computes density-based clusters needed to generate the density-based scatterplot
 Title
 }
 \examples{
-library(reticulate)
 generate_clust(
   output_file_name = "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
   out_dir = system.file("extdata",package = "ChIPbinner"),

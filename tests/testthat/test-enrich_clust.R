@@ -1,10 +1,10 @@
 test_that("running enrichment and depletion analysis works for specified clusters", {
-  library(tidyverse)
-  library(readr)
-  library(rtracklayer)
-  library(GenomicRanges)
-  library(LOLA)
-  library(highcharter)
+  # library(tidyverse)
+  # library(readr)
+  # library(rtracklayer)
+  # library(GenomicRanges)
+  # library(LOLA)
+  # library(highcharter)
   # downsampled
   enrich_clust(
     genome_assembly = "hg38",

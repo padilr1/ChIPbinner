@@ -81,20 +81,6 @@ Using two normalized bigWig files generated using 'norm.bw', the user can genera
 Title
 }
 \examples{
-library(data.table)
-library(tidyverse)
-library(matrixStats)
-library(isoband)
-library(sf)
-library(ggrepel)
-library(viridis)
-library(MASS)
-library(lwgeom)
-library(hexbin)
-library(pals)
-library(patchwork)
-library(GenomicRanges)
-library(rtracklayer)
 genic_intergenic_scatterplot(
   out_dir = system.file("extdata", package = "ChIPbinner"),
   genome_assembly = "hg38",

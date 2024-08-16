@@ -51,6 +51,7 @@ genic_intergenic_scatterplot <- function(out_dir,
                                          legend_pos = NULL,
                                          height_of_plot = NULL,
                                          width_of_plot = NULL) {
+  suppressWarnings({
   # output directory
   out_dir <- paste0(out_dir)
   # gene and intergenic reference files
@@ -114,7 +115,7 @@ genic_intergenic_scatterplot <- function(out_dir,
     Reduce(function(a, b) a[IRanges::overlapsAny(a, b)], .) %>%
     GenomicRanges::granges()
   # overlaps
-  olap <- tibble(
+  olap <- tibble::tibble(
     gene = IRanges::overlapsAny(r, gene),
     igr = IRanges::overlapsAny(r, igr)
   ) %>%
@@ -123,7 +124,7 @@ genic_intergenic_scatterplot <- function(out_dir,
       !gene & igr ~ -1,
       TRUE ~ 0
     )) %>%
-    pull(out)
+    dplyr::pull(out)
   # parameters for the plot
   lineclr <- "black"
   horz <- F
@@ -149,36 +150,36 @@ genic_intergenic_scatterplot <- function(out_dir,
     do.call(cbind, .) %>%
     data.frame() %>%
     `colnames<-`(1:len) %>%
-    mutate(clr = 1:dplyr::n()) %>%
+    dplyr::mutate(clr = 1:dplyr::n()) %>%
     reshape2::melt(id.vars = "clr", variable.name = "opa") %>%
-    mutate(opa = as.integer(opa))
+    dplyr::mutate(opa = as.integer(opa))
   # legend
-  leg <- ggplot() +
-    geom_tile(aes(x = opa, y = clr, fill = value),
+  leg <- ggplot2::ggplot() +
+    ggplot2::geom_tile(ggplot2::aes(x = opa, y = clr, fill = value),
       data = cmat
     ) +
-    scale_fill_identity() +
-    labs(
+    ggplot2::scale_fill_identity() +
+    ggplot2::labs(
       x = "# of bins \u25ba",
       y = "% genic \u25ba"
     ) +
-    coord_fixed(expand = F) +
-    theme(
-      panel.background = element_blank(),
-      plot.background = element_blank(),
-      panel.grid = element_blank(),
-      axis.line = element_blank(),
-      panel.border = element_rect(colour = "white", fill = NA, size = 0.1),
-      axis.ticks = element_blank(),
-      axis.text = element_blank(),
-      axis.title = element_text(
+    ggplot2::coord_fixed(expand = F) +
+    ggplot2::theme(
+      panel.background = ggplot2::element_blank(),
+      plot.background = ggplot2::element_blank(),
+      panel.grid = ggplot2::element_blank(),
+      axis.line = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(colour = "white", fill = NA, size = 0.1),
+      axis.ticks = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      axis.title = ggplot2::element_text(
         family = "Helvetica",
         color = "black",
         size = 10
       )
     )
   leg
-  ggsave(filename = sprintf("%s/legend.png", out_dir), plot = leg, height = 1, width = 1, device = "png", dpi = 600, bg = "white")
+  ggplot2::ggsave(filename = sprintf("%s/legend.png", out_dir), plot = leg, height = 1, width = 1, device = "png", dpi = 600, bg = "white")
   # pow
   if (is.null(pow)) {
     pow <- as.numeric(1.25)
@@ -189,16 +190,16 @@ genic_intergenic_scatterplot <- function(out_dir,
   ps <- split(d, c(cell_line,cell_line)) %>%
     lapply(function(x) {
       pdat <- lapply(x[2:1], function(y) {
-        findOverlaps(r, y) %>%
-          to() %>%
+        IRanges::findOverlaps(r, y) %>%
+          IRanges::to() %>%
           {
             y[.]
           } %>%
-          score()
+          GenomicRanges::score()
       }) %>%
-        bind_cols() %>%
+        dplyr::bind_cols() %>%
         `names<-`(c("x", "y")) %>%
-        mutate(r = olap) %>%
+        dplyr::mutate(r = olap) %>%
         dplyr::filter(
           x > quantile(x, .01),
           x < quantile(x, .99),
@@ -215,11 +216,11 @@ genic_intergenic_scatterplot <- function(out_dir,
 
       t1 <- "Intergenic vs genic ratio"
       pdat2 <- pdat %>%
-        group_by(cell) %>%
-        summarise(prop = mean(r, na.rm = T)) %>%
-        ungroup() %>%
-        right_join(hex, by = "cell") %>%
-        mutate(
+        dplyr::group_by(cell) %>%
+        dplyr::summarise(prop = mean(r, na.rm = T)) %>%
+        dplyr::ungroup() %>%
+        dplyr::right_join(hex, by = "cell") %>%
+        dplyr::mutate(
           logcount = log10(count),
           ttl = t1
         )
@@ -256,25 +257,25 @@ genic_intergenic_scatterplot <- function(out_dir,
       pow <- pow
       # if user wants to show the scale for x and y axes
       if (show_scales == TRUE) {
-        pm <- ggplot() +
-          geom_point(aes(x = x, y = y, color = c),
+        pm <- ggplot2::ggplot() +
+          ggplot2::geom_point(ggplot2::aes(x = x, y = y, color = c),
             alpha = 0, data = tdat,
             show.legend = T
           ) +
-          geom_hex(aes(x = x, y = y, fill = prop, alpha = count, color = prop),
+          ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
             stat = "identity", color = NA, data = pdat2, size = 5
           ) +
-          scale_fill_gradientn(
+          ggplot2::scale_fill_gradientn(
             colors = gradientn1, name = "% Genic",
             breaks = leg.brks, labels = leg.labs,
             limits = c(-1, 1)
           ) +
-          scale_color_gradientn(
+          ggplot2::scale_color_gradientn(
             colors = gradientn1, name = "% Genic",
             breaks = leg.brks, labels = leg.labs,
             limits = c(-1, 1)
           ) +
-          scale_alpha(
+          ggplot2::scale_alpha(
             range = c(0.01, 5), name = "Number of bins", guide = F,
             trans = scales::trans_new(
               "square",
@@ -284,49 +285,49 @@ genic_intergenic_scatterplot <- function(out_dir,
               function(x) x^(1 / pow)
             )
           ) +
-          coord_cartesian(
+          ggplot2::coord_cartesian(
             expand = F,
             xlim = lim$x,
             ylim = lim$y
           ) +
-          labs(
+          ggplot2::labs(
             x = sprintf("%s \u25ba", xaxis_label),
             y = sprintf("%s \u25ba", yaxis_label), title = title_of_plot
           ) +
-          annotate("segment", x = -Inf, xend = Inf, y = -Inf, yend = Inf, color = "gray") +
-          theme(
-            panel.background = element_rect(fill = "white"),
-            panel.border = element_rect(colour = "black", fill = NA, size = 1),
+          ggplot2::annotate("segment", x = -Inf, xend = Inf, y = -Inf, yend = Inf, color = "gray") +
+          ggplot2::theme(
+            panel.background = ggplot2::element_rect(fill = "white"),
+            panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 1),
             legend.position = "none",
-            panel.grid = element_blank(),
-            plot.background = element_blank(),
-            legend.background = element_blank(),
-            legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
-            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
-            strip.text = element_text(color = "black"),
-            strip.background = element_rect(fill = "black"),
-            axis.title = element_text(family = "Helvetica", color = "black")
+            panel.grid = ggplot2::element_blank(),
+            plot.background = ggplot2::element_blank(),
+            legend.background = ggplot2::element_blank(),
+            legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
+            plot.title = ggplot2::element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
+            strip.text = ggplot2::element_text(color = "black"),
+            strip.background = ggplot2::element_rect(fill = "black"),
+            axis.title = ggplot2::element_text(family = "Helvetica", color = "black")
           )
       } else {
-        pm <- ggplot() +
-          geom_point(aes(x = x, y = y, color = c),
+        pm <- ggplot2::ggplot() +
+          ggplot2::geom_point(ggplot2::aes(x = x, y = y, color = c),
             alpha = 0, data = tdat,
             show.legend = T
           ) +
-          geom_hex(aes(x = x, y = y, fill = prop, alpha = count, color = prop),
+          ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
             stat = "identity", color = NA, data = pdat2, size = 5
           ) +
-          scale_fill_gradientn(
+          ggplot2::scale_fill_gradientn(
             colors = gradientn1, name = "% Genic",
             breaks = leg.brks, labels = leg.labs,
             limits = c(-1, 1)
           ) +
-          scale_color_gradientn(
+          ggplot2::scale_color_gradientn(
             colors = gradientn1, name = "% Genic",
             breaks = leg.brks, labels = leg.labs,
             limits = c(-1, 1)
           ) +
-          scale_alpha(
+          ggplot2::scale_alpha(
             range = c(0.01, 5), name = "Number of bins", guide = F,
             trans = scales::trans_new(
               "square",
@@ -336,31 +337,31 @@ genic_intergenic_scatterplot <- function(out_dir,
               function(x) x^(1 / pow)
             )
           ) +
-          coord_cartesian(
+          ggplot2::coord_cartesian(
             expand = F,
             xlim = lim$x,
             ylim = lim$y
           ) +
-          labs(
+          ggplot2::labs(
             x = sprintf("%s \u25ba", xaxis_label),
             y = sprintf("%s \u25ba", yaxis_label), title = title_of_plot
           ) +
-          annotate("segment", x = -Inf, xend = Inf, y = -Inf, yend = Inf, color = "gray") +
-          theme(
-            panel.background = element_rect(fill = "white"),
-            panel.border = element_rect(colour = "black", fill = NA, size = 1),
+          ggplot2::annotate("segment", x = -Inf, xend = Inf, y = -Inf, yend = Inf, color = "gray") +
+          ggplot2::theme(
+            panel.background = ggplot2::element_rect(fill = "white"),
+            panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 1),
             legend.position = "none",
-            panel.grid = element_blank(),
-            plot.background = element_blank(),
-            legend.background = element_blank(),
-            legend.margin = margin(0.015, 0, 0, 0, unit = "npc"),
-            axis.text = element_blank(),
-            axis.ticks = element_blank(),
-            axis.line = element_blank(),
-            plot.title = element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
-            strip.text = element_text(color = "black"),
-            strip.background = element_rect(fill = "black"),
-            axis.title = element_text(family = "Helvetica", color = "black")
+            panel.grid = ggplot2::element_blank(),
+            plot.background = ggplot2::element_blank(),
+            legend.background = ggplot2::element_blank(),
+            legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
+            axis.text = ggplot2::element_blank(),
+            axis.ticks = ggplot2::element_blank(),
+            axis.line = ggplot2::element_blank(),
+            plot.title = ggplot2::element_text(hjust = 0.5, color = "black", size = 12, family = "Helvetica"),
+            strip.text = ggplot2::element_text(color = "black"),
+            strip.background = ggplot2::element_rect(fill = "black"),
+            axis.title = ggplot2::element_text(family = "Helvetica", color = "black")
           )
       }
       pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
@@ -373,32 +374,33 @@ genic_intergenic_scatterplot <- function(out_dir,
       if (!all(sf::st_is_valid(bdat))) {
         bdat <- sf::st_make_valid(bdat)
       }
-      bnds <- sf::st_bbox(bdat %>% filter(level > 1))
+      bnds <- sf::st_bbox(bdat %>% dplyr::filter(level > 1))
 
       bdat$ttl <- title_of_plot
       if (show_legend == TRUE) {
         # if no legend position is specified
         if (is.null(legend_pos)) {
-          pm + inset_element(leg,left = 0,bottom = 0.6,right = 0.4,top = 1)
+          pm + patchwork::inset_element(leg,left = 0,bottom = 0.6,right = 0.4,top = 1)
         }
         # else it is right
         else if (legend_pos == "right") {
-          pm + inset_element(leg, left = 0.6, bottom = 0.6, right = 1, top = 1)
+          pm + patchwork::inset_element(leg, left = 0.6, bottom = 0.6, right = 1, top = 1)
         }
         # else it is left
         else if (legend_pos == "left") {
-          pm + inset_element(leg,left = 0,bottom = 0.6,right = 0.4,top = 1)
+          pm + patchwork::inset_element(leg,left = 0,bottom = 0.6,right = 0.4,top = 1)
         } else {
           print("The only two options for 'legend_pos' is 'right' or 'left'")
         }
       } else{
-        wrap_plots(pm, nrow = 1)
+        patchwork::wrap_plots(pm, nrow = 1)
       }
     })
   ps[[cell_line]]
   # save plot
   # ggsave((sprintf("%s/%s.scatterplot.png",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = "png", dpi = 600)
-  ggsave((sprintf("%s/%s.scatterplot.pdf",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = cairo_pdf)
+  ggplot2::ggsave((sprintf("%s/%s.scatterplot.pdf",out_dir, output_filename)), ps[[cell_line]], height = height_of_plot, width = width_of_plot, device = cairo_pdf)
   # print completed statement
   print("Generated genic/intergenic scatterplot!")
+  })
 }

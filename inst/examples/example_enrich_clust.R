@@ -1,10 +1,3 @@
-#!/usr/bin/env Rscript
-library(tidyverse)
-library(readr)
-library(rtracklayer)
-library(GenomicRanges)
-library(LOLA)
-library(highcharter)
 enrich_clust(
   genome_assembly = "hg38",
   annotated_clusters = system.file("extdata/data","downsampled_annotated_clusters.rda", package = "ChIPbinner"),
