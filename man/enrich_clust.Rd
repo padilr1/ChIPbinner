@@ -2,7 +2,7 @@
 % Please edit documentation in R/enrich_clust.R
 \name{enrich_clust}
 \alias{enrich_clust}
-\title{Enrichment & depletion analysis for clusters of bins.}
+\title{Enrichment & depletion analysis for specified cluster of bins.}
 \usage{
 enrich_clust(
   genome_assembly,

@@ -46,7 +46,8 @@ Suggests:
     ggrastr,
     GenomeInfoDb,
     tools,
-    forcats
+    forcats,
+    gplots
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/start-first: norm_bw,genic_intergenic_scatterplot,pre_clust,generate_clust,annotate_clust,density_based_scatterplot,enrich_clust
@@ -60,6 +61,8 @@ Collate:
     'enrich_clust.R'
     'genic_intergenic_scatterplot.R'
     'merge_norm_bw.R'
+    'plot_PCA.R'
+    'plot_correlation.R'
 Depends: 
     R (>= 3.5.0)
 LazyData: true

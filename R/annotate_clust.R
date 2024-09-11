@@ -21,18 +21,22 @@ annotate_clust <- function(number_of_clusters,
                            hdbscan_output_file,
                            output_filename,
                            out_dir) {
-  suppressWarnings({
-  # out dir
-  out_dir <- paste0(out_dir)
-  # number of cluster
-  number_of_clusters <- as.integer(paste0(number_of_clusters))
-  # read in matrix file of enrichment scores
-  mat <- readr::read_csv(matrix_file, col_names = F)
-  # read in pooled BED file of genomic coordinates
+
+  # ensure number of cluster is an integer
+  number_of_clusters <- as.integer(number_of_clusters)
+
+  # check for valid number_of_clusters
+  if (number_of_clusters <= 1 || number_of_clusters >= 25) {
+    message("Invalid number of clusters. Minimum number is 2, maximum is 25.")
+    return(NULL)
+  }
+
+  # read data
+  mat <- readr::read_csv(matrix_file, col_names = FALSE)
   pooled_BED <- rtracklayer::import.bed(pooled_bed_file)
-  # read in HDBSCAN output file
-  mat$clu <- readr::read_csv(file = hdbscan_output_file, col_names = F)$X1
-  # separate workflows depending on the number of clusters
+  mat$clu <- readr::read_csv(hdbscan_output_file, col_names = FALSE)$X1
+
+  # process clusters
   if (number_of_clusters > 1 & number_of_clusters < 25) {
     ctr <- mat %>%
       dplyr::filter(clu != -1) %>%
@@ -57,5 +61,4 @@ annotate_clust <- function(number_of_clusters,
   }
   save(cons, file = (sprintf("%s/%s.annotated_clusters.rda", out_dir, output_filename)))
   print("Clusters annotated!")
-  })
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Enrichment & depletion analysis for clusters of bins.
+#' @title Enrichment & depletion analysis for specified cluster of bins.
 #' @description Performs overlap enrichment & depletion analysis between bins found in a specific cluster and a class of annotated regions from a curated database. Uses Fisher's exact test to assess statistical significance of the overlap against a background of all bins found in both cell lines being compared.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
 #' @param annotated_clusters an R object containing annotated clusters, generated from the annotate_clust() function.

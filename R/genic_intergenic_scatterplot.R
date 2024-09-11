@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 #+ message = FALSE, warning = FALSE
 #' Title
-#' @title Plot a scatterplot bins annotated as genic and intergenic.
+#' @title Plot a scatterplot of bins annotated as genic and intergenic.
 #' @description Using two normalized bigWig files generated using 'norm.bw', the user can generate a scatterplot to compare bins across two conditions (treated sample versus baseline sample (such as wildtype)). The bins will be annotated according to their overlap with genic and intergenic regions.
 #' @param out_dir a character string specifying the output directory for the scatterplot.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
@@ -10,7 +10,7 @@
 #' @param treated_samp_norm_bw a character string specifying the normalized bigwig file for the treated sample.
 #' @param wildtype_samp_norm_bw a character string specifying the normalized bigwig file for the wildtype sample.
 #' @param are_R_objects a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.
-#' @param output_filename a character string specifying the file name for the resuting scatterplot to be saved on disk.
+#' @param output_filename a character string specifying the file name for the resulting scatterplot to be saved on disk.
 #' @param title_of_plot a character string specifying title of the plot.
 #' @param max_x a numeric specifying the maximum value for the x-axis.
 #' @param max_y a numeric specifying the maximum value for the y-axis.

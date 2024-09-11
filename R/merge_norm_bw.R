@@ -1,15 +1,12 @@
 #!/usr/bin/env Rscript
 #' Title
 #' @title Merging of normalized bigWig files.
-#'
 #' @description Performs merging of normalized bigWig files, which are normally replicates.
-#'
 #' @param are_R_objects a logical indicating whether the inputs are bigWig files or R objects.
 #' @param rep1 a character string specifying the first bigWig file or R object to be merged. Usually the first replicate.
 #' @param rep2 a character string specifying the second bigWig file or R object to be merged. Usually the second replicate.
 #' @param merged_samples_label a character string specifying the filename of the merged bigWig file.
 #' @param out_dir a character string specifying the output directory for the merged bigWig file.
-#'
 #' @return a single merged bigWig file.
 #' @export
 #'

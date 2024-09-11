@@ -2,7 +2,7 @@
 % Please edit documentation in R/pre_clust.R
 \name{pre_clust}
 \alias{pre_clust}
-\title{Pre-processing of normalized bigWig files.}
+\title{Pre-processing and comparison of normalized bigWig files.}
 \usage{
 pre_clust(
   out_dir,

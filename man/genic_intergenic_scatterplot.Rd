@@ -2,7 +2,7 @@
 % Please edit documentation in R/genic_intergenic_scatterplot.R
 \name{genic_intergenic_scatterplot}
 \alias{genic_intergenic_scatterplot}
-\title{Plot a scatterplot bins annotated as genic and intergenic.}
+\title{Plot a scatterplot of bins annotated as genic and intergenic.}
 \usage{
 genic_intergenic_scatterplot(
   out_dir,
@@ -43,7 +43,7 @@ genic_intergenic_scatterplot(
 
 \item{are_R_objects}{a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.}
 
-\item{output_filename}{a character string specifying the file name for the resuting scatterplot to be saved on disk.}
+\item{output_filename}{a character string specifying the file name for the resulting scatterplot to be saved on disk.}
 
 \item{title_of_plot}{a character string specifying title of the plot.}
 

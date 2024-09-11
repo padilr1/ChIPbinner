@@ -189,7 +189,7 @@ After identifying and annotating clusters of bins, a Fisher's exact test can be 
 
 The <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a> contains curated databases ready for input into the parameter <code>functional_db</code> within the <code>enrich_clust()</code> function.
 
-Nevertheless, by specifying the <code>region</code> to be either <code>genic</code> or <code>intergenic</code>, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization. 
+Nevertheless, by specifying the <code>region</code> to be either <code>genic</code> or <code>intergenic</code>, the user can evaluate exclusively genic or intergenic bins overlapping a specific class of annotated regions. In these cases, the background is stratified to only genic or intergenic regions to avoid spurious associations to annotations confounded by their predominantly genic or intergenic localization.
 
 Below is an example of how to calculate overlap enrichment & depletion result of Ensembl annotations with bins found in cluster B identified from the previous analyses. Note that the size of the dots corresponds to the number of bins overlapping the corresponding annotation. The p-value is based on Fisher's exact test of bins overlapping a specific class of annotated regions versus a background of all bins found in both cell lines being compared.
 ```{r,eval=FALSE}

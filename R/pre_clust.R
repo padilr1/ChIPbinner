@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Pre-processing of normalized bigWig files.
+#' @title Pre-processing and comparison of normalized bigWig files.
 #'
 #' @description Finds overlapping regions between two bigWig files, removes the bottom and top 1% of bins across the two samples and finally generates a matrix of scores and BED file of coordinates to be used with HDBScan for generating clusters of bins with similar scores.
 #'
