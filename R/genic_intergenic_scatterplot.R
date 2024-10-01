@@ -52,8 +52,6 @@ genic_intergenic_scatterplot <- function(out_dir,
                                          height_of_plot = NULL,
                                          width_of_plot = NULL) {
   suppressWarnings({
-  # output directory
-  out_dir <- paste0(out_dir)
   # gene and intergenic reference files
   if (genome_assembly == "hg38") {
     gene <- hg38_gene
@@ -62,9 +60,6 @@ genic_intergenic_scatterplot <- function(out_dir,
     gene <- mm10_gene
     igr <- mm10_igr
   }
-  # samples info
-  cell_line <- paste0(cell_line)
-  mark <- paste0(histone_mark)
   # samples labels
   treated_samp_label <- basename(tools::file_path_sans_ext(treated_samp_norm_bw))
   wildtype_samp_label <- basename(tools::file_path_sans_ext(wildtype_samp_norm_bw))

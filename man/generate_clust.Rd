@@ -29,12 +29,7 @@ Computes density-based clusters needed to generate the density-based scatterplot
 Title
 }
 \examples{
-generate_clust(
-  output_file_name = "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb",
-  out_dir = system.file("extdata",package = "ChIPbinner"),
-  matrix_file = "downsampled.Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv",
-  minpts = 100,
-  minsamps = 100,
-  cores = 1
-)
+\dontrun{
+result <- generate_clust("output_clusters","outdir",matrix_file="mat.csv",minpts=5000,minsamps=5000,cores=6)
+}
 }

@@ -52,6 +52,7 @@ Title
 file1 <- "file1.bw"
 file2 <- "file2.bw"
 colors <- c("red", "blue")
-result <- plotPCA(file1, file2, colors = colors,out_dir=outdir,output_filename=output,plot_title=title)
+sample_labels <- c("samp1","samp2")
+result <- plotPCA(file1, file2, sample_labels=sample_labels, colors = colors,out_dir=outdir,output_filename=output,plot_title=title)
 }
 }

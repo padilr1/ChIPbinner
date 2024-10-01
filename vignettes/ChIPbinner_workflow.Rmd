@@ -108,7 +108,59 @@ genic_intergenic_scatterplot(
 )
 ```
 
-# Generating clusters of similarly-behaving genomic bins
+# Exploratory analyses
+
+## PCA
+
+Plots of principal component analysis can be generated using <code>plot_PCA</code> with an example below. PCA plots are useful for assessing the treatment effect and the consistency of replicates.
+```{r, eval=FALSE}
+  plot_PCA(
+    out_dir = "outdir",
+    output_filename = "PCA_plot",
+    colors = c("blue","blue3","red","red4","forestgreen","green1"),
+    sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
+    plot_title = "",
+    plot_height = 8,
+    plot_width= 12,
+    "samp1_10kb.norm.bw",
+    "samp2_10kbb.norm.bw",
+    "samp3_10kbb.norm.bw",
+    "samp4_10kbb.norm.bw",
+    "samp5_10kbb.norm.bw",
+    "samp6_10kbb.norm.bw",
+  )
+```
+
+## Correlation plots
+Correlation plots can be generated using <code>plot_correlation</code> with an example below. Correlation plots are useful for assessing separation of samples according to treatment and consistency of replicates.
+```{r, eval=FALSE}
+plot_correlation(
+    out_dir = "outdir",
+    output_filename = "correlation_plot",
+    sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
+    colors = c("blue","blue3","red","red4","forestgreen","green1"),
+    plot_height = 4,
+    plot_width = 4,
+    "samp1_10kb.norm.bw",
+    "samp2_10kbb.norm.bw",
+    "samp3_10kbb.norm.bw",
+    "samp4_10kbb.norm.bw",
+    "samp5_10kbb.norm.bw",
+    "samp6_10kbb.norm.bw"
+  )
+```
+
+# Combining replicates
+
+Replicates for a given treatment can be combined using <code>merge_norm_bw</code>. The merged bigWig file can be used for downstream analysis.
+```{r, eval=FALSE}
+merge_norm_bw(rep1 = "WT_rep1_10kb_norm.bw",
+              rep2 = "WT_rep2_10kb_norm.bw",
+              merged_samples_label = "merged_WT",
+              out_dir = "outdir")
+```
+
+# Identifying clusters of similarly-behaving genomic bins
 
 ## Processing bigwig files for clustering
 
