@@ -1,3 +1,5 @@
 # ChIPbinner
 
-R Package for analyzing binned ChIP-seq/Cut & Run data for broad histone marks, such as H3K36me2, H3K27me3, H3K9me3, etc. This tool generates helpful scatterplots for assessing genome-wide differences differences between two samples. Additionally, specific regions that are similar or different between the two samples can be identified.
+ChIPbinner is an open-source R package designed to facilitate genome-wide analysis of broad histone modifications. This tool addresses limitations in existing peak-calling software, which often struggles to accurately detect diffuse and broad signals in ChIP-Seq, CUT&RUN/TAG or related datasets. ChIPbinner instead divides the genome into uniform bins, offering an unbiased, reference-agnostic method to identify and explore differential enrichment across genomic regions.
+
+ChIPbinner provides users with functionalities for signal normalization and combining replicates, alongside visualization tools for exploratory analysis, including genic/intergenic scatterplots, principal component analysis and correlation plots. Finally, it allows users to identify clusters of similarly-behaving bins and statistically assess their overlap with specific classes of annotated regions. 
