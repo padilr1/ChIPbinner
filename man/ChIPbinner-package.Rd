@@ -4,9 +4,9 @@
 \name{ChIPbinner-package}
 \alias{ChIPbinner}
 \alias{ChIPbinner-package}
-\title{ChIPbinner: Analyze ChIP-seq/Cut&Run data in binned windows for broad histone marks}
+\title{ChIPbinner: Analyze ChIP-Seq or CUT&RUN/TAG data in binned windows for broad histone marks}
 \description{
-A system for clustering and analyzing ChIP-seq or Cut&Run data that has been binned in windows. You provide two samples for comparison, input information regarding the samples and follow the workflow. ChIPbinner will identify clusters of similarly behaving bins, assign bins and clusters of bins as genic or intergenic and finally, run enrichment and depletion analysis for the annotated clusters.
+A suite of tools for analyzing ChIP-Seq or CUT&RUN/TAG data that has been binned in uniform windows. ChIPbinner provides users with functionalities for signal normalization and combining replicates, alongside visualization tools for exploratory analysis, including genic/intergenic scatterplots, principal component analysis and correlation plots. Finally, it allows users to identify clusters of similarly-behaving bins and statistically assess their overlap with specific classes of annotated regions.
 }
 \author{
 \strong{Maintainer}: Reinnier Padilla \email{reinnier.padilla@mail.mcgill.ca} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
