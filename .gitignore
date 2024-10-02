@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-ChIPbinner.Rproj/
-.DS_Store/
+ChIPbinner.Rproj
+.DS_Store
