@@ -1,11 +1,17 @@
 Package: ChIPbinner
-Title: Analyze ChIP-Seq or CUT&RUN/TAG data in binned windows for broad histone marks
-Version: 0.99.1
+Title: Analysis of ChIP-Seq or CUT&RUN/TAG data in binned windows for broad histone marks
+Version: 0.99.0
 Authors@R: 
-    person("Reinnier", "Padilla", "reinnier.padilla@mail.mcgill.ca", role = "aut",
-           comment = c(ORCID = "0009-0005-5646-5450"))
-Description: A suite of tools for analyzing ChIP-Seq or CUT&RUN/TAG data that has been binned in uniform windows. ChIPbinner provides users with functionalities for signal normalization and combining replicates, alongside visualization tools for exploratory analysis, including genic/intergenic scatterplots, principal component analysis and correlation plots. Finally, it allows users to identify clusters of similarly-behaving bins and statistically assess their overlap with specific classes of annotated regions.
-License: GPL (>= 3)
+    c(person(given="Reinnier",family="Padilla",email="reinnier.padilla@mail.mcgill.ca", role = c("aut","cre"),
+           comment = c(ORCID = "0009-0005-5646-5450")),
+           person(given="Eric", family="Bareke", email="eric.bareke@mcgill.ca", role=c("aut", "ctb")),
+           person(given="Bo", family="Hu", email="frank.hu@mail.mcgill.ca", role=c("aut", "ctb")),
+           person(given="Jacek", family="Majewski", email="jacek.majewski@mcgill.ca", role=c("aut", "ctb")))
+Description: A suite of tools for analyzing ChIP-Seq or CUT&RUN/TAG data that has been binned in uniform windows. 
+  ChIPbinner provides users with functionalities for signal normalization and combining replicates, 
+  alongside visualization tools for exploratory analysis, including genic/intergenic scatterplots, principal component analysis and correlation plots. 
+  Finally, it allows users to identify clusters of similarly-behaving bins and statistically assess their overlap with specific classes of annotated regions.
+License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
@@ -65,3 +71,15 @@ Collate:
     'plot_correlation.R'
 Depends: 
     R (>= 3.5.0)
+biocViews:
+    ChIPSeq,
+    Epigenetics,
+    HistoneModification,
+    GenomeAnnotation,
+    Normalization,
+    Clustering,
+    PrincipalComponent,
+    Visualization,
+    Software
+    
+    
