@@ -17,7 +17,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' result <- generate_clust("output_clusters","outdir",matrix_file="mat.csv",minpts=5000,minsamps=5000,cores=6)
+#' result <- generate_clust("output_clusters",
+#' "outdir",
+#' matrix_file="mat.csv",
+#' minpts=5000,
+#' minsamps=5000,
+#' cores=6)
 #' }
 generate_clust <- function(output_file_name,
                  out_dir,

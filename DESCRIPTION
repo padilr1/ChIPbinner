@@ -65,4 +65,3 @@ Collate:
     'plot_correlation.R'
 Depends: 
     R (>= 3.5.0)
-LazyData: true

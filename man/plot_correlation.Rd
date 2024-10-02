@@ -68,6 +68,11 @@ file1 <- "file1.bw"
 file2 <- "file2.bw"
 colors <- c("red", "blue")
 sample_labels <- c("samp1","samp2")
-result <- plot_correlation(file1, file2, sample_labels = sample_labels,colors = colors,out_dir=outdir,output_filename=output,plot_title=title)
+result <- plot_correlation(file1,
+file2,
+sample_labels = sample_labels,
+colors = colors,out_dir=outdir,
+output_filename=output,
+plot_title=title)
 }
 }

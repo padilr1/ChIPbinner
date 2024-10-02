@@ -95,11 +95,17 @@ density_based_scatterplot(
   genome_assembly = "hg38",
   are_R_objects = TRUE,
   output_filename = "complete",
-  wildtype_samp_norm_bw = system.file("extdata/data","Cal27_WT_H3K36me2_10kb_norm_bw.rda", package = "ChIPbinner"),
-  treated_samp_norm_bw = system.file("extdata/data","Cal27_NSD1_KO_H3K36me2_10kb_norm_bw.rda", package = "ChIPbinner"),
+  wildtype_samp_norm_bw = system.file("extdata/data",
+                                      "Cal27_WT_H3K36me2_10kb_norm_bw.rda",
+                                      package = "ChIPbinner"),
+  treated_samp_norm_bw = system.file("extdata/data",
+                                     "Cal27_NSD1_KO_H3K36me2_10kb_norm_bw.rda",
+                                     package = "ChIPbinner"),
   cell_line = "Cal27",
   histone_mark = "H3K36me2",
-  annotated_clusters = system.file("extdata/data","complete_annotated_clusters.rda", package = "ChIPbinner"),
+  annotated_clusters = system.file("extdata/data",
+                                   "complete_annotated_clusters.rda",
+                                   package = "ChIPbinner"),
   number_of_clusters = 3,
   title_of_plot = "H3K36me2",
   pow = 1.1,
@@ -113,28 +119,5 @@ density_based_scatterplot(
   height_of_figure = 6,
   width_of_figure = 15
 )
-# using data in /data folder
-# density_based_scatterplot(
-#   out_dir = system.file("extdata", package = "ChIPbinner"),
-#   genome_assembly = "hg38",
-#   are_R_objects = TRUE,
-#   output_filename = "complete",
-#   wildtype_samp_norm_bw = system.file("data/Cal27_WT_H3K36me2_10kb_norm_bw.rda", package = "ChIPbinner"),
-#   treated_samp_norm_bw = system.file("data/Cal27_NSD1_KO_H3K36me2_10kb_norm_bw.rda", package = "ChIPbinner"),
-#   cell_line = "Cal27",
-#   histone_mark = "H3K36me2",
-#   annotated_clusters = system.file("data/complete_annotated_clusters.rda", package = "ChIPbinner"),
-#   number_of_clusters = 3,
-#   title_of_plot = "H3K36me2",
-#   pow = 1.1,
-#   show_legend = TRUE,
-#   min = -5,
-#   max = 2,
-#   bin_size = 50,
-#   show_scales = FALSE,
-#   xaxis_label = "WT",
-#   yaxis_label = "NSD1_KO",
-#   height_of_figure = 6,
-#   width_of_figure = 15
-# )
+
 }
