@@ -4,8 +4,8 @@ Version: 0.99.0
 Authors@R: 
     c(person(given="Reinnier",family="Padilla",email="reinnier.padilla@mail.mcgill.ca", role = c("aut","cre"),
            comment = c(ORCID = "0009-0005-5646-5450")),
-           person(given="Eric", family="Bareke", email="eric.bareke@mcgill.ca", role=c("aut", "ctb")),
-           person(given="Bo", family="Hu", email="frank.hu@mail.mcgill.ca", role=c("aut", "ctb")),
+           person(given="Eric", family="Bareke", email="eric.bareke@mcgill.ca", role="ctb"),
+           person(given="Bo", family="Hu", email="frank.hu@mail.mcgill.ca", role="ctb"),
            person(given="Jacek", family="Majewski", email="jacek.majewski@mcgill.ca", role=c("aut", "ctb")))
 Description: A suite of tools for analyzing ChIP-Seq or CUT&RUN/TAG data that has been binned in uniform windows. 
   ChIPbinner provides users with functionalities for signal normalization and combining replicates, 

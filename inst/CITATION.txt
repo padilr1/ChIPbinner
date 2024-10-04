@@ -1,0 +1,9 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "ChIPbinner: An R package for analyzing broad histone marks binned in uniform windows from ChIP-Seq or CUT&RUN/TAG data",
+  author   = "Reinnier Padilla, Eric Bareke, Bo Hu, Jacek Majewski",
+  journal  = "bioRxiv",
+  year     = 2024,
+  header   = "To cite ChIPbinner in publications, please use:",
+  doi      = "https://doi.org/10.1101/2024.10.02.616288"
+)
