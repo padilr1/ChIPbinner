@@ -5,13 +5,15 @@
 Users can install the package using the two methods indicated below:
 ```{r, eval=FALSE}
 # install the 'remotes' package first and run the installation code below:
-remotes::install_github("padilr1/ChIPbinner",build_vignettes=TRUE)
+remotes::install_github("padilr1/ChIPbinner")
 
 # download a '.tar.gz' file of ChIPbinner and run the installation code below:
-install.packages("ChIPbinner_0.99.0.tar.gz",repos=NULL,type="source",build_vignettes=TRUE)
+install.packages("ChIPbinner_0.99.0.tar.gz",repos=NULL,type="source")
 
-# including the parameter build_vignettes enables users to access the package's vignette, which can be viewed using:
+# the package vignette can be viewed using:
 browseVignettes("ChIPbinner")
+# if the vignette is still not visible, you can try forcing the installation of the package vignette directly:
+remotes::install_github("padilr1/ChIPbinner",build_vignettes=TRUE)
 ```
 
 _The authors are preparing to submit this package to Bioconductor._
