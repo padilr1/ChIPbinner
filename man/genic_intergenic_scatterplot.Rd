@@ -17,6 +17,7 @@ genic_intergenic_scatterplot(
   max_x,
   max_y,
   pow = NULL,
+  hexbins = NULL,
   xaxis_label,
   yaxis_label,
   min_x = NULL,
@@ -52,6 +53,8 @@ genic_intergenic_scatterplot(
 \item{max_y}{a numeric specifying the maximum value for the y-axis.}
 
 \item{pow}{a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
+
+\item{hexbins}{an integer specifying the number of hexagons across the x axis. The number of hexagons is determined by this integer: a larger value increases the number of hexagons, each containing fewer genomic bins, while a smaller value reduces the number of hexagons, with each containing more genomic bins. The default is 150.}
 
 \item{xaxis_label}{a character string specifying the label for the x-axis. This is normally the wildtype sample.}
 

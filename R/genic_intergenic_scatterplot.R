@@ -17,6 +17,7 @@
 #' @param min_x a numeric specifying the minimum value for the x-axis.
 #' @param min_y a numeric specifying the minimum value for the y-axis.
 #' @param pow a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
+#' @param hexbins an integer specifying the number of hexagons across the x axis. The number of hexagons is determined by this integer: a larger value increases the number of hexagons, each containing fewer genomic bins, while a smaller value reduces the number of hexagons, with each containing more genomic bins. The default is 150.
 #' @param xaxis_label a character string specifying the label for the x-axis. This is normally the wildtype sample.
 #' @param yaxis_label a character string specifying the label for the y-axis. This is normally the treated sample.
 #' @param show_scales a logical indicating whether to show scales or not. Defaults to TRUE.
@@ -42,6 +43,7 @@ genic_intergenic_scatterplot <- function(out_dir,
                                          max_x,
                                          max_y,
                                          pow = NULL,
+                                         hexbins = NULL,
                                          xaxis_label,
                                          yaxis_label,
                                          min_x = NULL,
@@ -196,13 +198,18 @@ genic_intergenic_scatterplot <- function(out_dir,
         `names<-`(c("x", "y")) %>%
         dplyr::mutate(r = olap) %>%
         dplyr::filter(
-          x > quantile(x, .01),
-          x < quantile(x, .99),
-          y > quantile(y, .01),
-          y < quantile(y, .99)
+          x > quantile(x, .001),
+          x < quantile(x, .999),
+          y > quantile(y, .001),
+          y < quantile(y, .999)
         )
       # colour gradient for bins
-      hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = 100, IDs = T)
+      if (is.null(hexbins)) {
+        hexbins <- 150
+      } else {
+        hexbins <- as.integer(hexbins)
+      }
+      hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = hexbins, IDs = T)
       pdat$cell <- hex@cID
       hex <- data.frame(hexbin::hcell2xy(hex),
         cell = hex@cell,

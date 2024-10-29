@@ -7,15 +7,12 @@
 norm_bw(
   out_dir,
   genome_assembly,
-  chip_samp_binned_file,
-  chip_samp_library_size,
-  use_control = TRUE,
-  control_binned_file = NULL,
-  control_library_size = NULL,
+  use_input = TRUE,
+  immunoprecipitated_binned_file,
+  input_binned_file = NULL,
   pseudocount = NULL,
   raw_count_cutoff = NULL,
-  scaling_factor = NULL,
-  per_million = FALSE
+  scaling_factor = NULL
 )
 }
 \arguments{
@@ -23,23 +20,17 @@ norm_bw(
 
 \item{genome_assembly}{a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".}
 
-\item{chip_samp_binned_file}{a character string specifying the binned BED file for the treated sample.}
+\item{use_input}{a logical indicating whether to use an input sample for normalization. This refers to the genomic input or IgG control sample for CUT&RUN/TAG.}
 
-\item{chip_samp_library_size}{an integer specifying the mapped library size for the treated sample.}
+\item{immunoprecipitated_binned_file}{a character string specifying the binned BED file for the treated sample, normally the immunoprecipitated sample for ChIP-seq or the targeted, enriched sample for CUT&RUN/TAG.}
 
-\item{use_control}{a logical indicating whether to use a control sample or not.}
-
-\item{control_binned_file}{a character string specifying the binned BED file for the control sample. This is usually the genomic input.}
-
-\item{control_library_size}{an integer specifying the mapped library size for the control sample.}
+\item{input_binned_file}{a character string specifying the binned BED file for the control sample. This is usually the genomic input or IgG control sample for CUT&RUN/TAG.}
 
 \item{pseudocount}{a numeric specifying the pseudocount to avoid division by 0. If NULL (the default), the pseudocount is 1e-3.}
 
 \item{raw_count_cutoff}{a numeric specifying the raw read count cutoff to exclude bins depleted in signal across all tracks. For example, if 10 is inputted, this removes raw read count consistently lower than 10. If NULL (the default), the raw count cutoff is 0.}
 
 \item{scaling_factor}{a numeric specifying the quantitative normalization/scaling of the raw binned signal by this factor. For example, this could be ChIP-Rx values or genome-wide modification percentage values obtained from mass spectrometry values. If NULL(the default), no quantitative scaling is performed.}
-
-\item{per_million}{a logical indicating whether to scale the normalized scores by millions. Only available when not using input as control. Defaults to FALSE.}
 }
 \value{
 a single bigWig file with normalized binned scores.
@@ -53,16 +44,14 @@ Title
 \examples{
 norm_bw(out_dir = system.file("extdata",package = "ChIPbinner"),
         genome_assembly = "hg38",
-        chip_samp_binned_file = system.file("extdata",
+        immunoprecipitated_binned_file = system.file("extdata",
                                             "downsampled.Cal27.WT.H3K36me2.10kb.bed.gz",
                                             package = "ChIPbinner"),
-        chip_samp_library_size = 64093770,
-        use_control = TRUE,
-        control_binned_file = system.file("extdata",
+        use_input = TRUE,
+        input_binned_file = system.file("extdata",
                                           "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz",
                                           package = "ChIPbinner"),
-        control_library_size = 52047022,
         raw_count_cutoff = 0,
-        pseudocount = 1e-15,
+        pseudocount = 1e-3,
         scaling_factor = 0.450328805)
 }
