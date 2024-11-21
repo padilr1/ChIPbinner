@@ -137,11 +137,12 @@ norm_bw <- function(out_dir,
     # ensure the scores per bin are numeric
     raw[[chip_samp_label]]$score <- as.numeric(raw[[chip_samp_label]]$score)
     # normalize scores per bin by the library depth and scale if necessary
+    # * (to_scale*100)
     if (use_input == TRUE) {
       raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
       bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size/1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size/1e6) + pseudocount)))
     } else {
-        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size/1e6)) + pseudocount))
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size/1e6)) + pseudocount))
     }
     bw[[chip_samp_label]] <- bw[[chip_samp_label]][!is.na(bw[[chip_samp_label]]$score)]
     # rename final object
