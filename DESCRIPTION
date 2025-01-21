@@ -33,6 +33,7 @@ Imports:
     readr,
     SummarizedExperiment,
     DESeq2,
+    edgeR,
     purrr
 Suggests: 
     knitr,
@@ -65,13 +66,13 @@ Collate:
     'pre_clust.R'
     'generate_clust.R'
     'annotate_clust.R'
+    'apply_normFactors.R'
     'density_based_scatterplot.R'
     'enrich_clust.R'
     'genic_intergenic_scatterplot.R'
     'merge_norm_bw.R'
     'plot_PCA.R'
     'plot_correlation.R'
-    'sizeFactor_norm.R'
 Depends: 
     R (>= 3.5.0)
 biocViews:

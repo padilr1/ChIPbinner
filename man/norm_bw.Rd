@@ -8,6 +8,7 @@ norm_bw(
   out_dir,
   genome_assembly,
   use_input = TRUE,
+  depth_norm = TRUE,
   immunoprecipitated_binned_file,
   input_binned_file = NULL,
   pseudocount = NULL,
@@ -21,6 +22,8 @@ norm_bw(
 \item{genome_assembly}{a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".}
 
 \item{use_input}{a logical indicating whether to use an input sample for normalization. This refers to the genomic input or IgG control sample for CUT&RUN/TAG.}
+
+\item{depth_norm}{a logical indicating whether to normalize by library size. If the samples have previously been normalized by size factors, normalizing by library size is not needed.}
 
 \item{immunoprecipitated_binned_file}{a character string specifying the binned BED file for the treated sample, normally the immunoprecipitated sample for ChIP-seq or the targeted, enriched sample for CUT&RUN/TAG.}
 
@@ -48,6 +51,7 @@ norm_bw(out_dir = system.file("extdata",package = "ChIPbinner"),
                                             "downsampled.Cal27.WT.H3K36me2.10kb.bed.gz",
                                             package = "ChIPbinner"),
         use_input = TRUE,
+        depth_norm = TRUE,
         input_binned_file = system.file("extdata",
                                           "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz",
                                           package = "ChIPbinner"),

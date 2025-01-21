@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Normalize binned raw counts using size factors
+#' @title Normalize binned raw counts using normalization factors
 #'
-#' @description Normalizes binned raw counts across samples using size factors, which are calculated with the median of ratios method from DESeq2
-#'
+#' @description Normalizes binned raw counts across samples using normalization factors, which are calculated using DESeq2's median ratio method or edgeR's trimmed mean of M-values (TMM)
+#' @param norm_method a character string specifying the normalization method to use. Allowed values include "DESeq2" or "edgeR".
 #' @param out_dir a character string specifying the output directory for the sizeFactor-normalized BED files.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
 #' @param treated_sample_bedfiles a vector specifying the BED file(s) for the treated sample(s) with raw counts.
@@ -11,20 +11,21 @@
 #' @param treated_condition_label a character string specifying the condition for the treated sample(s).
 #' @param wildtype_condition_label a character string specifying the condition for the wildtype sample(s).
 #'
-#' @return sizeFactor-normalized BED files
+#' @return BED files with normalized counts
 #' @export
 #'
 #'
 #' @examples
 #' \dontrun{
-#' sizeFactor_norm(out_dir,mm10,treated_sample_bedfiles=c("NSD1KO_rep1.bed","NSD1KO_rep2.bed"),wildtype_sample_bedfiles=c("WT_rep1.bed","WT_rep2.bed"),treated_condition_label="NSD1KO",wildtype_condition_label="WT")
+#' apply_normFactors(norm_method="DESeq2",out_dir, mm10, treated_sample_bedfiles = c("NSD1KO_rep1.bed", "NSD1KO_rep2.bed"), wildtype_sample_bedfiles = c("WT_rep1.bed", "WT_rep2.bed"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT")
 #' }
-sizeFactor_norm <- function(out_dir,
-                      genome_assembly,
-                      treated_sample_bedfiles,
-                      wildtype_sample_bedfiles,
-                      treated_condition_label,
-                      wildtype_condition_label) {
+apply_normFactors <- function(norm_method,
+                              out_dir,
+                              genome_assembly,
+                              treated_sample_bedfiles,
+                              wildtype_sample_bedfiles,
+                              treated_condition_label,
+                              wildtype_condition_label) {
   suppressWarnings({
     # directory parameters
     out_dir <- paste0(out_dir)
@@ -75,6 +76,8 @@ sizeFactor_norm <- function(out_dir,
       agg_metadata <- rbind(metadata_wildtype_samps, metadata_treated_samps) %>% tibble::column_to_rownames(., "kind")
       agg_counts <- cbind(agg_wildtype_samps, agg_treated_samps) %>% as.matrix()
     }
+
+    if (norm_method == "DESeq2") {
     # generate DESeq2 object
     dds <- DESeq2::DESeqDataSetFromMatrix(
       countData = agg_counts,
@@ -89,6 +92,21 @@ sizeFactor_norm <- function(out_dir,
     # apply sizeFactor normalization to raw counts
     normalized_counts <- DESeq2::counts(dds, normalized = TRUE) %>% as.data.frame()
 
+    } else if (norm_method == "edgeR") {
+
+      group <- factor(agg_metadata$cond)
+
+      y <- DGEList(counts = agg_counts, group = group)
+
+      y <- calcNormFactors(y, method = "TMM")
+
+      print(y$samples)
+
+      normalized_counts <- cpm(y,normalized.lib.sizes = TRUE) %>% as.data.frame()
+
+    }
+
+    ### get genomic coordinates ###
     get_genomic_coordinates <- function(samps) {
       # Import the first sample as a GRanges object
       first_sample_bed <- rtracklayer::import.bed(samps[1])
@@ -113,7 +131,7 @@ sizeFactor_norm <- function(out_dir,
       return(overlapping_coords)
     }
 
-    # export bed files for each sample
+    ### export bed files for each sample ###
 
     # Loop through each column (variable) in normalized_counts
     for (samp in colnames(normalized_counts)) {

@@ -45,15 +45,33 @@ bedtools intersect -a hg38.10kb.windows.bed -b Cal27.WT.H3K36me2.bed -sorted -c 
 
 # Normalizing raw counts by size factors
 
-The user can choose to normalize the raw counts in their BED files by sample-specific size factors, as implemented in <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2</a> using the median of ratios method. Multiple samples per condition (treated and wildtype) can be provided for this normalization. The function will then output the normalized counts in separate BED files for each sample. The user can then input these files into the next step — generating normalized bigWig files — where additional normalization and/or scaling of the signal can be performed.
+The user can choose to normalize the raw counts in their BED files using <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2's median ratio method</a> or <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html">edgeR's TMM</a>. In this case, DESeq2's median ratio method will divide the raw bin counts by sample-specific size factors, which are calculated by determining the median of the ratio of the raw bin counts for each bin relative to the geometric mean per bin across all samples. Conversely, edgeR’s TMM method will compute the TMM factor by considering one sample as a reference sample and the other as test samples. The sample with the count-per-million upper quartile closest to the mean upper quartile is designated as the reference. For each test sample, TMM is calculated as the weighted mean of log ratios between the test sample and the reference, excluding bins with the highest coverage and those with the largest log ratios. EdgeR assumes that there are few differential changes, so the TMM should be close to 1. If it's not, the TMM value indicates the correction factor that should be applied to the library sizes, resulting in what is referred to as the effective library size. The normalized read counts are then calculated by dividing the raw bin counts by the effective library size.
+
+In addition to correcting for technical biases arising from differences in sequencing depth across samples, both methods utilize normalization factors to address outlier regions that could distort comparisons of read counts per bin across samples. Thus, both methods are robust to outliers and bins with extremely high or low coverage. However, it is important to note that both methods assume most bins are not differentially covered (or differentially bound) between samples. <b> While these normalization methods enhance robustness against outlier regions, it also reduces sensitivity to detecting positive instances of differential changes. Therefore, users should exercise caution when applying these normalization techniques as they may reduce the power to detect true biological changes for a given histone mark. </b>
+
+Multiple samples per condition (treated and wildtype) can be provided for this normalization. The function will then output the normalized counts in separate BED files for each sample. The user can then input these files into the next step — generating normalized bigWig files — where additional normalization and/or scaling of the signal can be performed.
 
 ```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-sizeFactor_norm(out_dir="out_dir",
-                genome_assembly="mm10",
-                treated_sample_bedfiles=c("Cal27_NSD1KO_H3K36me2_rep1.10kb.bed","Cal27_NSD1KO_H3K36me2_rep2.10kb.bed"),
-                wildtype_sample_bedfiles=c("Cal27_WT_H3K36me2_rep1.10kb.bed","Cal27_WT_H3K36me2_rep2.10kb.bed"),
-                treated_condition_label="NSD1KO",
-                wildtype_condition_label="WT")
+# using DESeq2's median ratio method
+apply_normFactors(
+  norm_method = "DESeq2",
+  out_dir = "out_dir",
+  genome_assembly = "mm10",
+  treated_sample_bedfiles = c("Cal27_NSD1KO_H3K36me2_rep1.10kb.bed", "Cal27_NSD1KO_H3K36me2_rep2.10kb.bed"),
+  wildtype_sample_bedfiles = c("Cal27_WT_H3K36me2_rep1.10kb.bed", "Cal27_WT_H3K36me2_rep2.10kb.bed"),
+  treated_condition_label = "NSD1KO",
+  wildtype_condition_label = "WT"
+)
+# using edgeR's TMM
+apply_normFactors(
+  norm_method = "edgeR",
+  out_dir = "out_dir",
+  genome_assembly = "mm10",
+  treated_sample_bedfiles = c("Cal27_NSD1KO_H3K36me2_rep1.10kb.bed", "Cal27_NSD1KO_H3K36me2_rep2.10kb.bed"),
+  wildtype_sample_bedfiles = c("Cal27_WT_H3K36me2_rep1.10kb.bed", "Cal27_WT_H3K36me2_rep2.10kb.bed"),
+  treated_condition_label = "NSD1KO",
+  wildtype_condition_label = "WT"
+)
 ```
 
 # Generating normalized bigwig files
@@ -63,28 +81,36 @@ When you bin your files into windows, especially from aligned (BAM or SAM) files
 Here, we are generating normalized bigwig files for 10kb-binned files (in BED format) for a head and neck squamous cell carcinoma (HNSCC) line (Cal27) for the broad histone mark H3K36me2 generated via ChIP-seq. The lysine 36 methyl transferase NSD1 was knocked out in the sample (NSD1-KO) and is being compared to the wildtype (WT) cell line. Please see
 <a href="https://www.sciencedirect.com/science/article/pii/S2211124721000826?via%3Dihub">Farhangdoost et al. 2021</a> for more details. 
 
-<b>Important note:</b> For ChIPbinner, only two genome assemblies can be used: <code>hg38</code> or <code>mm10</code>. We will be using the <code>hg38</code> assembly for this analysis. 
+<b>Important note 1:</b> For ChIPbinner, only two genome assemblies can be used: <code>hg38</code> or <code>mm10</code>. We will be using the <code>hg38</code> assembly for this analysis. 
+
+<b>Important note 2:</b> If you've previously ran <code>apply_normFactors</code> on the BED files, then please use the parameter <code>depth_norm = FALSE </code> to avoid redundantly normalizing the read counts by library size.
 
 If you've ran the code chunk successfully, your resulting bigwig files will be found in the <code>output_directory</code> that you specified when running the function. The <code>immunoprecipitated_binned_file</code> refers to the immunoprecipitated sample for ChIP-seq or the targeted, enriched sample for CUT&RUN/TAG. The <code>input_binned_file</code> refers to the genomic input for ChIP-seq samples or the IgG control sample for CUT&RUN/TAG.
 ```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 # generate normalized bigwig for WT sample
-norm_bw(out_dir = "output_directory",
-        genome_assembly = "hg38",
-        immunoprecipitated_binned_file = "Cal27.WT.H3K36me2.10kb.bed",
-        use_input = TRUE,
-        input_binned_file = "Cal27.WT_input.H3K36me2.10kb.bed",
-        raw_count_cutoff = 0,
-        pseudocount = 1e-15,
-        scaling_factor = 0.450328805)
+norm_bw(
+  out_dir = "output_directory",
+  genome_assembly = "hg38",
+  immunoprecipitated_binned_file = "Cal27.WT.H3K36me2.10kb.bed",
+  use_input = TRUE,
+  depth_norm = TRUE,
+  input_binned_file = "Cal27.WT_input.H3K36me2.10kb.bed",
+  raw_count_cutoff = 0,
+  pseudocount = 1e-15,
+  scaling_factor = 0.450328805
+)
 # generate normalized bigwig for NSD1-KO sample
-norm_bw(out_dir = "output_directory",
-          genome_assembly = "hg38",
-          immunoprecipitated_binned_file = "Cal27.NSD1_KO.H3K36me2.10kb.bed",
-          use_input = TRUE,
-          input_binned_file = "Cal27.NSD1_KO_input.H3K36me2.10kb.bed",
-          raw_count_cutoff = 0,
-          pseudocount = 1e-15,
-          scaling_factor = 0.192272095)
+norm_bw(
+  out_dir = "output_directory",
+  genome_assembly = "hg38",
+  immunoprecipitated_binned_file = "Cal27.NSD1_KO.H3K36me2.10kb.bed",
+  use_input = TRUE,
+  depth_norm = TRUE,
+  input_binned_file = "Cal27.NSD1_KO_input.H3K36me2.10kb.bed",
+  raw_count_cutoff = 0,
+  pseudocount = 1e-15,
+  scaling_factor = 0.192272095
+)
 ```
 
 # Generating scatterplots with bins stratified into genic and intergenic regions
@@ -123,50 +149,52 @@ genic_intergenic_scatterplot(
 
 Plots of principal component analysis can be generated using <code>plot_PCA</code> with an example below. PCA plots are useful for assessing the treatment effect and the consistency of replicates.
 ```{r, eval=FALSE}
-  plot_PCA(
-    out_dir = "outdir",
-    output_filename = "PCA_plot",
-    colors = c("blue","blue3","red","red4","forestgreen","green1"),
-    sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
-    plot_title = "",
-    plot_height = 8,
-    plot_width= 12,
-    "samp1_10kb.norm.bw",
-    "samp2_10kbb.norm.bw",
-    "samp3_10kbb.norm.bw",
-    "samp4_10kbb.norm.bw",
-    "samp5_10kbb.norm.bw",
-    "samp6_10kbb.norm.bw",
-  )
+plot_PCA(
+  out_dir = "outdir",
+  output_filename = "PCA_plot",
+  colors = c("blue", "blue3", "red", "red4", "forestgreen", "green1"),
+  sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
+  plot_title = "",
+  plot_height = 8,
+  plot_width = 12,
+  "samp1_10kb.norm.bw",
+  "samp2_10kbb.norm.bw",
+  "samp3_10kbb.norm.bw",
+  "samp4_10kbb.norm.bw",
+  "samp5_10kbb.norm.bw",
+  "samp6_10kbb.norm.bw",
+)
 ```
 
 ## Correlation plots
 Correlation plots can be generated using <code>plot_correlation</code> with an example below. Correlation plots are useful for assessing separation of samples according to treatment and consistency of replicates.
 ```{r, eval=FALSE}
 plot_correlation(
-    out_dir = "outdir",
-    output_filename = "correlation_plot",
-    sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
-    colors = c("blue","blue3","red","red4","forestgreen","green1"),
-    plot_height = 4,
-    plot_width = 4,
-    "samp1_10kb.norm.bw",
-    "samp2_10kbb.norm.bw",
-    "samp3_10kbb.norm.bw",
-    "samp4_10kbb.norm.bw",
-    "samp5_10kbb.norm.bw",
-    "samp6_10kbb.norm.bw"
-  )
+  out_dir = "outdir",
+  output_filename = "correlation_plot",
+  sample_labels = c("samp_1", "samp_2", "samp_3", "samp_4", "samp_5", "samp_6"),
+  colors = c("blue", "blue3", "red", "red4", "forestgreen", "green1"),
+  plot_height = 4,
+  plot_width = 4,
+  "samp1_10kb.norm.bw",
+  "samp2_10kbb.norm.bw",
+  "samp3_10kbb.norm.bw",
+  "samp4_10kbb.norm.bw",
+  "samp5_10kbb.norm.bw",
+  "samp6_10kbb.norm.bw"
+)
 ```
 
 # Combining replicates
 
 Replicates for a given treatment can be combined using <code>merge_norm_bw</code>. The merged bigWig file can be used for downstream analysis.
 ```{r, eval=FALSE}
-merge_norm_bw(rep1 = "WT_rep1_10kb_norm.bw",
-              rep2 = "WT_rep2_10kb_norm.bw",
-              merged_samples_label = "merged_WT",
-              out_dir = "outdir")
+merge_norm_bw(
+  rep1 = "WT_rep1_10kb_norm.bw",
+  rep2 = "WT_rep2_10kb_norm.bw",
+  merged_samples_label = "merged_WT",
+  out_dir = "outdir"
+)
 ```
 
 # Identifying clusters of similarly-behaving genomic bins
@@ -192,8 +220,8 @@ The resulting <code>mat.csv</code> and <code>pooled.bed</code> from the <code>pr
 
 ```{r,eval=FALSE}
 genomic_coordinates <- data.table::fread("pooled.bed")
-signals <- data.table::fread("mat.csv") %>% `names<-`(c("KO",'WT'))
-normalized_signal_matrix <- cbind(genomic_coordinates,signals)
+signals <- data.table::fread("mat.csv") %>% `names<-`(c("KO", "WT"))
+normalized_signal_matrix <- cbind(genomic_coordinates, signals)
 ```
 
 ## Running HDBSCAN to generate clusters
@@ -217,12 +245,14 @@ generate_clust(
 
 After identifying clusters using HDBSCAN, these clusters need to be annotated for use in downstream analysis. The resulting R object contains genomic coordinates for each cluster, which can be accessed by referencing the elements within the object list, as demonstrated below. Each cluster will be in a <a href="https://bioconductor.org/packages/devel/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html">GRanges</a> format.
 ```{r,eval=FALSE}
-annotate_clust(number_of_clusters = 3,
-               matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv",
-               pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb_pooled.bed",
-               hdbscan_output_file = "clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
-               output_filename = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
-               out_dir="output_directory")
+annotate_clust(
+  number_of_clusters = 3,
+  matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv",
+  pooled_bed_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb_pooled.bed",
+  hdbscan_output_file = "clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
+  output_filename = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
+  out_dir = "output_directory"
+)
 # access each cluster, which will be in the GRanges format
 cluster_A <- cons$A
 cluster_B <- cons$B
@@ -238,11 +268,11 @@ density_based_scatterplot(
   genome_assembly = "hg38",
   are_R_objects = FALSE,
   output_filename = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
-  wildtype_samp_norm_bw ="Cal27_WT_H3K36me2_10kb.norm.bw",
+  wildtype_samp_norm_bw = "Cal27_WT_H3K36me2_10kb.norm.bw",
   treated_samp_norm_bw = "Cal27_NSD1_KO_H3K36me2_10kb.norm.bw",
   cell_line = "Cal27",
   histone_mark = "H3K36me2",
-  annotated_clusters ="Cal27.WT.NSD1_KO.H3K36me2.10kb_annotated_clusters.rda",
+  annotated_clusters = "Cal27.WT.NSD1_KO.H3K36me2.10kb_annotated_clusters.rda",
   number_of_clusters = 3,
   title_of_plot = "H3K36me2",
   pow = 1.1,
@@ -283,5 +313,5 @@ enrich_clust(
   width_of_plot = 7,
   height_of_plot = 3,
   out_dir = "output_directory"
-  )
+)
 ```

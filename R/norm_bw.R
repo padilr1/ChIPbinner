@@ -9,6 +9,7 @@
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
 #' @param immunoprecipitated_binned_file a character string specifying the binned BED file for the treated sample, normally the immunoprecipitated sample for ChIP-seq or the targeted, enriched sample for CUT&RUN/TAG.
 #' @param use_input a logical indicating whether to use an input sample for normalization. This refers to the genomic input or IgG control sample for CUT&RUN/TAG.
+#' @param depth_norm a logical indicating whether to normalize by library size. If the samples have previously been normalized by size factors, normalizing by library size is not needed.
 #' @param input_binned_file a character string specifying the binned BED file for the control sample. This is usually the genomic input or IgG control sample for CUT&RUN/TAG.
 #' @param pseudocount a numeric specifying the pseudocount to avoid division by 0. If NULL (the default), the pseudocount is 1e-3.
 #' @param raw_count_cutoff a numeric specifying the raw read count cutoff to exclude bins depleted in signal across all tracks. For example, if 10 is inputted, this removes raw read count consistently lower than 10. If NULL (the default), the raw count cutoff is 0.
@@ -21,6 +22,7 @@
 norm_bw <- function(out_dir,
                     genome_assembly,
                     use_input = TRUE,
+                    depth_norm = TRUE,
                     immunoprecipitated_binned_file,
                     input_binned_file = NULL,
                     pseudocount = NULL,
@@ -138,11 +140,21 @@ norm_bw <- function(out_dir,
     raw[[chip_samp_label]]$score <- as.numeric(raw[[chip_samp_label]]$score)
     # normalize scores per bin by the library depth and scale if necessary
     # * (to_scale*100)
+    if (depth_norm == TRUE) {
     if (use_input == TRUE) {
       raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
       bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size/1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size/1e6) + pseudocount)))
     } else {
         bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size/1e6)) + pseudocount))
+    }
+    }
+    else if (depth_norm == FALSE) {
+      if (use_input == TRUE) {
+        raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale)  + pseudocount) / (raw[[control_label]]$score + pseudocount)))
+      } else {
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
+      }
     }
     bw[[chip_samp_label]] <- bw[[chip_samp_label]][!is.na(bw[[chip_samp_label]]$score)]
     # rename final object

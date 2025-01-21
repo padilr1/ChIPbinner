@@ -4,6 +4,7 @@ test_that("generating normalized bigwig files from binned BED files works", {
           genome_assembly = "hg38",
           immunoprecipitated_binned_file = system.file("extdata", "downsampled.Cal27.WT.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
           use_input = TRUE,
+          depth_norm = TRUE,
           input_binned_file = system.file("extdata", "downsampled.Cal27.WT_input.H3K36me2.10kb.bed.gz", package = "ChIPbinner"),
           raw_count_cutoff = 0,
           pseudocount = 1e-3,
