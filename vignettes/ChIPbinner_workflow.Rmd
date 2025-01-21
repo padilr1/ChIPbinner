@@ -186,6 +186,16 @@ pre_clust(
 )
 ```
 
+## Matrix and pooled BED file of genomic coordinates
+
+The resulting <code>mat.csv</code> and <code>pooled.bed</code> from the <code>pre_clust()</code> function can be used to retrieve a matrix of normalized signals for the two samples being compared at a given genomic window, as shown below.
+
+```{r,eval=FALSE}
+genomic_coordinates <- data.table::fread("pooled.bed")
+signals <- data.table::fread("mat.csv") %>% `names<-`(c("KO",'WT'))
+normalized_signal_matrix <- cbind(genomic_coordinates,signals)
+```
+
 ## Running HDBSCAN to generate clusters
 
 The <code>clus()</code> function can be used to generate clusters of similarly-behaving genomic bins. It is based on an unsupervised learning algorithm to find clusters, or dense regions, of a dataset. More details on the Hierarchical Density-Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm can be found <a href="https://hdbscan.readthedocs.io/en/latest/index.html">here</a>. The function uses <code>reticulate</code> as an interface to a Python session. <b>Python version 3.9 will need to be installed in your environment prior to running the function.</b> No other actions are required from the user, as the minimal Python packages are automatically installed in an isolated virtual environment specifically designated for the ChIPbinner R package. This minimizes the risk of inadvertently disrupting another Python installation on the user’s system.
@@ -205,7 +215,7 @@ generate_clust(
 
 ## Annotating clusters
 
-After identifying clusters using HDBSCAN, these clusters need to be annotated for use in downstream analysis.
+After identifying clusters using HDBSCAN, these clusters need to be annotated for use in downstream analysis. The resulting R object contains genomic coordinates for each cluster, which can be accessed by referencing the elements within the object list, as demonstrated below. Each cluster will be in a <a href="https://bioconductor.org/packages/devel/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html">GRanges</a> format.
 ```{r,eval=FALSE}
 annotate_clust(number_of_clusters = 3,
                matrix_file = "Cal27.WT.NSD1_KO.H3K36me2.10kb_mat.csv",
@@ -213,6 +223,10 @@ annotate_clust(number_of_clusters = 3,
                hdbscan_output_file = "clus.Cal27.WT.NSD1_KO.H3K36me2.10kb.5000.5000.txt",
                output_filename = "Cal27.WT.NSD1_KO.H3K36me2.10kb",
                out_dir="output_directory")
+# access each cluster, which will be in the GRanges format
+cluster_A <- cons$A
+cluster_B <- cons$B
+cluster_C <- cons$C
 ```
 
 ## Generating density-based scatterplots
