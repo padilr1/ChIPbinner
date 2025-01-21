@@ -96,13 +96,13 @@ apply_normFactors <- function(norm_method,
 
       group <- factor(agg_metadata$cond)
 
-      y <- DGEList(counts = agg_counts, group = group)
+      y <- edgeR::DGEList(counts = agg_counts, group = group)
 
-      y <- calcNormFactors(y, method = "TMM")
+      y <- edgeR::calcNormFactors(y, method = "TMM")
 
       print(y$samples)
 
-      normalized_counts <- cpm(y,normalized.lib.sizes = TRUE) %>% as.data.frame()
+      normalized_counts <- edgeR::cpm(y,normalized.lib.sizes = TRUE) %>% as.data.frame()
 
     }
 
