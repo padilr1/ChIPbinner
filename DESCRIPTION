@@ -31,7 +31,9 @@ Imports:
     reticulate,
     LOLA,
     readr,
-    SummarizedExperiment
+    SummarizedExperiment,
+    DESeq2,
+    purrr
 Suggests: 
     knitr,
     formatR,
@@ -69,6 +71,7 @@ Collate:
     'merge_norm_bw.R'
     'plot_PCA.R'
     'plot_correlation.R'
+    'sizeFactor_norm.R'
 Depends: 
     R (>= 3.5.0)
 biocViews:
@@ -81,5 +84,3 @@ biocViews:
     PrincipalComponent,
     Visualization,
     Software
-    
-    

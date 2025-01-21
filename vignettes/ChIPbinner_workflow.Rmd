@@ -2,7 +2,7 @@
 title: "Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Analyzing binned ChIP-seq/Cut&Run data with ChIPbinner}
+  %\VignetteIndexEntry{Analyzing binned ChIP-seq/CUT&RUN/TAG data with ChIPbinner}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -41,6 +41,19 @@ bedtools intersect -a $WINDOW_REF -b ${sample}.bed -sorted -c -nonamecheck > $OU
 # example for binning Cal27 WT sample into 10kb windows
 bedtools bamtobed -i Cal27.WT.H3K36me2.sorted.bam | sort -k1,1 -k2,2n > Cal27.WT.H3K36me2.bed
 bedtools intersect -a hg38.10kb.windows.bed -b Cal27.WT.H3K36me2.bed -sorted -c -nonamecheck > Cal27.WT.H3K36me2.10kb.bed
+```
+
+# Normalizing raw counts by size factors
+
+The user can choose to normalize the raw counts in their BED files by sample-specific size factors, as implemented in <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2</a> using the median of ratios method. Multiple samples per condition (treated and wildtype) can be provided for this normalization. The function will then output the normalized counts in separate BED files for each sample. The user can then input these files into the next step — generating normalized bigWig files — where additional normalization and/or scaling of the signal can be performed.
+
+```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+sizeFactor_norm(out_dir="out_dir",
+                genome_assembly="mm10",
+                treated_sample_bedfiles=c("Cal27_NSD1KO_H3K36me2_rep1.10kb.bed","Cal27_NSD1KO_H3K36me2_rep2.10kb.bed"),
+                wildtype_sample_bedfiles=c("Cal27_WT_H3K36me2_rep1.10kb.bed","Cal27_WT_H3K36me2_rep2.10kb.bed"),
+                treated_condition_label="NSD1KO",
+                wildtype_condition_label="WT")
 ```
 
 # Generating normalized bigwig files
