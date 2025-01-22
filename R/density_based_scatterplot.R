@@ -18,9 +18,11 @@
 #' @param title_of_plot a character string specifying title of the plot.
 #' @param pow a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
 #' @param show_legend a logical indicating whether to show legend or not. Defaults to false.
-#' @param min a numeric specifying the minimum value for the x and y axis.
-#' @param max a numeric specifying the maximum value for the x and y axis
-#' @param bin_size an integer specifying the number of bins represented by each hexagonal shape.
+#' @param max_x a numeric specifying the maximum value for the x-axis.
+#' @param max_y a numeric specifying the maximum value for the y-axis.
+#' @param min_x a numeric specifying the minimum value for the x-axis.
+#' @param min_y a numeric specifying the minimum value for the y-axis.
+#' @param hexbins an integer specifying the number of hexagons across the x axis. The number of hexagons is determined by this integer: a larger value increases the number of hexagons, each containing fewer genomic bins, while a smaller value reduces the number of hexagons, with each containing more genomic bins. The default is 150.
 #' @param show_scales a logical indicating whether to show scales or not. Defaults to TRUE.
 #' @param xaxis_label a character string specifying the label for the x-axis. This is normally the wildtype sample.
 #' @param yaxis_label a character string specifying the label for the y-axis. This is normally the treated sample.
@@ -51,9 +53,11 @@ density_based_scatterplot <- function(out_dir,
                                       pow = NULL,
                                       show_legend = FALSE,
                                       legend_font_size = 7,
-                                      min,
-                                      max,
-                                      bin_size,
+                                      min_x,
+                                      min_y,
+                                      max_x,
+                                      max_y,
+                                      hexbins,
                                       show_scales = TRUE,
                                       xaxis_label,
                                       yaxis_label,
@@ -80,9 +84,9 @@ density_based_scatterplot <- function(out_dir,
     # number of cluster
     number_of_clusters <- as.integer(paste0(number_of_clusters))
     # parameters for plot
-    min <- as.numeric(paste0(min))
-    max <- as.numeric(paste0(max))
-    bin_size <- as.numeric(paste0(bin_size))
+    max_x <- as.numeric(max_x)
+    max_y <- as.numeric(max_y)
+    hexbins <- as.numeric(paste0(hexbins))
     xaxis_label <- paste0(xaxis_label)
     yaxis_label <- paste0(yaxis_label)
     height_of_figure <- as.numeric(paste0(height_of_figure))
@@ -195,6 +199,8 @@ density_based_scatterplot <- function(out_dir,
       dplyr::mutate(clr = 1:dplyr::n()) %>%
       reshape2::melt(id.vars = "clr", variable.name = "opa") %>%
       dplyr::mutate(opa = as.integer(opa))
+
+    # code for legend
     leg <- ggplot2::ggplot() +
       ggplot2::geom_tile(ggplot2::aes(x = opa, y = clr, fill = value),
         data = cmat
@@ -226,6 +232,8 @@ density_based_scatterplot <- function(out_dir,
         # )
       )
 
+    ########### start of code for plots #############
+
     ps <- split(d, c(cell_line, cell_line)) %>%
       lapply(function(x) {
         pdat <- lapply(x[2:1], function(y) {
@@ -240,18 +248,23 @@ density_based_scatterplot <- function(out_dir,
           `names<-`(c("x", "y")) %>%
           dplyr::mutate(r = olap) %>%
           dplyr::filter(
-            x > quantile(x, .01),
-            x < quantile(x, .99),
-            y > quantile(y, .01),
-            y < quantile(y, .99)
+            x > quantile(x, .001),
+            x < quantile(x, .999),
+            y > quantile(y, .001),
+            y < quantile(y, .999)
           )
 
-
-        hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = 75, IDs = T)
+        # colour gradient for bins
+        if (is.null(hexbins)) {
+          hexbins <- 150
+        } else {
+          hexbins <- as.integer(hexbins)
+        }
+        hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = hexbins, IDs = T)
         pdat$cell <- hex@cID
         hex <- data.frame(hexbin::hcell2xy(hex),
-          cell = hex@cell,
-          count = hex@count
+                          cell = hex@cell,
+                          count = hex@count
         )
 
         t1 <- "Intergenic vs genic ratio"
@@ -264,18 +277,32 @@ density_based_scatterplot <- function(out_dir,
             logcount = log10(count),
             ttl = t1
           )
+
+        # min and max values for x- and y-axes
+
+        if (is.null(min_x)) {
+          min_x <- as.numeric(min(pdat2$x[pdat2$count > 10]))
+        } else {
+          min_x <- as.numeric(paste0(min_x))
+        }
+        if (is.null(min_y)) {
+          min_y <- as.numeric(min(pdat2$y[pdat2$count > 10]))
+        } else {
+          min_y <- as.numeric(paste0(min_y))
+        }
         lim <- data.frame(
           x = c(
-            min(pdat2$x[pdat2$count > 10]),
-            max(pdat2$x[pdat2$count > 10])
+            min_x,
+            max_x
           ) %>%
             scales::expand_range(mul = .05),
           y = c(
-            min(pdat2$y[pdat2$count > 10]),
-            max(pdat2$y[pdat2$count > 10])
+            min_y,
+            max_y
           ) %>%
             scales::expand_range(mul = .05)
         )
+
         yrang <- diff(lim$y)
         tdat <- data.frame(
           x = rep(median(pdat$x), 2),

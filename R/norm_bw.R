@@ -61,7 +61,7 @@ norm_bw <- function(out_dir,
       to_scale <- as.numeric(paste0(scaling_factor))
     }
     # chip library size
-    chip_samp_filt <- chip_samp[!IRanges::overlapsAny(chip_samp,bl)]
+    chip_samp_filt <- chip_samp[!IRanges::overlapsAny(chip_samp, bl)]
     chip_samp_library_size <- sum(as.numeric(chip_samp_filt$name))
     # if using control/input
     if (is.null(input_binned_file)) {
@@ -78,7 +78,7 @@ norm_bw <- function(out_dir,
       control_label <- basename(tools::file_path_sans_ext(input_binned_file))
       # import control binned bed file
       control <- rtracklayer::import.bed(input_binned_file)
-      control_filt <- control[!IRanges::overlapsAny(control,bl)]
+      control_filt <- control[!IRanges::overlapsAny(control, bl)]
       control_library_size <- sum(as.numeric(control_filt$name))
       # print control info
       print(paste0("Control/input sample=", control_label))
@@ -141,17 +141,16 @@ norm_bw <- function(out_dir,
     # normalize scores per bin by the library depth and scale if necessary
     # * (to_scale*100)
     if (depth_norm == TRUE) {
-    if (use_input == TRUE) {
-      raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
-      bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size/1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size/1e6) + pseudocount)))
-    } else {
-        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size/1e6)) + pseudocount))
-    }
-    }
-    else if (depth_norm == FALSE) {
       if (use_input == TRUE) {
         raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
-        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale)  + pseudocount) / (raw[[control_label]]$score + pseudocount)))
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size / 1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size / 1e6) + pseudocount)))
+      } else {
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size / 1e6)) + pseudocount))
+      }
+    } else if (depth_norm == FALSE) {
+      if (use_input == TRUE) {
+        raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
+        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) + pseudocount) / (raw[[control_label]]$score + pseudocount)))
       } else {
         bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
       }
@@ -162,7 +161,7 @@ norm_bw <- function(out_dir,
     # output directory
     out_dir <- paste0(out_dir)
     # output bigwig file and R object
-    return(c(rtracklayer::export.bw(object = chip_samp_norm_bw, con = sprintf("%s/%s.norm.bw", out_dir, chip_samp_label)), save(chip_samp_norm_bw, file = sprintf("%s/%s.norm_bw.rda", out_dir, chip_samp_label))))
+    return(c(rtracklayer::export.bw(object = chip_samp_norm_bw, con = sprintf("%s/%s.bw", out_dir, chip_samp_label)), save(chip_samp_norm_bw, file = sprintf("%s/%s_norm_bw.rda", out_dir, chip_samp_label))))
     print("Normalized bigWig file created!")
   })
 }

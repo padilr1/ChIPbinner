@@ -20,9 +20,11 @@ density_based_scatterplot(
   pow = NULL,
   show_legend = FALSE,
   legend_font_size = 7,
-  min,
-  max,
-  bin_size,
+  min_x,
+  min_y,
+  max_x,
+  max_y,
+  hexbins,
   show_scales = TRUE,
   xaxis_label,
   yaxis_label,
@@ -62,11 +64,15 @@ density_based_scatterplot(
 
 \item{legend_font_size}{An integer specifying the font size for the legends. If not supplied, defaults to 7.}
 
-\item{min}{a numeric specifying the minimum value for the x and y axis.}
+\item{min_x}{a numeric specifying the minimum value for the x-axis.}
 
-\item{max}{a numeric specifying the maximum value for the x and y axis}
+\item{min_y}{a numeric specifying the minimum value for the y-axis.}
 
-\item{bin_size}{an integer specifying the number of bins represented by each hexagonal shape.}
+\item{max_x}{a numeric specifying the maximum value for the x-axis.}
+
+\item{max_y}{a numeric specifying the maximum value for the y-axis.}
+
+\item{hexbins}{an integer specifying the number of hexagons across the x axis. The number of hexagons is determined by this integer: a larger value increases the number of hexagons, each containing fewer genomic bins, while a smaller value reduces the number of hexagons, with each containing more genomic bins. The default is 150.}
 
 \item{show_scales}{a logical indicating whether to show scales or not. Defaults to TRUE.}
 
@@ -110,9 +116,11 @@ density_based_scatterplot(
   title_of_plot = "H3K36me2",
   pow = 1.1,
   show_legend = TRUE,
-  min = -5,
-  max = 2,
-  bin_size = 50,
+  min_x = -5,
+  min_y = -5,
+  max_x = 2,
+  max_y = 2,
+  hexbins = 50,
   show_scales = FALSE,
   xaxis_label = "WT",
   yaxis_label = "NSD1_KO",

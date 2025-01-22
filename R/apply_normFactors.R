@@ -151,7 +151,7 @@ apply_normFactors <- function(norm_method,
 
       # Export the data to a BED file
       # rtracklayer::export.bed(object = samp_bed, con = sprintf("%s/%s_sizeFactor_norm.bed", out_dir, samp))
-      readr::write_tsv(samp_df, file = sprintf("%s/%s_sizeFactor_norm.bed", out_dir, samp), col_names = FALSE, quote = "none")
+      readr::write_tsv(samp_df, file = sprintf("%s/%s_sizeFactorNorm.bed", out_dir, samp), col_names = FALSE, quote = "none")
     }
   })
 }
