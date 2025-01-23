@@ -12,7 +12,6 @@ test_that("Generating density-based scatterplots work", {
     number_of_clusters = 3,
     title_of_plot = "H3K36me2",
     pow = 1.1,
-    show_legend = TRUE,
     min_x = -5,
     min_y = -5,
     max_x = 2,
@@ -22,7 +21,9 @@ test_that("Generating density-based scatterplots work", {
     xaxis_label = "WT",
     yaxis_label = "NSD1_KO",
     height_of_figure = 6,
-    width_of_figure = 15
+    width_of_figure = 15,
+    include_additional_density_plot=TRUE,
+    filter_extreme_bins = TRUE
   )
   expect_snapshot_output(x = "Density-based scatterplots generated!")
 })

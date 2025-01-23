@@ -17,7 +17,6 @@
 #' @param output_filename a character string specifying the file name for the resuting scatterplots to be saved on disk.
 #' @param title_of_plot a character string specifying title of the plot.
 #' @param pow a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
-#' @param show_legend a logical indicating whether to show legend or not. Defaults to false.
 #' @param max_x a numeric specifying the maximum value for the x-axis.
 #' @param max_y a numeric specifying the maximum value for the y-axis.
 #' @param min_x a numeric specifying the minimum value for the x-axis.
@@ -31,6 +30,8 @@
 #' @param plot_title_font_size An integer specifying the font size for each plot title. If not supplied, defaults to 12.
 #' @param legend_font_size An integer specifying the font size for the legends. If not supplied, defaults to 7.
 #' @param axis_title_font_size An integer specifying the font size for the axis titles. If not supplied, defaults to 10.
+#' @param include_additional_density_plot A logical indicating whether to include an additional density plot that displays only the number of bins in non-annotated regions. Defaults to FALSE.
+#' @param filter_extreme_bins A logical specifying whether to filter out the top and bottom 1% of bins when plotting. Defaults to TRUE.
 #' @return plots of annotated genic/intergenic bins and previously identified density-based clusters.
 #' @export
 #'
@@ -49,21 +50,22 @@ density_based_scatterplot <- function(out_dir,
                                       number_of_clusters,
                                       output_filename,
                                       title_of_plot,
-                                      plot_title_font_size=12,
+                                      plot_title_font_size = 12,
                                       pow = NULL,
-                                      show_legend = FALSE,
                                       legend_font_size = 7,
-                                      min_x = NULL,
-                                      min_y = NULL,
+                                      min_x,
+                                      min_y,
                                       max_x,
                                       max_y,
                                       hexbins = NULL,
                                       show_scales = TRUE,
                                       xaxis_label,
                                       yaxis_label,
-                                      axis_title_font_size=10,
-                                      height_of_figure=6,
-                                      width_of_figure=15) {
+                                      axis_title_font_size = 10,
+                                      height_of_figure = 6,
+                                      width_of_figure = 15,
+                                      include_additional_density_plot=FALSE,
+                                      filter_extreme_bins = TRUE) {
   suppressWarnings({
     # directory parameters
     out_dir <- paste0(out_dir)
@@ -85,7 +87,9 @@ density_based_scatterplot <- function(out_dir,
     number_of_clusters <- as.integer(paste0(number_of_clusters))
     # parameters for plot
     max_x <- as.numeric(max_x)
+    min_x <- as.numeric(min_x)
     max_y <- as.numeric(max_y)
+    min_y <- as.numeric(min_y)
     hexbins <- as.numeric(paste0(hexbins))
     xaxis_label <- paste0(xaxis_label)
     yaxis_label <- paste0(yaxis_label)
@@ -93,9 +97,9 @@ density_based_scatterplot <- function(out_dir,
     width_of_figure <- as.numeric(paste0(width_of_figure))
     title_of_plot <- paste0(title_of_plot)
     # font sizes
-    plot_title_font_size = as.integer(plot_title_font_size)
-    legend_font_size = as.integer(legend_font_size)
-    axis_title_font_size = as.integer(axis_title_font_size)
+    plot_title_font_size <- as.integer(plot_title_font_size)
+    legend_font_size <- as.integer(legend_font_size)
+    axis_title_font_size <- as.integer(axis_title_font_size)
     # pow
     if (is.null(pow)) {
       pow <- as.numeric(1.25)
@@ -219,12 +223,16 @@ density_based_scatterplot <- function(out_dir,
         panel.border = ggplot2::element_rect(colour = "white", fill = NA, size = 0.5),
         axis.ticks = ggplot2::element_blank(),
         axis.text = ggplot2::element_blank(),
-        axis.title.x=ggplot2::element_text(family = "Helvetica",
-                                  color = "white",
-                                  size = legend_font_size,vjust=1.5,hjust=0.25),
-        axis.title.y=ggplot2::element_text(family = "Helvetica",
-                                  color = "white",
-                                  size = legend_font_size,vjust=-1.5,hjust=0.25)
+        axis.title.x = ggplot2::element_text(
+          family = "Helvetica",
+          color = "white",
+          size = legend_font_size, vjust = 1.5, hjust = 0.25
+        ),
+        axis.title.y = ggplot2::element_text(
+          family = "Helvetica",
+          color = "white",
+          size = legend_font_size, vjust = -1.5, hjust = 0.25
+        )
         # axis.title = element_text(
         #   family = "Helvetica",
         #   color = "white",
@@ -246,25 +254,31 @@ density_based_scatterplot <- function(out_dir,
         }) %>%
           dplyr::bind_cols() %>%
           `names<-`(c("x", "y")) %>%
-          dplyr::mutate(r = olap) %>%
-          dplyr::filter(
-            x > quantile(x, .001),
-            x < quantile(x, .999),
-            y > quantile(y, .001),
-            y < quantile(y, .999)
-          )
+          dplyr::mutate(r = olap)
+
+        if (filter_extreme_bins == TRUE){
+          pdat <- pdat %>%
+            dplyr::filter(
+              x > quantile(x, .01),
+              x < quantile(x, .99),
+              y > quantile(y, .01),
+              y < quantile(y, .99)
+            )
+        } else if (filter_extreme_bins == FALSE) {
+          pdat = pdat
+        }
 
         # colour gradient for bins
         if (is.null(hexbins)) {
-          hexbins <- 150
+          hexbins <- 100
         } else {
           hexbins <- as.integer(hexbins)
         }
         hex <- hexbin::hexbin(pdat$x, pdat$y, xbins = hexbins, IDs = T)
         pdat$cell <- hex@cID
         hex <- data.frame(hexbin::hcell2xy(hex),
-                          cell = hex@cell,
-                          count = hex@count
+          cell = hex@cell,
+          count = hex@count
         )
 
         t1 <- "Intergenic vs genic ratio"
@@ -280,16 +294,16 @@ density_based_scatterplot <- function(out_dir,
 
         # min and max values for x- and y-axes
 
-        if (is.null(min_x)) {
-          min_x <- as.numeric(min(pdat2$x[pdat2$count > 10]))
-        } else {
-          min_x <- as.numeric(paste0(min_x))
-        }
-        if (is.null(min_y)) {
-          min_y <- as.numeric(min(pdat2$y[pdat2$count > 10]))
-        } else {
-          min_y <- as.numeric(paste0(min_y))
-        }
+        # if (is.null(min_x)) {
+        #   min_x <- as.numeric(min(pdat2$x[pdat2$count > 10]))
+        # } else {
+        #   min_x <- as.numeric(paste0(min_x))
+        # }
+        # if (is.null(min_y)) {
+        #   min_y <- as.numeric(min(pdat2$y[pdat2$count > 10]))
+        # } else {
+        #   min_y <- as.numeric(paste0(min_y))
+        # }
         lim <- data.frame(
           x = c(
             min_x,
@@ -310,164 +324,149 @@ density_based_scatterplot <- function(out_dir,
           c = c(0, 1),
           ttl = t1
         )
+
         pow <- pow
+
+        # remove and add scales for pm
+        pm_with_scales <- function(x){
+          x +
+            ggplot2::theme(
+              panel.background = ggplot2::element_rect(fill = "black"),
+              legend.position = "none",
+              panel.grid = ggplot2::element_blank(),
+              plot.background = ggplot2::element_blank(),
+              text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
+              legend.background = ggplot2::element_blank(),
+              legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
+              axis.line = ggplot2::element_blank(),
+              plot.title = ggplot2::element_blank(),
+              strip.text = ggplot2::element_text(color = "white"),
+              strip.background = ggplot2::element_rect(fill = "black"),
+              axis.title = ggplot2::element_text(family = "Helvetica", color = "black", size = axis_title_font_size)
+            )
+        }
+
+        pm_without_scales <- function(x){
+          x +
+            ggplot2::theme(
+              panel.background = ggplot2::element_rect(fill = "black"),
+              legend.position = "none",
+              panel.grid = ggplot2::element_blank(),
+              plot.background = ggplot2::element_blank(),
+              text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
+              legend.background = ggplot2::element_blank(),
+              legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
+              axis.line = ggplot2::element_blank(),
+              axis.text = ggplot2::element_blank(),
+              axis.ticks = ggplot2::element_blank(),
+              plot.title = ggplot2::element_blank(),
+              strip.text = ggplot2::element_text(color = "white"),
+              strip.background = ggplot2::element_rect(fill = "black"),
+              axis.title = ggplot2::element_text(family = "Helvetica", color = "black", size = axis_title_font_size)
+            )
+        }
+
+        # genic/intergenic plot
+        pm <- ggplot2::ggplot() +
+          ggplot2::geom_point(ggplot2::aes(x = x, y = y, color = c),
+            alpha = 0, data = tdat,
+            show.legend = T
+          ) +
+          ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
+            stat = "identity", color = NA, data = pdat2, size = 5
+          ) +
+          ggplot2::scale_fill_gradientn(
+            colors = gradientn1, name = "% Genic",
+            breaks = leg.brks, labels = leg.labs,
+            limits = c(-1, 1)
+          ) +
+          ggplot2::scale_color_gradientn(
+            colors = gradientn1, name = "% Genic",
+            breaks = leg.brks, labels = leg.labs,
+            limits = c(-1, 1)
+          ) +
+          ggplot2::scale_alpha(
+            range = c(0.01, 1), name = "Number of bins", guide = FALSE,
+            trans = scales::trans_new(
+              "square",
+              function(x) {
+                x^(pow)
+              },
+              function(x) x^(1 / pow)
+            )
+          ) +
+          ggplot2::coord_cartesian(
+            expand = FALSE,
+            xlim = lim$x,
+            ylim = lim$y
+          ) +
+          ggplot2::facet_grid(. ~ ttl) +
+          ggplot2::labs(
+            x = sprintf("%s \u25ba", xaxis_label),
+            y = sprintf("%s \u25ba", yaxis_label)
+          ) +
+          ggplot2::annotate("segment",
+            x = -Inf, xend = Inf, y = Inf,
+            yend = Inf, color = "white"
+          )
+
         if (show_scales == TRUE) {
-          pm <- ggplot2::ggplot() +
-            ggplot2::geom_point(ggplot2::aes(x = x, y = y, color = c),
-              alpha = 0, data = tdat,
-              show.legend = T
-            ) +
-            ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
-              stat = "identity", color = NA, data = pdat2, size = 5
-            ) +
-            ggplot2::scale_fill_gradientn(
-              colors = gradientn1, name = "% Genic",
-              breaks = leg.brks, labels = leg.labs,
-              limits = c(-1, 1)
-            ) +
-            ggplot2::scale_color_gradientn(
-              colors = gradientn1, name = "% Genic",
-              breaks = leg.brks, labels = leg.labs,
-              limits = c(-1, 1)
-            ) +
-            ggplot2::scale_alpha(
-              range = c(0.01, 1), name = "Number of bins", guide = FALSE,
-              trans = scales::trans_new(
-                "square",
-                function(x) {
-                  x^(pow)
-                },
-                function(x) x^(1 / pow)
-              )
-            ) +
-            ggplot2::coord_cartesian(
-              expand = FALSE,
-              xlim = lim$x,
-              ylim = lim$y
-            ) +
-            ggplot2::facet_grid(. ~ ttl) +
-            ggplot2::labs(
-              x = sprintf("%s \u25ba", xaxis_label),
-              y = sprintf("%s \u25ba", yaxis_label)
-            ) +
-            ggplot2::annotate("segment",
-              x = -Inf, xend = Inf, y = Inf,
-              yend = Inf, color = "white"
-            ) +
+          pm <- pm_with_scales(pm)
+        } else if (show_scales == FALSE) {
+          pm <- pm_without_scales(pm)
+        }
+
+        # for magma plot
+
+        pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
+        brks <- pretty(c(pdat$z), 30)
+        nbrks <- length(brks)
+        fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
+        b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
+        bands <- isoband::iso_to_sfg(b)
+        bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
+        if (!all(sf::st_is_valid(bdat))) {
+          bdat <- sf::st_make_valid(bdat)
+        }
+        bnds <- sf::st_bbox(bdat %>% dplyr::filter(level > 0))
+
+        bdat$ttl <- title_of_plot
+
+        # magma plot with and without scales
+        pl_with_scales <- function(x){
+          x +
             ggplot2::theme(
-              panel.background = ggplot2::element_rect(fill = "black"),
-              legend.position = "none",
-              panel.grid = ggplot2::element_blank(),
-              plot.background = ggplot2::element_blank(),
-              text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
-              legend.background = ggplot2::element_blank(),
-              legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
-              axis.line = ggplot2::element_blank(),
-              plot.title = ggplot2::element_blank(),
-              strip.text = ggplot2::element_text(color = "white"),
-              strip.background = ggplot2::element_rect(fill = "black"),
-              axis.title = ggplot2::element_text(family = "Helvetica", color = "black",size=axis_title_font_size)
-            )
-
-          pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
-          brks <- pretty(c(pdat$z), 30)
-          nbrks <- length(brks)
-          fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
-          b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
-          bands <- isoband::iso_to_sfg(b)
-          bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
-          if (!all(sf::st_is_valid(bdat))) {
-            bdat <- sf::st_make_valid(bdat)
-          }
-          bnds <- sf::st_bbox(bdat %>% dplyr::filter(level > 1))
-
-          bdat$ttl <- title_of_plot
-          if (show_legend == FALSE) {
-            pl <- ggplot2::ggplot() +
-              ggplot2::geom_sf(data = bdat, ggplot2::aes(fill = level), color = NA) +
-              ggplot2::scale_fill_gradientn(
-                colors = pals::magma(10),
-                name = "# of bins \u25ba"
-              ) +
-              ggplot2::coord_sf(
-                expand = FALSE,
-                xlim = lim$x,
-                ylim = lim$y
-              ) +
-              ggplot2::labs(
-                x = sprintf("%s \u25ba", xaxis_label),
-                y = sprintf("%s \u25ba", yaxis_label)
-              ) +
-              ggplot2::facet_grid(. ~ ttl) +
-              ggplot2::guides(fill = ggplot2::guide_colorbar(
-                ticks.colour = NA,
-                frame.colour = "white", frame.linewidth = 0.25,
-                barwidth = 2.5, barheight = 0.5,
-                title.position = "top", title.hjust = 0.5,
-                title.vjust = -1,
-                alpha = 0.8
-              )) +
-              ggplot2::annotate("segment",
-                x = -Inf, xend = Inf, y = Inf,
-                yend = Inf, color = "white"
-              ) +
+            panel.background = ggplot2::element_rect(fill = "black"),
+            panel.grid = ggplot2::element_blank(),
+            plot.background = ggplot2::element_blank(),
+            text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
+            legend.title = ggplot2::element_text(
+              color = "white", family = "Helvetica",
+              size = legend_font_size
+            ),
+            legend.justification = c(0, 1),
+            legend.background = ggplot2::element_blank(),
+            legend.position = c(0.05, 0.95),
+            legend.direction = "horizontal",
+            legend.text = ggplot2::element_blank(),
+            plot.title = ggplot2::element_blank(),
+            strip.text = ggplot2::element_text(color = "white"),
+            strip.background = ggplot2::element_rect(fill = "black"),
+            axis.title = ggplot2::element_text(family = "Helvetica", size = axis_title_font_size)
+          )}
+        pl_without_scales <- function(x){
+            x +
               ggplot2::theme(
                 panel.background = ggplot2::element_rect(fill = "black"),
                 panel.grid = ggplot2::element_blank(),
                 plot.background = ggplot2::element_blank(),
-                text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
+                text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
                 legend.title = ggplot2::element_text(
                   color = "white", family = "Helvetica",
                   size = legend_font_size
                 ),
-                legend.justification = c(0, 1),
-                legend.background = ggplot2::element_blank(),
-                legend.position = "none",
-                legend.direction = "horizontal",
-                legend.text = ggplot2::element_blank(),
-                plot.title = ggplot2::element_blank(),
-                strip.text = ggplot2::element_text(color = "white"),
-                strip.background = ggplot2::element_rect(fill = "black"),
-                axis.title = ggplot2::element_text(family = "Helvetica",size = axis_title_font_size)
-              )
-          } else {
-            pl <- ggplot2::ggplot() +
-              ggplot2::geom_sf(data = bdat, ggplot2::aes(fill = level), color = NA) +
-              ggplot2::scale_fill_gradientn(
-                colors = pals::magma(10),
-                name = "# of bins \u25ba"
-              ) +
-              ggplot2::coord_sf(
-                expand = FALSE,
-                xlim = lim$x,
-                ylim = lim$y
-              ) +
-              ggplot2::labs(
-                x = sprintf("%s \u25ba", xaxis_label),
-                y = sprintf("%s \u25ba", yaxis_label)
-              ) +
-              ggplot2::facet_grid(. ~ ttl) +
-              ggplot2::guides(fill = ggplot2::guide_colorbar(
-                ticks.colour = NA,
-                frame.colour = "white", frame.linewidth = 0.25,
-                barwidth = 2.5, barheight = 0.5,
-                title.position = "top", title.hjust = 0.5,
-                title.vjust = -1,
-                alpha = 0.8
-              )) +
-              ggplot2::annotate("segment",
-                x = -Inf, xend = Inf, y = Inf,
-                yend = Inf, color = "white"
-              ) +
-              ggplot2::theme(
-                panel.background = ggplot2::element_rect(fill = "black"),
-                panel.grid = ggplot2::element_blank(),
-                plot.background = ggplot2::element_blank(),
-                text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
-                legend.title = ggplot2::element_text(
-                  color = "white", family = "Helvetica",
-                  size = legend_font_size
-                ),
+                axis.text = ggplot2::element_blank(),
+                axis.ticks = ggplot2::element_blank(),
                 legend.justification = c(0, 1),
                 legend.background = ggplot2::element_blank(),
                 legend.position = c(0.05, 0.95),
@@ -476,392 +475,177 @@ density_based_scatterplot <- function(out_dir,
                 plot.title = ggplot2::element_blank(),
                 strip.text = ggplot2::element_text(color = "white"),
                 strip.background = ggplot2::element_rect(fill = "black"),
-                axis.title = ggplot2::element_text(family = "Helvetica",size = axis_title_font_size)
-              )
-          }
-          pl$coordinates$aspect <- function(f) {
-            NULL
-          }
+                axis.title = ggplot2::element_text(family = "Helvetica", size = axis_title_font_size)
+              )}
 
+        pl <- ggplot2::ggplot() +
+          ggplot2::geom_sf(data = bdat, ggplot2::aes(fill = level), color = NA) +
+          ggplot2::scale_fill_gradientn(
+            colors = pals::magma(10),
+            name = "# of bins \u25ba"
+          ) +
+          ggplot2::coord_sf(
+            expand = FALSE,
+            xlim = lim$x,
+            ylim = lim$y
+          ) +
+          ggplot2::labs(
+            x = sprintf("%s \u25ba", xaxis_label),
+            y = sprintf("%s \u25ba", yaxis_label)
+          ) +
+          ggplot2::facet_grid(. ~ ttl) +
+          ggplot2::guides(fill = ggplot2::guide_colorbar(
+            ticks.colour = NA,
+            frame.colour = "white", frame.linewidth = 0.25,
+            barwidth = 2.5, barheight = 0.5,
+            title.position = "top", title.hjust = 0.5,
+            title.vjust = -1,
+            alpha = 0.8
+          )) +
+          ggplot2::annotate("segment",
+            x = -Inf, xend = Inf, y = Inf,
+            yend = Inf, color = "white"
+          )
 
-          d <- lapply(x[2:1], function(y) {
-            IRanges::findOverlaps(r, y) %>%
-              IRanges::to() %>%
-              {
-                y[.]
-              } %>%
-              GenomicRanges::score()
-          }) %>%
-            dplyr::bind_cols() %>%
-            `names<-`(c("x", "y")) %>%
-            dplyr::mutate(clu = clus) %>%
+        if (show_scales == TRUE) {
+          pl <- pl_with_scales(pl)
+        } else if (show_scales == FALSE) {
+          pl <- pl_without_scales(pl)
+        }
+
+        pl$coordinates$aspect <- function(f) {
+          NULL
+        }
+
+        d <- lapply(x[2:1], function(y) {
+          IRanges::findOverlaps(r, y) %>%
+            IRanges::to() %>%
+            {
+              y[.]
+            } %>%
+            GenomicRanges::score()
+        }) %>%
+          dplyr::bind_cols() %>%
+          `names<-`(c("x", "y")) %>%
+          dplyr::mutate(clu = clus)
+
+        if (filter_extreme_bins == TRUE){
+          d <- d %>%
             dplyr::filter(
               x > quantile(x, .01),
               x < quantile(x, .99),
               y > quantile(y, .01),
               y < quantile(y, .99)
             )
+        } else if (filter_extreme_bins == FALSE){
+          d <- d
+        }
 
-          hull <- na.omit(d) %>%
-            dplyr::group_by(clu) %>%
-            dplyr::slice(chull(x, y))
-          lab <- na.omit(d) %>%
-            dplyr::group_by(clu) %>%
-            dplyr::summarise(
-              x = mean(x),
-              y = mean(y)
-            )
+        hull <- na.omit(d) %>%
+          dplyr::group_by(clu) %>%
+          dplyr::slice(chull(x, y))
+        lab <- na.omit(d) %>%
+          dplyr::group_by(clu) %>%
+          dplyr::summarise(
+            x = mean(x),
+            y = mean(y)
+          )
 
-          bdat2 <- bdat
-          bdat2$ttl <- "Density-based clusters"
-          d$ttl <- bdat2$ttl[1]
-          gradientn <- paste0("#FFFFFF", sprintf("%02X", c(0, round(seq(0, 255, length.out = nbrks - 1)))))
-          pr <- ggplot2::ggplot() +
-            ggplot2::geom_sf(data = bdat2, ggplot2::aes(fill = level), color = NA) +
-            ggrastr::geom_point_rast(
-              data = d, ggplot2::aes(x = x, y = y, color = clu),
-              alpha = .1, size = .02, raster.dpi = 300,
-              raster.height = 5, raster.width = 5
-            ) +
-            ggrepel::geom_label_repel(
-              ggplot2::aes(
-                label = clu, x = x, y = y,
-                color = clu
-              ),
-              data = lab,
-              show.legend = FALSE,
-              point.padding = NA, box.padding = 0,
-              direction = "x", inherit.aes = FALSE
-            ) +
-            ggplot2::scale_fill_gradientn(colors = gradientn) +
-            ggplot2::scale_color_manual(values = cclr) +
-            ggplot2::coord_sf(
-              expand = FALSE,
-              xlim = lim$x,
-              ylim = lim$y
-            ) +
-            ggplot2::facet_grid(. ~ ttl) +
-            ggplot2::annotate("segment",
-              x = -Inf, xend = Inf, y = Inf,
-              yend = Inf, color = "white"
-            ) +
-            ggplot2::labs(
-              x = sprintf("%s \u25ba", xaxis_label),
-              y = sprintf("%s \u25ba", yaxis_label)
-            ) +
+        bdat2 <- bdat
+        bdat2$ttl <- "Density-based clusters"
+        d$ttl <- bdat2$ttl[1]
+        gradientn <- paste0("#FFFFFF", sprintf("%02X", c(0, round(seq(0, 255, length.out = nbrks - 1)))))
+
+        # density-based cluster plot scaling and no scaling
+        with_scaling_text_for_density_cluster <- function(x) {
+          x +
             ggplot2::theme(
               panel.background = ggplot2::element_rect(fill = "black"),
               legend.position = "none",
               panel.grid = ggplot2::element_blank(),
               plot.background = ggplot2::element_blank(),
-              text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
+              text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
               legend.background = ggplot2::element_blank(),
               plot.title = ggplot2::element_blank(),
               strip.text = ggplot2::element_text(color = "white"),
               strip.background = ggplot2::element_rect(fill = "black"),
               legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
-              axis.title = ggplot2::element_text(family = "Helvetica",size=axis_title_font_size)
+              axis.title = ggplot2::element_text(family = "Helvetica", size = axis_title_font_size)
             )
-          if (show_legend == FALSE) {
-            pr$coordinates$aspect <- function(f) {
-              NULL
-            }
-            # lo <- c(
-            #   patchwork::area(t = 1, l = 1, b = 20, r = 20),
-            #   patchwork::area(t = 2, l = 2, b = 8, r = 8)
-            # )
-            # pm_leg <- pm + leg + plot_layout(design = lo)
-            patchwork::wrap_plots(pl, pm, pr, nrow = 1)
-          } else {
-            pr$coordinates$aspect <- function(f) {
-              NULL
-            } # patchwork::area(t = 1, l = 1, b = 20, r = 20),
-            # patchwork::area(t = 2, l = 2, b = 8, r = 8)
-            lo <- c(
-              patchwork::area(t = 1, l = 1, b = 20, r = 20),
-              patchwork::area(t = 2, l = 2, b = 7, r = 7)
-            )
-            pm_leg <- pm + leg + patchwork::plot_layout(design = lo)
-            patchwork::wrap_plots(pl, pm_leg, pr, nrow = 1)
-          }
-        } else {
-          pm <- ggplot2::ggplot() +
-            ggplot2::geom_point(ggplot2::aes(x = x, y = y, color = c),
-              alpha = 0, data = tdat,
-              show.legend = T
-            ) +
-            ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
-              stat = "identity", color = NA, data = pdat2, size = 5
-            ) +
-            ggplot2::scale_fill_gradientn(
-              colors = gradientn1, name = "% Genic",
-              breaks = leg.brks, labels = leg.labs,
-              limits = c(-1, 1)
-            ) +
-            ggplot2::scale_color_gradientn(
-              colors = gradientn1, name = "% Genic",
-              breaks = leg.brks, labels = leg.labs,
-              limits = c(-1, 1)
-            ) +
-            ggplot2::scale_alpha(
-              range = c(0.01, 1), name = "Number of bins", guide = FALSE,
-              trans = scales::trans_new(
-                "square",
-                function(x) {
-                  x^(pow)
-                },
-                function(x) x^(1 / pow)
-              )
-            ) +
-            ggplot2::coord_cartesian(
-              expand = FALSE,
-              xlim = lim$x,
-              ylim = lim$y
-            ) +
-            ggplot2::facet_grid(. ~ ttl) +
-            ggplot2::labs(
-              x = sprintf("%s \u25ba", xaxis_label),
-              y = sprintf("%s \u25ba", yaxis_label)
-            ) +
-            ggplot2::annotate("segment",
-              x = -Inf, xend = Inf, y = Inf,
-              yend = Inf, color = "white"
-            ) +
+        }
+        without_scaling_text_for_density_cluster <- function(x) {
+          x +
             ggplot2::theme(
               panel.background = ggplot2::element_rect(fill = "black"),
               legend.position = "none",
               panel.grid = ggplot2::element_blank(),
-              plot.background = ggplot2::element_blank(),
-              text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
-              legend.background = ggplot2::element_blank(),
-              legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
+              # to remove scales
               axis.text = ggplot2::element_blank(),
               axis.ticks = ggplot2::element_blank(),
-              axis.line = ggplot2::element_blank(),
-              plot.title = ggplot2::element_blank(),
-              strip.text = ggplot2::element_text(color = "white"),
-              strip.background = ggplot2::element_rect(fill = "black"),
-              axis.title = ggplot2::element_text(family = "Helvetica", color = "black",size = axis_title_font_size)
-            )
-
-          pdat <- MASS::kde2d(x = pdat$x, y = pdat$y, n = 100)
-          brks <- pretty(c(pdat$z), 30)
-          nbrks <- length(brks)
-          fac <- diff(brks[1:2]) * nrow(d) / sum(pdat$z)
-          b <- isoband::isobands(x = pdat$x, y = pdat$y, z = t(pdat$z), brks[1:(nbrks - 1)], brks[2:nbrks])
-          bands <- isoband::iso_to_sfg(b)
-          bdat <- sf::st_sf(level = 1:length(bands), geometry = sf::st_sfc(bands))
-          if (!all(sf::st_is_valid(bdat))) {
-            bdat <- sf::st_make_valid(bdat)
-          }
-          bnds <- sf::st_bbox(bdat %>% dplyr::filter(level > 1))
-
-          bdat$ttl <- title_of_plot
-          if (show_legend == FALSE) {
-            pl <- ggplot2::ggplot() +
-              ggplot2::geom_sf(data = bdat, ggplot2::aes(fill = level), color = NA) +
-              ggplot2::scale_fill_gradientn(
-                colors = pals::magma(10),
-                name = "# of bins \u25ba"
-              ) +
-              ggplot2::coord_sf(
-                expand = FALSE,
-                xlim = lim$x,
-                ylim = lim$y
-              ) +
-              ggplot2::labs(
-                x = sprintf("%s \u25ba", xaxis_label),
-                y = sprintf("%s \u25ba", yaxis_label)
-              ) +
-              ggplot2::facet_grid(. ~ ttl) +
-              ggplot2::guides(fill = ggplot2::guide_colorbar(
-                ticks.colour = NA,
-                frame.colour = "white", frame.linewidth = 0.25,
-                barwidth = 2.5, barheight = 0.5,
-                title.position = "top", title.hjust = 0.5,
-                title.vjust = -1,
-                alpha = 0.8
-              )) +
-              ggplot2::annotate("segment",
-                x = -Inf, xend = Inf, y = Inf,
-                yend = Inf, color = "white"
-              ) +
-              ggplot2::theme(
-                panel.background = ggplot2::element_rect(fill = "black"),
-                panel.grid = ggplot2::element_blank(),
-                plot.background = ggplot2::element_blank(),
-                axis.text = ggplot2::element_blank(),
-                axis.ticks = ggplot2::element_blank(),
-                text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
-                legend.title = ggplot2::element_text(
-                  color = "white", family = "Helvetica",
-                  size = legend_font_size
-                ),
-                legend.justification = c(0.1, 1),
-                legend.background = ggplot2::element_blank(),
-                legend.position = "none",
-                legend.direction = "horizontal",
-                legend.text = ggplot2::element_blank(),
-                plot.title = ggplot2::element_blank(),
-                strip.text = ggplot2::element_text(color = "white"),
-                strip.background = ggplot2::element_rect(fill = "black"),
-                axis.title = ggplot2::element_text(family = "Helvetica",size = axis_title_font_size)
-              )
-          } else {
-            pl <- ggplot2::ggplot() +
-              ggplot2::geom_sf(data = bdat, ggplot2::aes(fill = level), color = NA) +
-              ggplot2::scale_fill_gradientn(
-                colors = pals::magma(10),
-                name = "# of bins \u25ba"
-              ) +
-              ggplot2::coord_sf(
-                expand = FALSE,
-                xlim = lim$x,
-                ylim = lim$y
-              ) +
-              ggplot2::labs(
-                x = sprintf("%s \u25ba", xaxis_label),
-                y = sprintf("%s \u25ba", yaxis_label)
-              ) +
-              ggplot2::facet_grid(. ~ ttl) +
-              ggplot2::guides(fill = ggplot2::guide_colorbar(
-                ticks.colour = NA,
-                frame.colour = "white", frame.linewidth = 0.25,
-                barwidth = 2.5,
-                barheight = 0.5,
-                title.position = "top", title.hjust = 0.5,
-                title.vjust = -1,
-                alpha = 0.8
-              )) +
-              ggplot2::annotate("segment",
-                x = -Inf, xend = Inf, y = Inf,
-                yend = Inf, color = "white"
-              ) +
-              ggplot2::theme(
-                panel.background = ggplot2::element_rect(fill = "black"),
-                panel.grid = ggplot2::element_blank(),
-                plot.background = ggplot2::element_blank(),
-                axis.text = ggplot2::element_blank(),
-                axis.ticks = ggplot2::element_blank(),
-                text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
-                legend.title = ggplot2::element_text(
-                  color = "white", family = "Helvetica",
-                  size = legend_font_size
-                ),
-                legend.justification = c(0.1, 1),
-                legend.background = ggplot2::element_blank(),
-                legend.position = c(0.05, 0.95),
-                legend.direction = "horizontal",
-                legend.text = ggplot2::element_blank(),
-                plot.title = ggplot2::element_blank(),
-                strip.text = ggplot2::element_text(color = "white"),
-                strip.background = ggplot2::element_rect(fill = "black"),
-                axis.title = ggplot2::element_text(family = "Helvetica",size=axis_title_font_size)
-              )
-          }
-          pl$coordinates$aspect <- function(f) {
-            NULL
-          }
-
-
-          d <- lapply(x[2:1], function(y) {
-            IRanges::findOverlaps(r, y) %>%
-              IRanges::to() %>%
-              {
-                y[.]
-              } %>%
-              GenomicRanges::score()
-          }) %>%
-            dplyr::bind_cols() %>%
-            `names<-`(c("x", "y")) %>%
-            dplyr::mutate(clu = clus) %>%
-            dplyr::filter(
-              x > quantile(x, .01),
-              x < quantile(x, .99),
-              y > quantile(y, .01),
-              y < quantile(y, .99)
-            )
-
-          hull <- na.omit(d) %>%
-            dplyr::group_by(clu) %>%
-            dplyr::slice(chull(x, y))
-          lab <- na.omit(d) %>%
-            dplyr::group_by(clu) %>%
-            dplyr::summarise(
-              x = mean(x),
-              y = mean(y)
-            )
-
-          bdat2 <- bdat
-          bdat2$ttl <- "Density-based clusters"
-          d$ttl <- bdat2$ttl[1]
-          gradientn <- paste0("#FFFFFF", sprintf("%02X", c(0, round(seq(0, 255, length.out = nbrks - 1)))))
-          pr <- ggplot2::ggplot() +
-            ggplot2::geom_sf(data = bdat2, ggplot2::aes(fill = level), color = NA) +
-            ggrastr::geom_point_rast(
-              data = d, ggplot2::aes(x = x, y = y, color = clu),
-              alpha = .1, size = .02, raster.dpi = 300,
-              raster.height = 5, raster.width = 5
-            ) +
-            ggrepel::geom_label_repel(
-              ggplot2::aes(
-                label = clu, x = x, y = y,
-                color = clu
-              ),
-              data = lab,
-              show.legend = FALSE,
-              point.padding = NA, box.padding = 0,
-              direction = "x", inherit.aes = FALSE
-            ) +
-            ggplot2::scale_fill_gradientn(colors = gradientn) +
-            ggplot2::scale_color_manual(values = cclr) +
-            ggplot2::coord_sf(
-              expand = FALSE,
-              xlim = lim$x,
-              ylim = lim$y
-            ) +
-            ggplot2::facet_grid(. ~ ttl) +
-            ggplot2::annotate("segment",
-              x = -Inf, xend = Inf, y = Inf,
-              yend = Inf, color = "white"
-            ) +
-            ggplot2::labs(
-              x = sprintf("%s \u25ba", xaxis_label),
-              y = sprintf("%s \u25ba", yaxis_label)
-            ) +
-            ggplot2::theme(
-              panel.background = ggplot2::element_rect(fill = "black"),
-              legend.position = "none",
-              panel.grid = ggplot2::element_blank(),
               plot.background = ggplot2::element_blank(),
-              axis.text = ggplot2::element_blank(),
-              axis.ticks = ggplot2::element_blank(),
-              text = ggplot2::element_text(color = "black",family = "Helvetica",size = plot_title_font_size),
+              text = ggplot2::element_text(color = "black", family = "Helvetica", size = plot_title_font_size),
               legend.background = ggplot2::element_blank(),
               plot.title = ggplot2::element_blank(),
               strip.text = ggplot2::element_text(color = "white"),
               strip.background = ggplot2::element_rect(fill = "black"),
               legend.margin = ggplot2::margin(0.015, 0, 0, 0, unit = "npc"),
-              axis.title = ggplot2::element_text(family = "Helvetica",size=axis_title_font_size)
+              axis.title = ggplot2::element_text(family = "Helvetica", size = axis_title_font_size)
             )
-          if (show_legend == FALSE) {
-            pr$coordinates$aspect <- function(f) {
-              NULL
-            }
-            patchwork::wrap_plots(pl, pm, pr, nrow = 1)
-          } else {
-            pr$coordinates$aspect <- function(f) {
-              NULL
-            }
-            lo <- c(
-              # https://patchwork.data-imaginist.com/reference/area.html
-              # This means that t and l should always be less or equal to b and r respectively
-              patchwork::area(t = 1, l = 1, b = 20, r = 20),
-              patchwork::area(t = 2, l = 2, b = 7, r = 7)
-            )
-            pm_leg <- pm + leg + patchwork::plot_layout(design = lo)
-            patchwork::wrap_plots(pl, pm_leg, pr, nrow = 1)
-          }
+        }
+
+        #### pr = density-based plot ####
+        pr <- ggplot2::ggplot() +
+          ggplot2::geom_sf(data = bdat2, ggplot2::aes(fill = level), color = NA) +
+          ggrastr::geom_point_rast(
+            data = d, ggplot2::aes(x = x, y = y, color = clu),
+            # alpha = .1, size = .05, raster.dpi = 600,
+            alpha = 0.01, size = .05, raster.dpi = 600,
+            raster.height = 5, raster.width = 5
+          ) +
+          ggrepel::geom_label_repel(
+            ggplot2::aes(
+              label = clu, x = x, y = y,
+              color = clu
+            ),
+            data = lab,
+            show.legend = FALSE,
+            point.padding = NA, box.padding = 0,
+            direction = "x", inherit.aes = FALSE
+          ) +
+          ggplot2::scale_fill_gradientn(colors = gradientn) +
+          ggplot2::scale_color_manual(values = cclr) +
+          ggplot2::coord_sf(
+            expand = FALSE,
+            xlim = lim$x,
+            ylim = lim$y
+          ) +
+          ggplot2::facet_grid(. ~ ttl) +
+          ggplot2::annotate("segment",
+            x = -Inf, xend = Inf, y = Inf,
+            yend = Inf, color = "white"
+          ) +
+          ggplot2::labs(
+            x = sprintf("%s \u25ba", xaxis_label),
+            y = sprintf("%s \u25ba", yaxis_label)
+          )
+        if (show_scales == TRUE) {
+          pr <- with_scaling_text_for_density_cluster(pr)
+        } else if (show_scales == FALSE) {
+          pr <- without_scaling_text_for_density_cluster(pr)
+        }
+        pr$coordinates$aspect <- function(f) {
+          NULL
+        } # patchwork::area(t = 1, l = 1, b = 20, r = 20),
+        # patchwork::area(t = 2, l = 2, b = 8, r = 8)
+        lo <- c(
+          patchwork::area(t = 1, l = 1, b = 20, r = 20),
+          patchwork::area(t = 2, l = 2, b = 7, r = 7)
+        )
+        pm_leg <- pm + leg + patchwork::plot_layout(design = lo)
+        if(include_additional_density_plot == TRUE){
+        patchwork::wrap_plots(pl, pm_leg, pr, nrow = 1)
+        } else if(include_additional_density_plot == FALSE){
+          patchwork::wrap_plots(pm_leg, pr, nrow = 1)
         }
       })
     ggplot2::ggsave((sprintf("%s/%s_density_scatterplot.pdf", out_dir, output_filename)), ps[[cell_line]], height = height_of_figure, width = width_of_figure, device = cairo_pdf, units = "cm")

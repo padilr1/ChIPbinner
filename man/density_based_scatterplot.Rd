@@ -18,19 +18,20 @@ density_based_scatterplot(
   title_of_plot,
   plot_title_font_size = 12,
   pow = NULL,
-  show_legend = FALSE,
   legend_font_size = 7,
   min_x,
   min_y,
   max_x,
   max_y,
-  hexbins,
+  hexbins = NULL,
   show_scales = TRUE,
   xaxis_label,
   yaxis_label,
   axis_title_font_size = 10,
   height_of_figure = 6,
-  width_of_figure = 15
+  width_of_figure = 15,
+  include_additional_density_plot = FALSE,
+  filter_extreme_bins = TRUE
 )
 }
 \arguments{
@@ -60,8 +61,6 @@ density_based_scatterplot(
 
 \item{pow}{a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.}
 
-\item{show_legend}{a logical indicating whether to show legend or not. Defaults to false.}
-
 \item{legend_font_size}{An integer specifying the font size for the legends. If not supplied, defaults to 7.}
 
 \item{min_x}{a numeric specifying the minimum value for the x-axis.}
@@ -85,6 +84,10 @@ density_based_scatterplot(
 \item{height_of_figure}{A numeric specifying the height of the plots. If not supplied, defaults to 5.}
 
 \item{width_of_figure}{A numeric specifying the width of the plots. If not supplied, defaults to 5.}
+
+\item{include_additional_density_plot}{A logical indicating whether to include an additional density plot that displays only the number of bins in non-annotated regions. Defaults to FALSE.}
+
+\item{filter_extreme_bins}{A logical specifying whether to filter out the top and bottom 1\% of bins when plotting. Defaults to TRUE.}
 }
 \value{
 plots of annotated genic/intergenic bins and previously identified density-based clusters.
@@ -115,7 +118,6 @@ density_based_scatterplot(
   number_of_clusters = 3,
   title_of_plot = "H3K36me2",
   pow = 1.1,
-  show_legend = TRUE,
   min_x = -5,
   min_y = -5,
   max_x = 2,
@@ -125,7 +127,9 @@ density_based_scatterplot(
   xaxis_label = "WT",
   yaxis_label = "NSD1_KO",
   height_of_figure = 6,
-  width_of_figure = 15
+  width_of_figure = 15,
+  include_additional_density_plot=TRUE,
+  filter_extreme_bins = TRUE
 )
 
 }
