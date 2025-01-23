@@ -261,7 +261,7 @@ cluster_C <- cons$C
 
 ## Generating density-based scatterplots
 
-Finally, a density-based cluster scatterplot (along with the genic/intergenic scatterplot) can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can found at <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.
+Finally, a density-based cluster scatterplot (along with the genic/intergenic scatterplot) can be generated using <code>density_based_scatterplot()</code>. Here, we used the complete matrix of enrichment scores to generate the HBDSCAN output. The complete HDBSCAN output can found at <a href="https://github.com/padilr1/ChIPbinner_database.git">ChIPbinner database</a>.The user can choose to include an additional density plot that displays only the number of bins in non-annotated regions with the parameter <code> include_additional_density_plot = TRUE </code>. Otherwise, this defaults to <code>FALSE</code>.
 ```{r,eval=FALSE}
 density_based_scatterplot(
   out_dir = "output_directory",
@@ -276,7 +276,6 @@ density_based_scatterplot(
   number_of_clusters = 3,
   title_of_plot = "H3K36me2",
   pow = 1.1,
-  show_legend = TRUE,
   min_x = -5,
   min_y = -5,
   max_x = 2,
@@ -286,7 +285,9 @@ density_based_scatterplot(
   xaxis_label = "WT",
   yaxis_label = "NSD1_KO",
   height_of_figure = 6,
-  width_of_figure = 15
+  width_of_figure = 15,
+  include_additional_density_plot=TRUE,
+  filter_extreme_bins = TRUE
 )
 ```
 
