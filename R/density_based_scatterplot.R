@@ -90,7 +90,7 @@ density_based_scatterplot <- function(out_dir,
     min_x <- as.numeric(min_x)
     max_y <- as.numeric(max_y)
     min_y <- as.numeric(min_y)
-    hexbins <- as.numeric(paste0(hexbins))
+    # hexbins <- as.numeric(paste0(hexbins))
     xaxis_label <- paste0(xaxis_label)
     yaxis_label <- paste0(yaxis_label)
     height_of_figure <- as.numeric(paste0(height_of_figure))
