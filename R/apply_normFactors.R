@@ -3,7 +3,7 @@
 #' @title Normalize binned raw counts using normalization factors
 #'
 #' @description Normalizes binned raw counts across samples using normalization factors, which are calculated using DESeq2's median ratio method or edgeR's trimmed mean of M-values (TMM)
-#' @param norm_method a character string specifying the normalization method to use. Allowed values include "DESeq2" or "edgeR".
+#' @param norm_method a character string specifying the normalization method to use. Allowed values include "DESeq2", "edgeR" or "depth-norm-only". Choosing "depth-norm-only" will return counts per million without any factor normalization.
 #' @param out_dir a character string specifying the output directory for the sizeFactor-normalized BED files.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
 #' @param treated_sample_bedfiles a vector specifying the BED file(s) for the treated sample(s) with raw counts.
@@ -104,6 +104,17 @@ apply_normFactors <- function(norm_method,
 
       normalized_counts <- edgeR::cpm(y,normalized.lib.sizes = TRUE) %>% as.data.frame()
 
+    } else if (norm_method == "depth-norm-only") {
+
+      group <- factor(agg_metadata$cond)
+
+      y <- edgeR::DGEList(counts = agg_counts, group = group)
+
+      y <- edgeR::calcNormFactors(y, method = "TMM")
+
+      print(y$samples)
+
+      normalized_counts <- edgeR::cpm(y,normalized.lib.sizes = FALSE) %>% as.data.frame()
     }
 
     ### get genomic coordinates ###
@@ -152,6 +163,7 @@ apply_normFactors <- function(norm_method,
       # Export the data to a BED file
       # rtracklayer::export.bed(object = samp_bed, con = sprintf("%s/%s_sizeFactor_norm.bed", out_dir, samp))
       readr::write_tsv(samp_df, file = sprintf("%s/%s_sizeFactorNorm.bed", out_dir, samp), col_names = FALSE, quote = "none")
+
     }
   })
 }
