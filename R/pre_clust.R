@@ -65,10 +65,14 @@ pre_clust <- function(out_dir,
       }) %>%
         dplyr::bind_cols() %>%
         `names<-`(c("x", "y"))
-      ok <- o$x > quantile(o$x, .01) &
-        o$x < quantile(o$x, .99) &
-        o$y > quantile(o$y, .01) &
-        o$y < quantile(o$y, .99)
+      # ok <- o$x > quantile(o$x, .01) &
+      #   o$x < quantile(o$x, .99) &
+      #   o$y > quantile(o$y, .01) &
+      #   o$y < quantile(o$y, .99)
+      ok <- o$x &
+        o$x &
+        o$y &
+        o$y
       readr::write_csv(o[ok, ], sprintf("%s/%s_mat.csv", out_dir, output_filename), col_names = F)
       rtracklayer::export.bed(r[ok], sprintf("%s/%s_pooled.bed", out_dir, output_filename))
     })
