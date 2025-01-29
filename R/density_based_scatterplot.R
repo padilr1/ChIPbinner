@@ -14,7 +14,7 @@
 #' @param number_of_clusters an integer specifying the total number of clusters identified by the HDBSCAN algorithm.
 #' @param annotated_clusters a character string specifying the R object containing the annotated clusters generated using annotate_clust().
 #' @param are_R_objects a logical indicating whether the inputted bigwig files are R objects. It'll use load() for the reps as opposed to reading them in via rtracklayer::import.bed(). Defaults to FALSE.
-#' @param output_filename a character string specifying the file name for the resuting scatterplots to be saved on disk.
+#' @param output_filename a character string specifying the file name for the resulting scatter-plots to be saved on disk.
 #' @param title_of_plot a character string specifying title of the plot.
 #' @param pow a numeric specifying the power of. Returns the value of x to the power of y (x^y) and this is used for the scales (i.e. show bins if surpassing a certain intensity). Defaults to 1.25.
 #' @param max_x a numeric specifying the maximum value for the x-axis.

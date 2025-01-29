@@ -2,6 +2,7 @@
 
 export(annotate_clust)
 export(apply_normFactors)
+export(clusterSpecific_bin_stats)
 export(density_based_scatterplot)
 export(enrich_clust)
 export(generate_clust)

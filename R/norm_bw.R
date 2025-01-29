@@ -129,7 +129,8 @@ norm_bw <- function(out_dir,
       inp <- as.data.frame(x) %>% dplyr::select("seqnames", "start", "end", "name")
       colnames(inp) <- c("chr", "start", "end", "score")
       imd <- dplyr::semi_join(inp, keep, by = "chr")
-      out <- imd[, 1:3] %>% dplyr::mutate(start = start + 1)
+      # out <- imd[, 1:3] %>% dplyr::mutate(start = start + 1)
+      out <- imd[, 1:3]
       out <- out %>%
         GenomicRanges::makeGRangesFromDataFrame(seqinfo = gn)
       out <- out[k_final]

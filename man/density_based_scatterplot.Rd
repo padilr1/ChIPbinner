@@ -53,7 +53,7 @@ density_based_scatterplot(
 
 \item{number_of_clusters}{an integer specifying the total number of clusters identified by the HDBSCAN algorithm.}
 
-\item{output_filename}{a character string specifying the file name for the resuting scatterplots to be saved on disk.}
+\item{output_filename}{a character string specifying the file name for the resulting scatter-plots to be saved on disk.}
 
 \item{title_of_plot}{a character string specifying title of the plot.}
 

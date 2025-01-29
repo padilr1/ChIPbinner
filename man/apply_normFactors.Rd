@@ -15,7 +15,7 @@ apply_normFactors(
 )
 }
 \arguments{
-\item{norm_method}{a character string specifying the normalization method to use. Allowed values include "DESeq2" or "edgeR".}
+\item{norm_method}{a character string specifying the normalization method to use. Allowed values include "DESeq2", "edgeR" or "depth-norm-only". Choosing "depth-norm-only" will return counts per million without any factor normalization.}
 
 \item{out_dir}{a character string specifying the output directory for the sizeFactor-normalized BED files.}
 
