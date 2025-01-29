@@ -116,6 +116,8 @@ clusterSpecific_bin_stats <- function(out_dir,
         dplyr::mutate(genomic_coord = sprintf("%s.%d.%d", .$seqnames, .$start, .$end)) %>%
         dplyr::select("genomic_coord")
 
+      agg_metadata$cond <- factor(x = agg_metadata$cond,levels = c(wildtype_condition_label,treated_condition_label))
+
       agg_counts_with_coordinates <- cbind(samp_bed, agg_counts) %>% tibble::column_to_rownames("genomic_coord")
 
       dds <- DESeq2::DESeqDataSetFromMatrix(
@@ -125,7 +127,7 @@ clusterSpecific_bin_stats <- function(out_dir,
       )
       dds <- DESeq2::DESeq(dds)
 
-      dds$condition <- stats::relevel(dds$cond, paste0(wildtype_condition_label))
+      dds$condition <- stats::relevel(dds$cond,wildtype_condition_label)
 
       dds <- DESeq2::nbinomWaldTest(dds)
 

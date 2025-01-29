@@ -7,8 +7,8 @@ test_that("Running differential bin analysis works", {
     treated_condition_label = "Downsampled",
     wildtype_condition_label = "WT",
     annotated_clusters = "~/Documents/ChIPbinner_manuscript/analysis/simulating_downsampled_dataset/sim_output/H3K36me2/clus.depthNorm_Cal27_PA_H3K36me2_rep1_downsampled_noisy_sorted.10kb_Cal27_P8_k36me2.10kb.15000.1.annotated_clusters.rda",
-    output_filename = "Cal27_WT_WT_downsampled_H3K36me2",
-    return_results_for_all_bins = TRUE
+    output_filename = "test_Cal27_WT_WT_downsampled_H3K36me2",
+    return_results_for_all_bins = FALSE
   )
   expect_snapshot_output(x = "Stats per bin generated!")
 })
