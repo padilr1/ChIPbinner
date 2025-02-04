@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title filter bins depleted in signal across all samples
+#' @title Filter bins depleted in signal across all samples
 #' @description Filters bins with raw read count consistently lower than a specified value across all samples
 #' @param out_dir a character string specifying the output directory for the sizeFactor-normalized BED files.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
