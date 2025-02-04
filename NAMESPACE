@@ -2,8 +2,8 @@
 
 export(annotate_clust)
 export(apply_normFactors)
-export(clusterSpecific_bin_stats)
 export(density_based_scatterplot)
+export(differentialBinAnalysis)
 export(enrich_clust)
 export(filter_low_counts)
 export(generate_clust)

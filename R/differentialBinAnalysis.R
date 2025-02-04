@@ -25,7 +25,7 @@
 #' \dontrun{
 #' clusterSpecific_bin_stats(out_dir, hg38, treated_sample_bigWigFiles,= c("NSD1KO_rep1.bw", "NSD1KO_rep2.bw"), wildtype_sample_bigWigFiles = c("WT_rep1.bw", "WT_rep2.bw"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT",bootstrap_value=1000,K_value = 5000, annotated_clusters = "input_directory/annotated_clusters.rda")
 #' }
-clusterSpecific_bin_stats <- function(out_dir,
+differentialBinAnalysis <- function(out_dir,
                                       genome_assembly,
                                       treated_sample_bigWigFiles,
                                       wildtype_sample_bigWigFiles,

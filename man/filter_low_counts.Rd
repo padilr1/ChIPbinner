@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_low_counts.R
 \name{filter_low_counts}
 \alias{filter_low_counts}
-\title{filter bins depleted in signal across all samples}
+\title{Filter bins depleted in signal across all samples}
 \usage{
 filter_low_counts(out_dir, genome_assembly, sample_bedfiles, cutoff = 100)
 }
