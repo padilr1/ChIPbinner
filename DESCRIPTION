@@ -1,6 +1,6 @@
 Package: ChIPbinner
 Title: Analysis of ChIP-Seq or CUT&RUN/TAG data in binned windows for broad histone marks
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: 
     c(person(given="Reinnier",family="Padilla",email="reinnier.padilla@mail.mcgill.ca", role = c("aut","cre"),
            comment = c(ORCID = "0009-0005-5646-5450")),
@@ -10,7 +10,7 @@ Authors@R:
 Description: A suite of tools for analyzing ChIP-Seq or CUT&RUN/TAG data that has been binned in uniform windows. 
   ChIPbinner provides users with functionalities for signal normalization and combining replicates, 
   alongside visualization tools for exploratory analysis, including genic/intergenic scatterplots, principal component analysis and correlation plots. 
-  Finally, it allows users to identify clusters of similarly-behaving bins and statistically assess their overlap with specific classes of annotated regions.
+  Finally, it allows users to identify clusters of similarly-behaving bins, perform differential bin analysis and statistically assess their overlap with specific classes of annotated regions.
 License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

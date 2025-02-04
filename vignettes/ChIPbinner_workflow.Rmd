@@ -43,6 +43,13 @@ bedtools bamtobed -i Cal27.WT.H3K36me2.sorted.bam | sort -k1,1 -k2,2n > Cal27.WT
 bedtools intersect -a hg38.10kb.windows.bed -b Cal27.WT.H3K36me2.bed -sorted -c -nonamecheck > Cal27.WT.H3K36me2.10kb.bed
 ```
 
+# Filtering bins depleted in signal across samples
+
+Using the <code>filter_low_counts</code> function, the user can remove bins with consistently low raw read counts (e.g., for a given bin, if all four samples have a raw read count less than 100, it is filtered out). This filtering step reduces computational time and enhances the power to detect differential binding.
+```{r,eval=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+filter_low_counts(out_dir, hg38, sample_bedfiles = c("NSD1KO_rep1.bed", "NSD1KO_rep2.bed", "WT_rep1.bed", "WT_rep2.bed"), cutoff = 100)
+```
+
 # Normalizing raw counts by size factors
 
 The user can choose to normalize the raw counts in their BED files using <a href="https://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2's median ratio method</a> or <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html">edgeR's TMM</a>. In this case, DESeq2's median ratio method will divide the raw bin counts by sample-specific size factors, which are calculated by determining the median of the ratio of the raw bin counts for each bin relative to the geometric mean per bin across all samples. Conversely, edgeR’s TMM method will compute the TMM factor by considering one sample as a reference sample and the other as test samples. The sample with the count-per-million upper quartile closest to the mean upper quartile is designated as the reference. For each test sample, TMM is calculated as the weighted mean of log ratios between the test sample and the reference, excluding bins with the highest coverage and those with the largest log ratios. EdgeR assumes that there are few differential changes, so the TMM should be close to 1. If it's not, the TMM value indicates the correction factor that should be applied to the library sizes, resulting in what is referred to as the effective library size. The normalized read counts are then calculated by dividing the raw bin counts by the effective library size.
@@ -286,10 +293,31 @@ density_based_scatterplot(
   yaxis_label = "NSD1_KO",
   height_of_figure = 6,
   width_of_figure = 15,
-  include_additional_density_plot=TRUE,
+  include_additional_density_plot = TRUE,
   filter_extreme_bins = TRUE
 )
 ```
+
+# Differential binding analysis
+If replicates are included per group, differential binding (DB) can be performed by the user. ChIPbinner uses the <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005562">ROTS</a> method to assess DB between two groups for each bin. Unlike methods relying on a fixed predefined statistical model, ROTS optimizes the test statistic directly from the data. This adaptive approach, based on t-type statistics, ranks genomic features based on the strength of evidence for differential binding in two-group comparisons. A priori assumptions about the data distribution or specific cutoffs for ranking do not need to be specified for ROTS. The optimization process maximizes the overlap of top-ranked features in bootstrap datasets that maintain the original group structure. 
+
+Previous performance comparisons demonstrated that ROTS, while exhibiting less power in datasets with a small proportion of differentially expressed features, surpasses other differential expression methods, such as edgeR and DESeq2, in datasets characterized by a large proportion of differentially expressed features and a skewed distribution of these features – conditions frequently observed in ChIP-seq data following mutations affecting global histone levels.
+
+<b> Running <code>differentialBinAnalysis</code> requires significant computational resources, including dedicated compute clusters with ample memory </b>. The <code>bootstrap_value</code> parameter specifies the number of permutation resamplings to estimate the null distribution of the test statistic (default 1000). Increasing this value can improve the precision of your results, but at the expense of greater computational run-time.The <code>K_value</code> parameter specifies the largest top list size considered. It is recommended that the K value should be considerably higher than the number of features expected to be differentially affected. However, increasing this value will also substantially increase the computational run-time.
+
+```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+differentialBinAnalysis(out_dir,
+  genome_assembly="hg38",
+  treated_sample_bigWigFiles = c("Cal27_NSD1KO_H3K36me2_rep1.10kb_norm.bw", "Cal27_NSD1KO_H3K36me2_rep2.10kb_norm.bw"),
+  wildtype_sample_bigWigFiles= c("Cal27_WT_H3K36me2_rep1.10kb_norm.bw", "Cal27_WT_H3K36me2_rep2.10kb_norm.bw"),
+  treated_condition_label = "NSD1KO",
+  wildtype_condition_label = "WT",
+  bootstrap_value = 1000,
+  K_value = 100000,
+  annotated_clusters = "annotated_clusters.rda"
+)
+```
+
 
 # Overlap enrichment/depletion analysis with annotated clusters of bins
 
