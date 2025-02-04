@@ -86,6 +86,9 @@ norm_bw <- function(out_dir,
       # list chip and control files
       d <- list(chip_samp, control)
       names(d) <- c(chip_samp_label, control_label)
+      # ensure chip and input file overlap
+      d[[control_label]] <- IRanges::subsetByOverlaps(d[[control_label]], d[[chip_samp_label]])
+      d[[chip_samp_label]] <- IRanges::subsetByOverlaps(d[[chip_samp_label]], d[[control_label]])
     }
     ### deriving cut-off for raw counts ###
     # read in chrom sizes
@@ -146,16 +149,38 @@ norm_bw <- function(out_dir,
         raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
         bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size / 1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size / 1e6) + pseudocount)))
       } else {
-        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size / 1e6)) + pseudocount))
+        # bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size / 1e6)) + pseudocount))
+        bw[[chip_samp_label]]$score <- log(((raw[[chip_samp_label]]$score * (to_scale))/chip_samp_library_size)*1e6 + pseudocount)
       }
     } else if (depth_norm == FALSE) {
       if (use_input == TRUE) {
         raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
         bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) + pseudocount) / (raw[[control_label]]$score + pseudocount)))
       } else {
-        bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
+        # bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
+        bw[[chip_samp_label]]$score <- (log(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
       }
     }
+
+    ######### stable #########
+    # if (depth_norm == TRUE) {
+    #   if (use_input == TRUE) {
+    #     raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
+    #     bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) / (chip_samp_library_size / 1e6) + pseudocount) / (raw[[control_label]]$score / (control_library_size / 1e6) + pseudocount)))
+    #   } else {
+    #     bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale)) / (chip_samp_library_size / 1e6)) + pseudocount))
+    #   }
+    # } else if (depth_norm == FALSE) {
+    #   if (use_input == TRUE) {
+    #     raw[[control_label]]$score <- as.numeric(raw[[control_label]]$score)
+    #     bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * to_scale) + pseudocount) / (raw[[control_label]]$score + pseudocount)))
+    #   } else {
+    #     bw[[chip_samp_label]]$score <- (log2(((raw[[chip_samp_label]]$score * (to_scale))) + pseudocount))
+    #   }
+    # }
+    #####################
+
+
     bw[[chip_samp_label]] <- bw[[chip_samp_label]][!is.na(bw[[chip_samp_label]]$score)]
     # rename final object
     chip_samp_norm_bw <- bw[[chip_samp_label]]

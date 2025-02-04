@@ -2,50 +2,62 @@
 % Please edit documentation in R/clusterSpecific_bin_stats.R
 \name{clusterSpecific_bin_stats}
 \alias{clusterSpecific_bin_stats}
-\title{Extract results per bin within each cluster from a DESeq analysis}
+\title{Extract results for statistical testing per bin between two groups within each cluster}
 \usage{
 clusterSpecific_bin_stats(
   out_dir,
   genome_assembly,
-  treated_sample_bedfiles,
-  wildtype_sample_bedfiles,
+  treated_sample_bigWigFiles,
+  wildtype_sample_bigWigFiles,
   treated_condition_label,
   wildtype_condition_label,
+  bootstrap_value = 1000,
+  K_value,
   annotated_clusters = NULL,
-  output_filename,
-  return_results_for_all_bins = FALSE
+  output_filename = NULL,
+  return_results_for_all_bins = FALSE,
+  precomputed_ROTS = NULL
 )
 }
 \arguments{
-\item{out_dir}{a character string specifying the output directory for the sizeFactor-normalized BED files.}
+\item{out_dir}{a character string specifying the output directory.}
 
 \item{genome_assembly}{a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".}
 
-\item{treated_sample_bedfiles}{a vector specifying the BED file(s) for the treated sample(s) with raw counts.}
+\item{treated_sample_bigWigFiles}{a vector specifying the normalized bigWig file(s) for the treated sample(s).}
 
-\item{wildtype_sample_bedfiles}{a vector specifying the BED file(s) for the wildtype sample(s) with raw counts.}
+\item{wildtype_sample_bigWigFiles}{a vector specifying the the normalized bigWig file(s) for the wildtype sample(s).}
 
 \item{treated_condition_label}{a character string specifying the condition for the treated sample(s).}
 
 \item{wildtype_condition_label}{a character string specifying the condition for the wildtype sample(s).}
 
+\item{bootstrap_value}{an integer specifying the number of bootstrap and permutation resamplings to estimate the null distribution of the test statistic (default 1000). Increasing B can improve the precision of your results, but at the expense of greater computational run-time.}
+
+\item{K_value}{an integer indicating the largest top list size considered. It is recommended that the K value should be considerably higher than the number of features expected to be differentially expressed.}
+
 \item{annotated_clusters}{a character string specifying the R object containing the annotated clusters generated using annotate_clust(). If no clusters are provided, then the function proceeds without associating any bins to a cluster.}
 
-\item{output_filename}{a character string specifying the file name for the resulting table to be saved on disk.}
+\item{output_filename}{a character string specifying the file name for the resulting table to be saved on disk. An output filename will be automatically generated if none is specified.}
 
 \item{return_results_for_all_bins}{a logical indicating whether to also return a table with all results, including bins not associated with any cluster. Defaults to FALSE.}
+
+\item{precomputed_ROTS}{a character string specifying the R object containing the precomputed ROTS object. This parameter should only be used if ROTS has already been executed, and the goal is to match the resulting bins to their assigned clusters.}
 }
 \value{
-a csv file
+a csv file of statistical comparison results for each bin assigned to their respective clusters.
 }
 \description{
-Performs differential bin analysis on raw counts using DESeq2. Log2 fold changes are shrunk using the "apeglm" method. Results include base means, log2 fold changes, standard errors, p-values, adjusted p-values, genomic coordinates, and cluster assignments for each bin.
+Performs differential bin analysis on normalized and/or scaled counts using reproducibility-optimized test statistics (ROTS) between two groups. Results include log fold changes, adjusted p-values, genomic coordinates, and cluster assignments for each bin.
 }
 \details{
 Title
 }
 \examples{
 \dontrun{
-clusterSpecific_bin_stats(out_dir, mm10, treated_sample_bedfiles = c("NSD1KO_rep1.bed", "NSD1KO_rep2.bed"), wildtype_sample_bedfiles = c("WT_rep1.bed", "WT_rep2.bed"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT", annotated_clusters = "input_directory/annotated_clusters.rda", output_filename = "results_per_bin_per_cluster")
+clusterSpecific_bin_stats(out_dir, hg38, treated_sample_bigWigFiles,= c("NSD1KO_rep1.bw", "NSD1KO_rep2.bw"), wildtype_sample_bigWigFiles = c("WT_rep1.bw", "WT_rep2.bw"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT",bootstrap_value=1000,K_value = 5000, annotated_clusters = "input_directory/annotated_clusters.rda")
 }
+}
+\references{
+Suomi T, Seyednasrollah F, Jaakkola MK, Faux T, Elo LL. ROTS: An R package for reproducibility-optimized statistical testing. PLoS Comput Biol 2017; 13: e1005562.
 }

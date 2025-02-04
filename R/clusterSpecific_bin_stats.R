@@ -1,38 +1,51 @@
 #!/usr/bin/env Rscript
 #' Title
-#' @title Extract results per bin within each cluster from a DESeq analysis
+#' @title Extract results for statistical testing per bin between two groups within each cluster
 #'
-#' @description Performs differential bin analysis on raw counts using DESeq2. Log2 fold changes are shrunk using the "apeglm" method. Results include base means, log2 fold changes, standard errors, p-values, adjusted p-values, genomic coordinates, and cluster assignments for each bin.
+#' @description Performs differential bin analysis on normalized and/or scaled counts using reproducibility-optimized test statistics (ROTS) between two groups. Results include log fold changes, adjusted p-values, genomic coordinates, and cluster assignments for each bin.
 #'
-#' @param out_dir a character string specifying the output directory for the sizeFactor-normalized BED files.
+#' @param out_dir a character string specifying the output directory.
 #' @param genome_assembly a character string specifying the genome assembly. Allowed values include "hg38" or "mm10".
-#' @param treated_sample_bedfiles a vector specifying the BED file(s) for the treated sample(s) with raw counts.
-#' @param wildtype_sample_bedfiles a vector specifying the BED file(s) for the wildtype sample(s) with raw counts.
+#' @param treated_sample_bigWigFiles a vector specifying the normalized bigWig file(s) for the treated sample(s).
+#' @param wildtype_sample_bigWigFiles a vector specifying the the normalized bigWig file(s) for the wildtype sample(s).
 #' @param treated_condition_label a character string specifying the condition for the treated sample(s).
 #' @param wildtype_condition_label a character string specifying the condition for the wildtype sample(s).
 #' @param annotated_clusters a character string specifying the R object containing the annotated clusters generated using annotate_clust(). If no clusters are provided, then the function proceeds without associating any bins to a cluster.
-#' @param output_filename a character string specifying the file name for the resulting table to be saved on disk.
+#' @param bootstrap_value an integer specifying the number of bootstrap and permutation resamplings to estimate the null distribution of the test statistic (default 1000). Increasing B can improve the precision of your results, but at the expense of greater computational run-time.
+#' @param K_value an integer indicating the largest top list size considered. It is recommended that the K value should be considerably higher than the number of features expected to be differentially expressed.
+#' @param output_filename a character string specifying the file name for the resulting table to be saved on disk. An output filename will be automatically generated if none is specified.
 #' @param return_results_for_all_bins a logical indicating whether to also return a table with all results, including bins not associated with any cluster. Defaults to FALSE.
-#' @return a csv file
+#' @param precomputed_ROTS a character string specifying the R object containing the precomputed ROTS object. This parameter should only be used if ROTS has already been executed, and the goal is to match the resulting bins to their assigned clusters.
+#' @references Suomi T, Seyednasrollah F, Jaakkola MK, Faux T, Elo LL. ROTS: An R package for reproducibility-optimized statistical testing. PLoS Comput Biol 2017; 13: e1005562.
+#' @return a csv file of statistical comparison results for each bin assigned to their respective clusters.
 #' @export
 #'
 #'
 #' @examples
 #' \dontrun{
-#' clusterSpecific_bin_stats(out_dir, mm10, treated_sample_bedfiles = c("NSD1KO_rep1.bed", "NSD1KO_rep2.bed"), wildtype_sample_bedfiles = c("WT_rep1.bed", "WT_rep2.bed"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT", annotated_clusters = "input_directory/annotated_clusters.rda", output_filename = "results_per_bin_per_cluster")
+#' clusterSpecific_bin_stats(out_dir, hg38, treated_sample_bigWigFiles,= c("NSD1KO_rep1.bw", "NSD1KO_rep2.bw"), wildtype_sample_bigWigFiles = c("WT_rep1.bw", "WT_rep2.bw"), treated_condition_label = "NSD1KO", wildtype_condition_label = "WT",bootstrap_value=1000,K_value = 5000, annotated_clusters = "input_directory/annotated_clusters.rda")
 #' }
 clusterSpecific_bin_stats <- function(out_dir,
                                       genome_assembly,
-                                      treated_sample_bedfiles,
-                                      wildtype_sample_bedfiles,
+                                      treated_sample_bigWigFiles,
+                                      wildtype_sample_bigWigFiles,
                                       treated_condition_label,
                                       wildtype_condition_label,
+                                      bootstrap_value=1000,
+                                      K_value,
                                       annotated_clusters = NULL,
-                                      output_filename,
-                                      return_results_for_all_bins = FALSE) {
+                                      output_filename = NULL,
+                                      return_results_for_all_bins = FALSE,
+                                      precomputed_ROTS = NULL) {
   suppressWarnings({
+    # loading function
+    loadRData <- function(fileName) {
+      # loads an RData file, and returns it
+      load(fileName)
+      get(ls()[ls() != "fileName"])
+    }
+
     # directory parameters
-    out_dir <- paste0(out_dir)
     if (genome_assembly == "hg38") {
       bl <- hg38_bl
       chrom_sizes <- hg38_chrom_sizes
@@ -42,23 +55,32 @@ clusterSpecific_bin_stats <- function(out_dir,
     }
 
     read_and_agg_samps <- function(samps) {
-      # Use purrr::map to process each sample and return a list of data frames
-      samp_list <- purrr::map(samps, function(samp) {
-        samp_label <- basename(tools::file_path_sans_ext(samp)) # Get sample label from file name
+      # Read all samples and store as GRanges
+      samp_list_gr <- purrr::map(samps, function(samp) {
+        samp_raw_bed <- rtracklayer::import.bw(samp)  # Read bigWig file
+        samp_bed_gr <- samp_raw_bed[!IRanges::overlapsAny(samp_raw_bed, bl)]  # Remove blacklist regions
+        return(samp_bed_gr)
+      })
 
-        samp_raw_bed <- rtracklayer::import.bed(samp)
+      # **Find common overlapping regions**
+      common_regions <- base::Reduce(intersect, samp_list_gr)
 
-        samp_bed_gr <- samp_raw_bed[!IRanges::overlapsAny(samp_raw_bed, bl)]
+      # Ensure all samples only contain these regions
+      samp_list_filtered <- purrr::map(samp_list_gr, function(samp_bed_gr) {
+        IRanges::subsetByOverlaps(samp_bed_gr, common_regions)  # Retain only overlapping regions
+      })
 
-        samp_bed <- samp_bed_gr %>%
-          as.data.frame() # Import BED file as data frame
+      # Convert filtered GRanges objects to data frames
+      samp_list <- purrr::map2(samp_list_filtered, samps, function(samp_bed_gr, samp) {
+        samp_label <- basename(tools::file_path_sans_ext(samp))
+        samp_bed <- as.data.frame(samp_bed_gr)
 
-        # Rename the column for the sample
-        colnames(samp_bed)[6] <- paste0(samp_label)
+        # Rename the value column with sample label
+        colnames(samp_bed)[6] <- paste0(samp_label)  # Assuming signal values are in column 6
 
-        # Select the relevant column (the one with the sample data)
+        # Extract relevant sample column and ensure numeric format
         samp_mat <- samp_bed %>%
-          dplyr::select(c(paste0(samp_label))) %>%
+          dplyr::select(paste0(samp_label)) %>%
           dplyr::mutate(across(everything(), as.numeric))
 
         return(samp_mat)
@@ -69,33 +91,41 @@ clusterSpecific_bin_stats <- function(out_dir,
 
       return(agg_samp)
     }
-    agg_treated_samps <- read_and_agg_samps(samps = treated_sample_bedfiles)
-    agg_wildtype_samps <- read_and_agg_samps(samps = wildtype_sample_bedfiles)
+
+
+    agg_all_samps <- read_and_agg_samps(samps = c(treated_sample_bigWigFiles,wildtype_sample_bigWigFiles))
+
+    treated_sampleNames <- lapply(treated_sample_bigWigFiles,function(x){basename(tools::file_path_sans_ext(x))}) %>% as.character()
+    wildtype_sampleNames <- lapply(wildtype_sample_bigWigFiles,function(x){basename(tools::file_path_sans_ext(x))}) %>% as.character()
+
+    agg_treated_samps  <- agg_all_samps %>% dplyr::select(dplyr::all_of(treated_sampleNames))
+    agg_wildtype_samps <- agg_all_samps %>% dplyr::select(dplyr::all_of(wildtype_sampleNames))
+
     metadata_treated_samps <- data.frame(kind = colnames(agg_treated_samps)) %>% dplyr::mutate(cond = treated_condition_label)
     metadata_wildtype_samps <- data.frame(kind = colnames(agg_wildtype_samps)) %>% dplyr::mutate(cond = wildtype_condition_label)
     if (ncol(agg_treated_samps) < 2 || ncol(agg_wildtype_samps) < 2) {
       stop("At least two replicates per condition are needed.")
-    }
-    if (nrow(agg_treated_samps) != nrow(agg_wildtype_samps)) {
-      stop("The number of genomic regions differs between wildtype and treated samples. The same number of genomic regions should be found in both wildtype and treated samples.")
     } else if (nrow(agg_treated_samps) == nrow(agg_wildtype_samps)) {
       agg_metadata <- rbind(metadata_wildtype_samps, metadata_treated_samps) %>% tibble::column_to_rownames(., "kind")
       agg_counts <- cbind(agg_wildtype_samps, agg_treated_samps) %>% as.matrix()
     }
 
-    norm_method <- "DESeq2"
-    if (norm_method == "DESeq2") {
+    norm_method <- "ROTS"
+    if (norm_method == "ROTS") {
       ### get genomic coordinates ###
       get_genomic_coordinates <- function(samps) {
         # Import the first sample as a GRanges object
-        first_sample_bed <- rtracklayer::import.bed(samps[1])
+        # first_sample_bed <- rtracklayer::import.bed(samps[1])
+
+        first_sample_bed <- rtracklayer::import.bw(samps[1])
 
         # Filter out regions that overlap with 'bl' (assuming 'bl' is predefined)
         first_sample_bed_filtered <- first_sample_bed[!IRanges::overlapsAny(first_sample_bed, bl)]
 
         # Use purrr::reduce to iteratively apply subsetByOverlaps to find overlapping coordinates across all samples
         overlapping_coords <- purrr::reduce(samps[-1], function(accumulated_gr, samp) {
-          samp_bed <- rtracklayer::import.bed(samp)
+          # samp_bed <- rtracklayer::import.bed(samp)
+          samp_bed <- rtracklayer::import.bw(samp)
 
           # Filter out overlapping regions with 'bl' for the current sample
           samp_bed_filtered <- samp_bed[!IRanges::overlapsAny(samp_bed, bl)]
@@ -110,31 +140,42 @@ clusterSpecific_bin_stats <- function(out_dir,
         return(overlapping_coords)
       }
 
-      samp_bed <- get_genomic_coordinates(samps = c(treated_sample_bedfiles, wildtype_sample_bedfiles)) %>%
+      samp_bw <- get_genomic_coordinates(samps = c(treated_sample_bigWigFiles, wildtype_sample_bigWigFiles)) %>%
         as.data.frame() %>%
         dplyr::select(c("seqnames", "start", "end")) %>%
         dplyr::mutate(genomic_coord = sprintf("%s.%d.%d", .$seqnames, .$start, .$end)) %>%
         dplyr::select("genomic_coord")
 
-      agg_metadata$cond <- factor(x = agg_metadata$cond,levels = c(wildtype_condition_label,treated_condition_label))
+      # agg_metadata$cond <- factor(x = agg_metadata$cond,levels = c(wildtype_condition_label,treated_condition_label))
 
-      agg_counts_with_coordinates <- cbind(samp_bed, agg_counts) %>% tibble::column_to_rownames("genomic_coord")
+      agg_counts_with_coordinates <- cbind(samp_bw, agg_counts) %>% tibble::column_to_rownames("genomic_coord") %>% as.matrix()
 
-      dds <- DESeq2::DESeqDataSetFromMatrix(
-        countData = agg_counts_with_coordinates,
-        colData = agg_metadata,
-        design = ~cond
-      )
-      dds <- DESeq2::DESeq(dds)
+      if (is.null(precomputed_ROTS)) {
+        rots.out <- ROTS::ROTS(agg_counts_with_coordinates, groups = agg_metadata$cond,B = bootstrap_value, K = K_value,progress=TRUE,log = TRUE,seed=123)
+      } else {
+        rots.out <- loadRData(paste0(precomputed_ROTS))
+      }
 
-      dds$condition <- stats::relevel(dds$cond,wildtype_condition_label)
+      # get df
+      # ROTS_df_preProcessed <- rots.out$data %>% as.data.frame()
+      #
+      # ROTS_treated_samps  <- ROTS_df_preProcessed %>% dplyr::select(dplyr::all_of(treated_sampleNames))
+      # ROTS_wildtype_samps <- ROTS_df_preProcessed %>% dplyr::select(dplyr::all_of(wildtype_sampleNames))
+      #
+      # ROTS_df <- cbind(ROTS_wildtype_samps,ROTS_treated_samps)
 
-      dds <- DESeq2::nbinomWaldTest(dds)
+      # Saving ROTS output to a file
+      utils::capture.output({
+        # Capture the full summary output as a character vector
+        full_summary <- utils::capture.output(summary(rots.out, fdr = 0.05))
 
-      resLFC <- DESeq2::lfcShrink(dds = dds, coef = 2, type = "apeglm") %>%
-        as.data.frame() %>%
-        tibble::rownames_to_column("genomic_coord") %>%
-        na.omit()
+        # Print the first 10 lines of the summary
+        cat(paste(head(full_summary, n = 10), collapse = "\n"))
+      }, file = sprintf("%s/ROTS_output_summary.txt", out_dir))
+
+      # resLFC <- bind_cols(list(ROTS_df, rots.out$logfc %>% as.data.frame() %>% `names<-`(c("logFC")), rots.out$FDR %>% as.data.frame() %>% `names<-`(c("FDR")))) %>% rownames_to_column("genomic_coord")
+
+      resLFC <- bind_cols(list(rots.out$logfc %>% as.data.frame() %>% `names<-`(c("logFC")), rots.out$FDR %>% as.data.frame() %>% `names<-`(c("FDR")))) %>% rownames_to_column("genomic_coord")
 
       resLFC[c("chr", "start", "end")] <- stringr::str_split_fixed(resLFC$genomic_coord, "[.]", 3)
 
@@ -157,26 +198,21 @@ clusterSpecific_bin_stats <- function(out_dir,
 
       resLFC$genomic_coord <- sprintf("%s.%d.%d", resLFC$chr, resLFC$start, resLFC$end)
 
+      resLFC <- resLFC[,c("genomic_coord","chr","start","end","logFC","FDR")]
+
       if (is.null(annotated_clusters)) {
-        readr::write_csv(resLFC, file = sprintf("%s/%s_stats_all_bins_no_clustering.csv", out_dir, output_filename), col_names = TRUE, quote = "none")
+        readr::write_csv(resLFC, file = sprintf("%s/stats_for_all_bins_no_clustering.csv", out_dir), col_names = TRUE, quote = "none")
         stop("The results table for all bins without clustering information has been generated.")
       }
 
       if (return_results_for_all_bins == TRUE) {
-        readr::write_csv(resLFC, file = sprintf("%s/%s_stats_all_bins_no_clustering.csv", out_dir, output_filename), col_names = TRUE, quote = "none")
+        readr::write_csv(resLFC, file = sprintf("%s/stats_for_all_bins_no_clustering.csv", out_dir), col_names = TRUE, quote = "none")
       }
 
       # remove redundant columns
       resLFC$chr <- NULL
       resLFC$start <- NULL
       resLFC$end <- NULL
-
-      # loading function
-      loadRData <- function(fileName) {
-        # loads an RData file, and returns it
-        load(fileName)
-        get(ls()[ls() != "fileName"])
-      }
 
       cons <- loadRData(paste0(annotated_clusters))
 
@@ -201,10 +237,14 @@ clusterSpecific_bin_stats <- function(out_dir,
       modified_dfs <- purrr::map2(cons_dfs, names(cons_dfs), add_cluster_name)
 
       # aggregate clusters
-      agg_cluster <- dplyr::bind_rows(modified_dfs)
+      agg_cluster <- dplyr::bind_rows(modified_dfs) %>% dplyr::select(c("genomic_coord","seqnames","start","end","strand","logFC","FDR","cluster"))
 
       # write csv
-      readr::write_csv(agg_cluster, file = sprintf("%s/%s_stats_per_cluster.csv", out_dir, output_filename), col_names = TRUE, quote = "none")
+      if (is.null(output_filename)) {
+        readr::write_csv(agg_cluster, file = sprintf("%s/stats_per_cluster.csv", out_dir), col_names = TRUE, quote = "none")
+      } else {
+      readr::write_csv(agg_cluster, file = sprintf("%s/%s.csv", out_dir,output_filename), col_names = TRUE, quote = "none")
+      }
     }
     # print output message
     print("Stats per bin generated!")

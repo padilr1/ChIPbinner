@@ -34,7 +34,8 @@ Imports:
     SummarizedExperiment,
     DESeq2,
     edgeR,
-    purrr
+    purrr,
+    ROTS
 Suggests: 
     knitr,
     formatR,
@@ -56,7 +57,8 @@ Suggests:
     GenomeInfoDb,
     tools,
     forcats,
-    gplots
+    gplots,
+    stringr
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/testthat/start-first: norm_bw,genic_intergenic_scatterplot,pre_clust,generate_clust,annotate_clust,density_based_scatterplot,enrich_clust
@@ -70,6 +72,7 @@ Collate:
     'clusterSpecific_bin_stats.R'
     'density_based_scatterplot.R'
     'enrich_clust.R'
+    'filter_low_counts.R'
     'genic_intergenic_scatterplot.R'
     'merge_norm_bw.R'
     'plot_PCA.R'
