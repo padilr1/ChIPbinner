@@ -307,9 +307,9 @@ Previous performance comparisons demonstrated that ROTS, while exhibiting less p
 
 ```{r,eval=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 differentialBinAnalysis(out_dir,
-  genome_assembly="hg38",
+  genome_assembly = "hg38",
   treated_sample_bigWigFiles = c("Cal27_NSD1KO_H3K36me2_rep1.10kb_norm.bw", "Cal27_NSD1KO_H3K36me2_rep2.10kb_norm.bw"),
-  wildtype_sample_bigWigFiles= c("Cal27_WT_H3K36me2_rep1.10kb_norm.bw", "Cal27_WT_H3K36me2_rep2.10kb_norm.bw"),
+  wildtype_sample_bigWigFiles = c("Cal27_WT_H3K36me2_rep1.10kb_norm.bw", "Cal27_WT_H3K36me2_rep2.10kb_norm.bw"),
   treated_condition_label = "NSD1KO",
   wildtype_condition_label = "WT",
   bootstrap_value = 1000,
