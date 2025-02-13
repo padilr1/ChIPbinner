@@ -38,7 +38,7 @@ filter_low_counts <- function(out_dir,
       })
 
       # **Find common overlapping regions**
-      common_regions <- base::Reduce(intersect, samp_list_gr)
+      common_regions <- base::Reduce(IRanges::intersect, samp_list_gr)
 
       # Ensure all samples only contain these regions
       samp_list_filtered <- purrr::map(samp_list_gr, function(samp_bed_gr) {
@@ -69,12 +69,6 @@ filter_low_counts <- function(out_dir,
 
     agg_all_samps <- read_and_agg_samps(samps = sample_bedfiles)
 
-    # filter counts
-    filtered_counts <- agg_all_samps %>%
-      dplyr::mutate(max = apply(., 1, max)) %>%
-      dplyr::filter(max > as.numeric(cutoff))
-
-    filtered_counts$max <- NULL
 
     ### get genomic coordinates ###
     get_genomic_coordinates <- function(samps) {
@@ -101,28 +95,48 @@ filter_low_counts <- function(out_dir,
       return(overlapping_coords)
     }
 
+    genomic_coordinates <- get_genomic_coordinates(samps = sample_bedfiles) %>% as.data.frame() %>%
+      dplyr::select(c(1:3)) %>%
+      dplyr::select(c("seqnames", "start", "end")) %>%
+      dplyr::mutate(genomic_coord = sprintf("%s.%d.%d", .$seqnames, .$start, .$end)) %>%
+      dplyr::select("genomic_coord")
+
+    agg_counts_with_coordinates <- cbind(genomic_coordinates,agg_all_samps) %>% tibble::column_to_rownames("genomic_coord")
+
+    # filter counts
+    filtered_counts <- agg_counts_with_coordinates %>%
+      dplyr::mutate(max = apply(., 1, max)) %>%
+      dplyr::filter(max > as.numeric(cutoff))
+
+    filtered_counts$max <- NULL
+
     ### export bed files for each sample ###
 
     # Loop through each column (variable) in filtered_counts
     for (samp in colnames(filtered_counts)) {
       # Get the genomic coordinates for the current sample
-      samp_bed <- get_genomic_coordinates(samps = sample_bedfiles) %>% as.data.frame()
+      # samp_bed <- get_genomic_coordinates(samps = sample_bedfiles) %>% as.data.frame()
 
       # Assign the corresponding normalized counts to the 'name' column of the BED data frame
       # samp_bed$score <- filtered_counts[[samp]]
 
-      samp_bed$name <- NULL
+      # samp_bed$name <- NULL
+      #
+      # samp_df <- samp_bed %>%
+      #   as.data.frame() %>%
+      #   dplyr::select(c(1:3))
 
-      samp_df <- samp_bed %>%
-        as.data.frame() %>%
-        dplyr::select(c(1:3))
+      samp_df <- filtered_counts %>% tibble::rownames_to_column("genomic_coord") %>% dplyr::select("genomic_coord")
 
+      samp_df[c("chr", "start", "end")] <- stringr::str_split_fixed(samp_df$genomic_coord, "[.]", 3)
+      samp_df$start <- as.integer(samp_df$start)
+      samp_df$end <- as.integer(samp_df$end)
+      samp_df$genomic_coord <- NULL
       samp_df$score <- filtered_counts[[samp]]
 
       # Export the data to a BED file
       # rtracklayer::export.bed(object = samp_bed, con = sprintf("%s/%s_sizeFactor_norm.bed", out_dir, samp))
       readr::write_tsv(samp_df, file = sprintf("%s/%s_filt.bed", out_dir, samp), col_names = FALSE, quote = "none")
-
     }
 
   })
