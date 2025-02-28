@@ -372,6 +372,7 @@ density_based_scatterplot <- function(out_dir,
             alpha = 0, data = tdat,
             show.legend = T
           ) +
+          ggplot2::geom_abline(slope = 1, intercept = 0, color = "grey", size = 0.3,alpha=0.5) +
           ggplot2::geom_hex(ggplot2::aes(x = x, y = y, fill = prop, alpha = count, color = prop),
             stat = "identity", color = NA, data = pdat2, size = 5
           ) +
@@ -484,6 +485,7 @@ density_based_scatterplot <- function(out_dir,
             colors = pals::magma(10),
             name = "# of bins \u25ba"
           ) +
+          ggplot2::geom_abline(slope = 1, intercept = 0, color = "grey", size = 0.3,alpha=0.5) +
           ggplot2::coord_sf(
             expand = FALSE,
             xlim = lim$x,
@@ -602,10 +604,11 @@ density_based_scatterplot <- function(out_dir,
             alpha = 0.01, size = .05, raster.dpi = 600,
             raster.height = 5, raster.width = 5
           ) +
+          ggplot2::geom_abline(slope = 1, intercept = 0, color = "grey", size = 0.3,alpha=0.5) +
           ggrepel::geom_label_repel(
             ggplot2::aes(
               label = clu, x = x, y = y,
-              color = clu
+              color = clu,nudge_x = 0.1,nudge_y = 0.1
             ),
             data = lab,
             show.legend = FALSE,

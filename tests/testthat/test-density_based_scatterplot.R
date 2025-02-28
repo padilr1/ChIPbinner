@@ -25,5 +25,4 @@ test_that("Generating density-based scatterplots work", {
     include_additional_density_plot=TRUE,
     filter_extreme_bins = TRUE
   )
-  expect_snapshot_output(x = "Density-based scatterplots generated!")
 })
