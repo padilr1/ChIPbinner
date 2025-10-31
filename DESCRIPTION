@@ -1,6 +1,6 @@
 Package: ChIPbinner
 Title: Analysis of ChIP-Seq or CUT&RUN/TAG data in binned windows for broad histone marks
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: 
     c(person(given="Reinnier",family="Padilla",email="reinnier.padilla@mail.mcgill.ca", role = c("aut","cre"),
            comment = c(ORCID = "0009-0005-5646-5450")),

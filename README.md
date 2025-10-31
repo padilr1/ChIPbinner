@@ -27,3 +27,7 @@ ChIPbinner provides users with functionalities for signal normalization and comb
 ChIPbinner improves on previously published software by offering a clustering approach that is independent of differential binding and including additional features for downstream analysis.
 
 Curated databases and complete published datasets for use with ChIPbinner can be found in this <a href="https://github.com/padilr1/ChIPbinner_database.git">GitHub repository</a>.
+
+## Workflow
+
+For a step-by-step tutorial on how to run ChIPbinner please see the <a href="https://padilr1.github.io/ChIPbinnerWorkflow/"> workflow documentation </a>
