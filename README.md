@@ -1,5 +1,7 @@
 # ChIPbinner
 
+ChIPbinner is published in BMC Bioinformatics: <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-025-06103-6">doi.org/10.1186/s12859-025-06103-6</a>
+
 ## Installation
 
 Users can install the package using the two methods indicated below:
