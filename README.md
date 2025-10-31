@@ -18,8 +18,6 @@ browseVignettes("ChIPbinner")
 remotes::install_github("padilr1/ChIPbinner",build_vignettes=TRUE)
 ```
 
-_The authors are preparing to submit this package to Bioconductor._
-
 ## Introduction
 
 ChIPbinner is an open-source R package designed to facilitate genome-wide analysis of broad histone modifications. This tool addresses limitations in existing peak-calling software, which often struggles to accurately detect diffuse and broad signals in ChIP-Seq, CUT&RUN/TAG or related datasets. ChIPbinner instead divides the genome into uniform bins, offering an unbiased, reference-agnostic method to identify and explore differential enrichment across genomic regions.
